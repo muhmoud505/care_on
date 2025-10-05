@@ -1,0 +1,139 @@
+{
+  "welcome": "Welcome to our Application",
+  "intro": "This is a complete example of how to implement localization in Expo apps. You can switch between English and Arabic with full RTL support.",
+  "features": {
+    "title": "Key Features:",
+    "list": [
+      "Real-time language switching",
+      "Right-to-left (RTL) support",
+      "Dynamic text direction",
+      "Formatted numbers and dates"
+    ]
+  },
+  "more": "This is additional",
+  "switch_language": "Switch to Arabic",
+
+  "common": {
+    "save": "Save",
+    "skip": "Skip",
+    "send": "Send",
+    "next": "Next",
+    "confirm": "Confirm",
+    "download": "Download",
+    "from": "From",
+    "to": "To",
+    "date": "Date",
+    "description": "Description",
+    "error": "Error",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "yes": "Yes",
+    "no": "No",
+    "lets_go": "Let's go!",
+    "later": "Later!"
+  },
+
+  "auth": {
+    "signin": "Sign in",
+    "signup": "Sign up",
+    "login": "Log in",
+    "national_id": "National ID",
+    "enter_national_id": "Enter your national ID",
+    "password": "Password",
+    "enter_password": "Enter your password",
+    "forgot_password_q": "Forgot password?",
+    "enter_email_send_code": "Enter your email, a code will be sent",
+    "send_code": "Send code",
+    "enter_code": "Please enter the code",
+    "resend_code": "Resend code",
+    "enter_passwords": "Please enter the passwords",
+    "create_your_account_prompt": "To create your account, please fill in the following data..",
+    "create_child_account_prompt": "To create your child's account, please fill in the following data..",
+    "linked_accounts": "Linked accounts",
+    "add_another_account": "Add another account",
+    "impersonate_user": "Impersonate user",
+    "reset_password": "Reset password",
+    "email": "Email",
+    "enter_email": "Enter your email",
+    "code": "Code",
+    "current_password": "Current password",
+    "new_password": "New password",
+    "confirm_password": "Confirm password",
+    "reenter_password": "Re-enter password",
+    "password_rules": "Must include: at least 8 characters, English letters, symbols (@, #, $ ...)"
+  },
+
+  "home": {
+    "get_started": "Get started",
+    "enter_following_data": "Please enter the following data",
+    "account": "Account",
+    "results_title": "Lab results",
+    "xray_title": "X-rays",
+    "reports_title": "Doctors' reports",
+    "medicines_title": "Medicines",
+    "last_reports_title": "Previous reports",
+    "results": {
+      "analysis_name": "Test name:",
+      "lab_name": "Lab name:",
+      "test_date": "Test date:",
+      "description": "Description:",
+      "hello": "Hello,"
+    },
+    "reports": {
+      "doctor_name": "Doctor name:",
+      "examination_date": "Examination date:",
+      "description": "Description:"
+    },
+    "xray": {
+      "xray_name": "X-ray name:",
+      "lab_name": "Lab name:",
+      "xray_date": "X-ray date:",
+      "description": "Description:"
+    },
+    "medicines": {
+      "dosage": "Dosage:",
+      "frequency_twice_daily": "Twice daily"
+    }
+  },
+
+  "payment": {
+    "details": "Transaction details",
+    "records": "Payment records",
+    "recent_transactions": "Your recent transactions",
+    "to": "To",
+    "reference_number": "Reference number",
+    "date": "Date"
+  },
+
+  "profile": {
+    "age_to_date": "Age to date",
+    "day": "day",
+    "month": "month",
+    "year": "year",
+    "birth_certificate": "Birth certificate"
+  },
+
+  "marketing": {
+    "health_in_pocket": "Your health in your pocket",
+    "anytime_anywhere": "Anytime - Anywhere",
+    "login": "Log in",
+    "register": "Register"
+  },
+  "services": {
+    "nearest_service": "Nearest medical service",
+    "share_location_prompt": "Share your location to find the nearest medical service",
+    "country": "Country",
+    "select_country": "Select country",
+    "governorate": "Governorate",
+    "select_governorate": "Select governorate",
+    "address": "Address",
+    "enter_detailed_address": "Enter detailed address"
+  },
+  "permissions": {
+    "allow_location_q": "Allow access to location?"
+  },
+  "uploader": {
+    "pick_failed": "Image selection failed",
+    "upload": "Upload"
+  }
+}

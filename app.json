@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "HC",
+    "entryPoint":"./index.js"
+    ,
+    "slug": "HC",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./constants2/images/icon.png",
+    "scheme": "HC",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./constants2/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [ 
+       [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
+      ],
+      
+      [
+        
+        "expo-splash-screen",
+        {
+          "image": "./constants2/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-localization"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "welcome": "مرحبًا بكم في تطبيقنا",
+  "intro": "هذا مثال كامل لكيفية تنفيذ الترجمة في تطبيقات إكسبو. يمكنك التبديل بين الإنجليزية والعربية مع دعم كامل للنصوص من اليمين لليسار.",
+  "features": {
+    "title": "الميزات الرئيسية:",
+    "list": [
+      "تبديل اللغة في الوقت الحقيقي",
+      "دعم النصوص من اليمين لليسار (RTL)",
+      "اتجاه النص الديناميكي",
+      "تنسيق الأرقام والتواريخ"
+    ]
+  },
+  "more": "هذا اضافي",
+  "switch_language": "التبديل إلى الإنجليزية",
+
+  "common": {
+    "save": "حفظ",
+    "skip": "تجاهل",
+    "send": "ارسال",
+    "next": "التالي",
+    "confirm": "تأكيد",
+    "download": "تنزيل",
+    "from": "من:",
+    "to": "إلى:",
+    "date": "التاريخ",
+    "description": "الوصف:",
+    "error": "خطأ",
+    "ok": "حسناً",
+    "cancel": "إلغاء",
+    "yes": "نعم",
+    "no": "لا",
+    "lets_go": "هيا بنا !",
+    "later": "لاحقا !"
+  },
+
+  "auth": {
+    "signin": "تسجيل الدخول",
+    "signup": "تسجيل",
+    "login": "تسجيل دخول",
+    "national_id": "الرقم القومي",
+    "enter_national_id": "ادخل رقمك القومي",
+    "password": "كلمة السر",
+    "enter_password": "ادخل كلمة السر",
+    "forgot_password_q": "نسيت كلمة السر؟",
+    "enter_email_send_code": "ادخل بريدك الالكتروني ، سيتم ارسال كود",
+    "send_code": "ارسل الكود",
+    "enter_code": "يرجي ادخال الكود",
+    "resend_code": "اعادة ارسال الكود",
+    "enter_passwords": "برجاء ادخال كلمات السر",
+    "create_your_account_prompt": "لإنشاء حسابك يرجي ملئ البيانات التالية ..",
+    "create_child_account_prompt": "لإنشاء حساب طفلك يرجي ملئ البيانات التالية ..",
+    "linked_accounts": "الحسابات المرتبطة",
+    "add_another_account": "اضافة حساب اخر",
+    "impersonate_user": "تمثيل المستخدم",
+    "reset_password": "اعادة تعيين كلمة السر",
+    "email": "البريد الالكتروني",
+    "enter_email": "ادخل بريدك الالكتروني",
+    "code": "الكود",
+    "current_password": "كلمة السر الحالية",
+    "new_password": "كلمة السر الجديدة",
+    "confirm_password": "تأكيد كلمة السر",
+    "reenter_password": "اعد ادخال كلمة السر",
+    "password_rules": "يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)"
+  },
+
+  "home": {
+    "get_started": "البدء",
+    "enter_following_data": "يرجي ادخال البيانات التالية",
+    "account": "الحساب",
+    "results_title": "نتائج التحاليل",
+    "xray_title": "الاشعة",
+    "reports_title": "تقارير الدكاترة",
+    "medicines_title": "الادوية",
+    "last_reports_title": "التقارير السابقة",
+    "results": {
+      "analysis_name": "اسم التحليل:",
+      "lab_name": "اسم المعمل:",
+      "test_date": "تاريخ التحليل:",
+      "description": "الوصف:",
+      "hello": "اهلا،"
+    },
+    "reports": {
+      "doctor_name": "اسم الدكتور:",
+      "examination_date": "تاريخ الكشف:",
+      "description": "الوصف:"
+    },
+    "xray": {
+      "xray_name": "اسم الاشعة:",
+      "lab_name": "اسم المعمل:",
+      "xray_date": "تاريخ الاشعة:",
+      "description": "الوصف:"
+    },
+    "medicines": {
+      "dosage": "الجرعة:",
+      "frequency_twice_daily": "مرتين يوميا"
+    }
+  },
+
+  "payment": {
+    "details": "تفاصيل المعاملة",
+    "records": "سجلات الدفع",
+    "recent_transactions": "معاملاتك الاخيرة",
+    "to": "الي",
+    "reference_number": "الرقم المرجعي",
+    "date": "التاريخ"
+  },
+
+  "profile": {
+    "age_to_date": "العمر لليوم",
+    "day": "يوم",
+    "month": "شهر",
+    "year": "سنة",
+    "birth_certificate": "شهادة الميلاد"
+  },
+
+  "marketing": {
+    "health_in_pocket": "صحتك في جيبك",
+    "anytime_anywhere": "أي وقت - أي مكان",
+    "login": "تسجيل دخول",
+    "register": "تسجيل"
+  },
+  "services": {
+    "nearest_service": "أقرب خدمة طبية",
+    "share_location_prompt": "شارك موقعك الجغرافي للبحث عن اقرب خدمة طبية",
+    "country": "البلد",
+    "select_country": "اختر البلد",
+    "governorate": "المحافظة",
+    "select_governorate": "اختر المحافظة",
+    "address": "العنوان",
+    "enter_detailed_address": "ادخل العنوان التفصيلي"
+  },
+  "permissions": {
+    "allow_location_q": "السماح بالوصول للموقع؟"
+  },
+  "uploader": {
+    "pick_failed": "فشل اختيار الصورة",
+    "upload": "تحميل"
+  }
+}
