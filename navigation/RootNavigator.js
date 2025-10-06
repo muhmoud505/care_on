@@ -1,10 +1,14 @@
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useAuth } from '../contexts/authContext';
 import SplashScreen from '../screens/home/splash';
+import WelcomeScreen from '../screens/home/welcome';
 import AppStack from './AppStack';
 import AuthStack from './AuthStack';
+
+const RootStack = createNativeStackNavigator();
 
 /**
  * This is the root navigator. It decides which stack to show
@@ -20,7 +24,17 @@ const RootNavigator = () => {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        {isAuthenticated ?  <AppStack />:<AuthStack /> }
+        <RootStack.Navigator screenOptions={{ headerShown: false }}>
+          {isAuthenticated ? (
+            <RootStack.Screen name="App" component={AppStack} />
+          ) : (
+            <>
+              <RootStack.Screen name="Auth" component={AuthStack} />
+              {/* WelcomeScreen is now a sibling to the Auth stack */}
+              <RootStack.Screen name="welcome" component={WelcomeScreen} />
+            </>
+          )}
+        </RootStack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
   );

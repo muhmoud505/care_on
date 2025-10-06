@@ -4,6 +4,8 @@
 const Images = {
   // Logos and branding
   logo: require('../assets2/images/logo.png'),
+  confirmed: require('../assets2/images/confirmed.png'),
+
   background: require('../assets2/images/backg.png'),
   wave: require('../assets2/images/wave.png'),
   results:require('../assets2/images/results.png'),

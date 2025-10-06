@@ -1,15 +1,14 @@
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Alert,
   SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
@@ -21,6 +20,7 @@ import { hp, wp } from '../../../utils/responsive';
 const Signup = () => {
   const { t, i18n } = useTranslation();
   const route = useRoute();
+  const navigation=useNavigation()
   const { signup, isAuthLoading } = useAuth();
   const { form, errors, handleChange, checkFormValidity } = useForm({
     name: '',
@@ -51,17 +51,9 @@ const Signup = () => {
     formData.append('id', form.id);
 
     try {
-      const response = await signup(formData);
-      Alert.alert(
-        t('common.success', { defaultValue: 'Success' }),
-        t('auth.signup_success_message', { defaultValue: 'Your account has been created successfully. Please check your email to verify.' })
-      );
-      // TODO: Navigate to the login screen or a "verify email" screen
-    } catch (error) {
-      Alert.alert(
-        t('common.error', { defaultValue: 'Error' }),
-        error.message || t('auth.signup_failed_message', { defaultValue: 'An unknown error occurred during signup.' })
-      );
+      navigation.navigate('password',{formData})
+    }catch(err){
+      console.error(err);
     }
   };
 
@@ -112,8 +104,9 @@ const Signup = () => {
       <TouchableOpacity
         onPress={handleSignup}
         activeOpacity={0.7}
-        disabled={!formIsValid || isAuthLoading}
-        style={[styles.submitButton, (!formIsValid || isAuthLoading) && styles.disabledButton]}
+        //disabled={!formIsValid || isAuthLoading}
+        style={styles.submitButton}
+        
       >
         {isAuthLoading ? (
           <ActivityIndicator color="#fff" />

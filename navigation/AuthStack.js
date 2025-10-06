@@ -6,6 +6,7 @@ import Reset from "../screens/auth/password/Reset"
 import AfterCode from "../screens/auth/password/ResetAfterCode"
 import SignIn from "../screens/auth/signin"
 import S1 from "../screens/auth/signup/a"
+import PasswordScreen from "../screens/auth/signup/passwork"
 import Signup from "../screens/auth/signup/signup"; // Updated import
 
 const Stack =createNativeStackNavigator()
@@ -15,6 +16,8 @@ const Stack =createNativeStackNavigator()
     <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="s1" component={S1} options={{ headerShown: false }} />
         <Stack.Screen name="Signup" component={Signup} options={{ title: t('auth.create_account', { defaultValue: 'إنشاء حساب' }) }} />
+        <Stack.Screen name="password" component={PasswordScreen} options={{ title: t('set_password', { defaultValue: 'كلمة السر' }) }} />
+        
         <Stack.Screen name="signin" component={SignIn} options={{ title: t('auth.signin', { defaultValue: 'تسجيل الدخول' }) }} />
               <Stack.Screen name='reset' component={Reset} options={{ title: t('auth.reset_password', { defaultValue: 'اعادة تعيين كلمة السر' }) }} />
               <Stack.Screen name='forget' component={Forget} options={{ title: t('auth.reset_password', { defaultValue: 'اعادة تعيين كلمة السر' }) }} />

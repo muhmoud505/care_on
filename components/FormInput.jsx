@@ -28,12 +28,13 @@ const FormField = ({
   required,
   type,
   error,
-  onBlur, 
+  onBlur,
   data,
+  secureTextEntry, // Receive the secureTextEntry prop from parent
+  onToggleSecureEntry, // Receive the toggle function from parent
   ...props
-  
 }) => {
-  const [showPassword, setShowPassword] = useState(false);
+  // Removed internal state to rely on parent props
   const { i18n } = useTranslation();
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
@@ -79,15 +80,14 @@ const FormField = ({
           placeholderTextColor="#7B7B8B"
           onChangeText={onChangeText}
 
-          onBlur={onBlur} // Added onBlur handler
-          secureTextEntry={type === "password" && !showPassword}
+          onBlur={onBlur}
+          secureTextEntry={type === "password" && secureTextEntry} // Use the prop from parent
           {...props}
-        
         />
         {type === "password" && (
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+          <TouchableOpacity onPress={onToggleSecureEntry}>
             <Image
-              source={!showPassword ? Images.eye : Images.eyeHide}
+              source={secureTextEntry ? Images.eye : Images.eyeHide}
               style={styles.icon}
               resizeMode="contain"
             />

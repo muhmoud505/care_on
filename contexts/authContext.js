@@ -65,27 +65,27 @@ export const AuthProvider = ({ children }) => {
         body: userData,
       });
 
-      if (!response.ok) {
-        // Attempt to get a JSON error message from the server
-        try {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Sign up failed.');
-        } catch (jsonError) {
-          // If the error response isn't JSON, read it as text.
-          // This will capture HTML error pages or plain text errors.
-          const errorText = await response.text();
-          console.error("Non-JSON error response from server:", errorText);
-          throw new Error(`Server error: ${response.status}`);
-        }
+      // Read the response body as text ONCE.
+      const responseText = await response.text();
+      let data;
+      try {
+        // Try to parse the text as JSON.
+        data = JSON.parse(responseText);
+      } catch (e) {
+        // If parsing fails, 'data' will be undefined.
+        // This is fine if we don't expect a JSON body on error.
       }
 
-      // If the response is OK, we expect JSON. But we'll verify.
-      const responseText = await response.text();
-      try {
-        const data = JSON.parse(responseText);
-      } catch (e) {
-        console.error("Successful response was not valid JSON:", responseText);
-        throw new Error('Received an invalid response from the server.');
+      if (!response.ok) {
+        // Use the parsed data if available, otherwise throw a generic error.
+        const errorMessage = data?.message || `Server error: ${response.status}`;
+        console.error("Signup failed with non-OK response:", responseText);
+        throw new Error(errorMessage);
+      }
+
+      if (!data) {
+        // This handles cases where the response is OK but the body is not valid JSON.
+        throw new Error('Received an invalid or empty response from the server.');
       }
     } catch (error) {
       console.error("Signup failed:", error);
