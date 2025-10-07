@@ -43,7 +43,7 @@ const DatePick = ({
 
   return (
     <View 
-      style={[styles.container, otherStyles, { alignItems: i18n.dir() === 'rtl' ? 'flex-end' : 'flex-start' }]}
+      style={[styles.container, otherStyles, { alignItems: i18n.dir() === 'ltr' ? 'flex-end' : 'flex-start' }]}
     >
       <Text style={styles.title}>
         {title}

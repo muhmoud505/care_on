@@ -32,6 +32,7 @@ const FormField = ({
   data,
   secureTextEntry, // Receive the secureTextEntry prop from parent
   onToggleSecureEntry, // Receive the toggle function from parent
+  pickerItems,
   ...props
 }) => {
   // Removed internal state to rely on parent props
@@ -46,11 +47,14 @@ const FormField = ({
     setDate(currentDate);
   };
 
+  // Find the label for the current value to display in the TextInput
+  const selectedLabel = type === 'picker' ? (pickerItems?.find(item => item.value === value)?.label || placeholder) : value;
+
   return (
     <View 
-      style={[styles.container, { direction:'rtl'}, otherStyles]}
+      style={[styles.container, { direction:'ltr'}, otherStyles]}
     >
-      <Text style={[styles.title, {textAlign: 'left'}]}>
+      <Text style={[styles.title, {textAlign: 'right'}]}>
         {title}
         {required && <Text style={styles.required}> *</Text>}
       </Text>
@@ -70,20 +74,26 @@ const FormField = ({
               />
           )
         }
-        <TextInput
-          style={[styles.input]}
-          value={value}
-          numberOfLines={type === 'long' ? 5 : 1}
-          editable={type !== 'drop'}
-          multiline={type === 'long'}
-          placeholder={placeholder}
-          placeholderTextColor="#7B7B8B"
-          onChangeText={onChangeText}
-
-          onBlur={onBlur}
-          secureTextEntry={type === "password" && secureTextEntry} // Use the prop from parent
-          {...props}
-        />
+        {type === 'picker' ? (
+          <TouchableOpacity style={styles.pickerTouchable} onPress={() => setShowList(!showList)}>
+            <Text style={[styles.input, styles.pickerInput]}>{selectedLabel}</Text>
+            <Image source={Images.arrD} style={styles.icon} resizeMode="contain" />
+          </TouchableOpacity>
+        ) : (
+          <TextInput
+            style={[styles.input]}
+            value={value}
+            numberOfLines={type === 'long' ? 5 : 1}
+            editable={type !== 'drop' && type !== 'date'}
+            multiline={type === 'long'}
+            placeholder={placeholder}
+            placeholderTextColor="#7B7B8B"
+            onChangeText={onChangeText}
+            onBlur={onBlur}
+            secureTextEntry={type === "password" && secureTextEntry}
+            {...props}
+          />
+        )}
         {type === "password" && (
           <TouchableOpacity onPress={onToggleSecureEntry}>
             <Image
@@ -136,20 +146,20 @@ const FormField = ({
           scrollEnabled={false}
           contentContainerStyle={styles.daysGrid} */}
 
-      {showList&&(
+      {showList && (type === 'drop' || type === 'picker') && (
         <FlatList
          nestedScrollEnabled={true}
          scrollEnabled={true}
-          data={data}
+          data={type === 'picker' ? pickerItems : data}
           renderItem={({item})=>(
             <TouchableOpacity
              style={styles.itemStyle}
              onPress={() => {
-              onChangeText(item);
+              onChangeText(type === 'picker' ? item.value : item);
               setShowList(false);
             }}
             >
-              <Text style={styles.listItemText}>{item}</Text>
+              <Text style={styles.listItemText}>{type === 'picker' ? item.label : item}</Text>
             </TouchableOpacity>
           )
             
@@ -216,6 +226,15 @@ const styles = StyleSheet.create({
     fontSize: Math.min(wp(3), 12),
     marginTop: hp(0.5),
     textAlign: 'right',
+  },
+  pickerInput: {
+    color: '#000', // Ensure selected value is visible
+  },
+  pickerTouchable: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   listItemText: {
     fontSize: 14,

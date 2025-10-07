@@ -1,126 +1,219 @@
-import { useNavigation } from '@react-navigation/native'
-import { StatusBar } from 'expo-status-bar'
-import { useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import DatePick from '../../../components/datePicker'
-
+import { useNavigation } from '@react-navigation/native';
+import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomHeader from '../../../components/CustomHeader';
+import DatePick from '../../../components/datePicker';
+import FormField from '../../../components/FormInput';
+import { hp, wp } from '../../../utils/responsive';
 
 const S2 = () => {
-  const [selectedDate, setSelectedDate] = useState()
-  const navigation=useNavigation()
-  const handleSelectedData=(selectedDate)=>{
-    setSelectedDate(selectedDate)
-    console.log('date from screen1: ',selectedDate);
-    
-  }
-   const handlePress = () => {
-    console.log('date before navigate: ',selectedDate);
-    
-    navigation.navigate('signup2', { 
-      date: selectedDate, // Your date data
-      otherParam: 'some value' // Any other data you want to send
-    });
-  };
-    // console.log(text);
-    
-  
-  return (
-    <SafeAreaView style={styles.safeContainer} className=' '>
-     
-     <View style={styles.v1} >
-        <Text style={styles.txt1} >ادخل تاريخ ميلاد الطفل</Text>
-        <DatePick 
-         title={'تاريخ الميلاد'}
-         required
-         placeholder={'ادخل تاريخ ميلاد الطفل'}
-         onDateSelect={handleSelectedData}
-         
-         />
-     </View>
-      <View style={styles.v2}>
-        <TouchableOpacity 
-         style={styles.btn1}
-         onPress={()=>handlePress()}
-         activeOpacity={0.7}
-         
-         >
-         <Text style={styles.btntxt}>التالي</Text>
-      </TouchableOpacity>
-     
-      </View>
-      
-    <StatusBar backgroundColor='#80D280' style='auto'/>
-      
-    </SafeAreaView>
-  )
-}
+  const navigation = useNavigation();
+  const { t } = useTranslation();
+  const [flowType, setFlowType] = useState(null); // 'adult' or 'child'
+  const [formData, setFormData] = useState({
+    birthdate: null,
+    gender: '',
+  });
 
-export default S2
+  const handleFieldChange = useCallback((field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const isFormValid = useMemo(() => {
+    return formData.birthdate && formData.gender;
+  }, [formData]);
+
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return null;
+    const today = new Date();
+    const parts = birthDate.split('/');
+    const birth = new Date(parts[2], parts[1] - 1, parts[0]);
+    if (birth > today) return 0;
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) { age--; }
+    return age;
+  };
+
+  const handleProceed = () => {
+    if (!isFormValid) return;
+
+    const age = calculateAge(formData.birthdate);
+
+    // Reformat the date from DD/MM/YYYY to YYYY-MM-DD for the API
+    const parts = formData.birthdate.split('/');
+    const formattedApiDate = `${parts[2]}-${String(parts[1]).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
+
+    const dataToPass = { 
+      ...formData, 
+      birthdate: formattedApiDate, // Use the API-friendly format
+      age };
+
+    if (flowType === 'adult') {
+      if (age < 18) {
+        Alert.alert("Error", "Users must be 18 or older to create a personal account.");
+        return;
+      }
+      navigation.navigate('Signup', {
+        title: t('auth.create_account', { defaultValue: 'إنشاء حساب' }),
+        isChild: false,
+        ...dataToPass,
+      });
+    } else {
+      if (age >= 18) {
+        Alert.alert("Error", "For users 18 and over, please create a personal account.");
+        return;
+      }
+      navigation.navigate('signupBaby', {
+        title: t('auth.create_child_account', { defaultValue: 'إنشاء حساب لطفل' }),
+        ...dataToPass,
+      });
+    }
+  };
+
+  const resetFlow = () => {
+    setFlowType(null);
+    setFormData({ birthdate: null, gender: '' });
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <CustomHeader text={t('auth.signup', { defaultValue: 'Sign up' })} />
+      
+      {!flowType ? (
+        <View style={styles.container}>
+          <Text style={styles.title}>{t('auth.choose_account_type', { defaultValue: 'اختر نوع الحساب' })}</Text>
+
+          <TouchableOpacity style={styles.card} onPress={() => setFlowType('adult')} activeOpacity={0.7}>
+            <Image source={require('../../../assets2/images/img1.png')} style={styles.icon} />
+            <Text style={styles.cardText}>{t('auth.personal_account', { defaultValue: 'حساب شخصي' })}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.card} onPress={() => setFlowType('child')} activeOpacity={0.7}>
+            <Image source={require('../../../assets2/images/img2.png')} style={styles.icon} />
+            <Text style={styles.cardText}>{t('auth.child_account', { defaultValue: 'حساب لطفل' })}</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>
+            {flowType === 'adult' ? 'ادخل بياناتك' : 'ادخل بيانات الطفل'}
+          </Text>
+          <View style={{rowGap: hp(3)}}>
+          <DatePick 
+            title={t('profile.dob', { defaultValue: 'تاريخ الميلاد' })}
+            required
+            placeholder={'ادخل تاريخ الميلاد'}
+            value={formData.birthdate}
+            onDateSelect={(date) => handleFieldChange('birthdate', date)}
+          />
+          <FormField
+            required
+            title={'الجنس'}
+            placeholder={'اختر الجنس'}
+            value={formData.gender}
+            onChangeText={(value) => handleFieldChange('gender', value)} // This line might need adjustment based on how your onChangeText works with picker
+            type="picker"
+            pickerItems={[{ label: 'ذكر', value: 'male' }, { label: 'أنثى', value: 'female' }]}
+          />
+          </View>
+          <TouchableOpacity
+            style={[styles.nextButton, !isFormValid && styles.disabledButton]}
+            onPress={handleProceed}
+            disabled={!isFormValid}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.nextButtonText}>{t('common.next', { defaultValue: 'Next' })}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.backButton} onPress={resetFlow}>
+            <Text style={styles.backButtonText}>{t('common.back', { defaultValue: 'Back' })}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </SafeAreaView>
+  );
+};
+
+export default S2;
 
 const styles = StyleSheet.create({
-  // w-[100%] h-[100%] bg-white flex items-center justify-start 
-  safeContainer:{
-    width:'100%',
-    height:'100%',
-    backgroundColor:'#fff',
-    // alignItems:'center',
-    
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
   },
-  //  className='w-[300px] h-[300px]'
-  img:{
-    width:300,
-    height:300
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: wp(5),
   },
-  // className="items-center top-4"
-  v1:{
-    // alignItems:'center',
-    alignItems:'flex-end'
-
-    , top:40,
-    marginRight:10,
-    rowGap:30
+  formContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: wp(5),
   },
-  txt1:{
-    // className="font-bold -[3text2px] text-center  "
-    fontWeight:'bold',
-    fontSize:20,
-    
+  title: {
+    fontSize: Math.min(wp(6), 24),
+    fontWeight: 'bold',
+    marginBottom: hp(5),
+    textAlign: 'center',
   },
-  // className='font-bold text-[26px] text-center'
-  txt2:{
-    fontWeight:'bold',
-    fontSize:26,
-
+  card: {
+    backgroundColor: '#f0f4ff',
+    width: '100%',
+    paddingVertical: hp(3),
+    paddingHorizontal: wp(5),
+    borderRadius: wp(4),
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: hp(3),
+    borderWidth: 1,
+    borderColor: '#014CC4',
   },
-  // className="font-bold text-[20px] top-6"
-  txt3:{
-    fontWeight:'bold',
-    fontSize:20,
-    marginTop:15
+  icon: {
+    width: wp(12),
+    height: wp(12),
+    resizeMode: 'contain',
+    marginRight: wp(4),
   },
-  // bg-[#014CC4] w-[327px] h-[56] rounded-[16px] gap-[10px] align-middle'
-  btn1:{
-    backgroundColor:'#014CC4',
-    width:327,
-    height:56,
-    borderRadius:16,
-    justifyContent:'center',
-    alignItems:'center'
+  cardText: {
+    fontSize: Math.min(wp(5), 20),
+    fontWeight: '600',
+    color: '#014CC4',
   },
-  // className='text-white font-bold text-[24px] text-center '
-  btntxt:{
-    color:'#fff',
-    fontWeight:'bold',
-    fontSize:24,
-    
+  backButton: {
+    marginTop: hp(3),
+    padding: wp(3),
+    alignItems: 'center',
   },
-  // className='bottom-[-120] gap-5'
-  v2:{
-    position:'absolute',
-    rowGap:20,
-    bottom:70,
-    marginHorizontal:20
-  }
-
-})
+  backButtonText: {
+    fontSize: Math.min(wp(4.5), 18),
+    color: '#014CC4',
+    fontWeight: 'bold',
+  },
+  nextButton: {
+    backgroundColor: '#014CC4',
+    height: hp(7),
+    borderRadius: wp(4),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: hp(4),
+  },
+  nextButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: Math.min(wp(5), 20),
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+});

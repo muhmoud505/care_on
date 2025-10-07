@@ -1,5 +1,5 @@
-import { CommonActions, useNavigation, useRoute } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import { CommonActions, useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -17,11 +17,9 @@ import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 
-const PasswordScreen = () => {
+const PasswordScreen = ({ route }) => { // Accept route as a prop
   const { t, i18n } = useTranslation();
   const navigation =useNavigation()
-  const route = useRoute();
-  const { formData: previousFormData } = route.params;
   const { signup, isAuthLoading } = useAuth();
   const { form, errors, handleChange, checkFormValidity } = useForm({
     password: '',
@@ -29,41 +27,51 @@ const PasswordScreen = () => {
   });
   const [isPasswordSecure, setIsPasswordSecure] = useState(true);
   const [isConfirmPasswordSecure, setIsConfirmPasswordSecure] = useState(true);
+    const { signupData } = route.params || {};
 
-console.log(previousFormData)
+     console.log(signupData.birthdate)
+     console.log(signupData.age)
+
   const formIsValid = checkFormValidity();
 
-  useEffect(() => {
-    if (form.password && form.password_confirmation && form.password !== form.password_confirmation) {
-      // This is a simple example of cross-field validation.
-      // You might want to integrate this into your useForm hook.
-      errors.password_confirmation = t('auth.passwords_do_not_match', { defaultValue: 'Passwords do not match' });
-    } else if (errors.password_confirmation) {
-      // Clear error if they match
-      delete errors.password_confirmation;
-    }
-  }, [form, errors]);
+  // useEffect(() => {
+  //   if (form.password && form.password_confirmation && form.password !== form.password_confirmation) {
+  //     // This is a simple example of cross-field validation.
+  //     // You might want to integrate this into your useForm hook.
+  //     errors.password_confirmation = t('auth.passwords_do_not_match', { defaultValue: 'Passwords do not match' });
+  //   } else if (errors.password_confirmation) {
+  //     // Clear error if they match
+  //     delete errors.password_confirmation;
+  //   }
+  // }, [form, errors]);
 
   const handleSignup = async () => {
     if (!formIsValid || form.password !== form.password_confirmation) {
         Alert.alert(t('common.error', { defaultValue: 'Error' }), t('auth.passwords_do_not_match', { defaultValue: 'Passwords do not match' }));
+
         return;
     };
 
-    // Append password fields to the FormData object from the previous screen
-    previousFormData.append('password', form.password);
-    previousFormData.append('password_confirmation', form.password_confirmation);
+    // Safely get signupData from route.params inside the handler
+    const { signupData } = route.params || {};
+    // Defensive check to ensure signupData exists before using it.
+    if (!signupData) {
+      console.error("Critical Error: signupData is missing in PasswordScreen.");
+      Alert.alert("Error", "An unexpected error occurred. Please start the signup process again.");
+      return;
+    }
+
+    // Add the password fields to the object.
+    signupData.password = form.password;
+    signupData.password_confirmation = form.password_confirmation;
+    signupData.isChild = route.params?.signupData?.isChild;
 
     try {
       // Perform the signup API call
-      await signup(previousFormData);
-
+      await signup(signupData);
       // On success, reset the navigation stack to the 'welcome' screen
-      navigation.dispatch(
-        CommonActions.reset({ index: 0, routes: [{ name: 'welcome' }] })
-      );
+      navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'welcome' }] }));
     } catch (error) {
-      // On failure, show an alert with the error message from the API
       Alert.alert(t('common.error', { defaultValue: 'Error' }), error.message);
     }
   };

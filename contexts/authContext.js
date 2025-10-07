@@ -32,18 +32,24 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (userData) => {
-    // In a real app, you would make an API call here with username/password
-    // For this example, we'll just simulate a successful login.
+    setIsAuthLoading(true);
     try {
-      // Mock user data and token
+      // TODO: Replace this with a real API call to your login endpoint.
+      // For example:
+      // const response = await fetch(`${API_URL}/api/v1/auth/login`, { ... });
+      // const loggedInUser = await response.json();
+
+      // For now, we'll simulate a successful login after a short delay.
+      await new Promise(resolve => setTimeout(resolve, 1000));
       const loggedInUser = { ...userData, token: 'fake-jwt-token' };
 
       await AsyncStorage.setItem('user', JSON.stringify(loggedInUser));
       setUser(loggedInUser);
     } catch (error) {
       console.error("Login failed:", error);
-      // You might want to throw the error to handle it in the UI
       throw error;
+    } finally {
+      setIsAuthLoading(false);
     }
   };
 
@@ -57,17 +63,23 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signup = async (userData) => {
-    // userData is expected to be a FormData object
+    // userData is now a plain JavaScript object
     setIsAuthLoading(true);
     try {
       const response = await fetch(`${API_URL}/api/v1/auth/users`, {
         method: 'POST',
-        body: userData,
+        body: JSON.stringify(userData), // Convert the object to a JSON string
+        headers: {
+          'Content-Type': 'application/json',
+          "accept": "application/json"
+        },
       });
 
       // Read the response body as text ONCE.
       const responseText = await response.text();
+      
       let data;
+      
       try {
         // Try to parse the text as JSON.
         data = JSON.parse(responseText);
@@ -87,6 +99,11 @@ export const AuthProvider = ({ children }) => {
         // This handles cases where the response is OK but the body is not valid JSON.
         throw new Error('Received an invalid or empty response from the server.');
       }
+
+      // On successful signup, store the user data and update the state.
+      // Assuming the server response 'data' contains the user object and a token.
+      await AsyncStorage.setItem('user', JSON.stringify(data));
+      setUser(data);
     } catch (error) {
       console.error("Signup failed:", error);
       throw error; // Re-throw to be handled by the UI component

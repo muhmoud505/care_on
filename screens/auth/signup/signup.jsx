@@ -1,8 +1,10 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useEffect } from 'react';
+import * as FileSystem from 'expo-file-system'; // Import Expo FileSystem
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Alert,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -13,7 +15,6 @@ import {
 import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
 import Uploader from '../../../components/Uploader';
-import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 
@@ -21,12 +22,14 @@ const Signup = () => {
   const { t, i18n } = useTranslation();
   const route = useRoute();
   const navigation=useNavigation()
-  const { signup, isAuthLoading } = useAuth();
+  const { isChild, birthdate, gender, age } = route.params || {};
+  const [isProcessing, setIsProcessing] = useState(false); // State for image processing
   const { form, errors, handleChange, checkFormValidity } = useForm({
     name: '',
-    nationalId: '',
+    national_number: isChild ? undefined : '',
     email: '',
     id: null,
+    type:'patient'
   });
 
   const formIsValid = checkFormValidity();
@@ -42,18 +45,34 @@ const Signup = () => {
   const handleSignup = async () => {
     if (!formIsValid) return;
 
-    // Create a FormData object to send multipart/form-data
-    const formData = new FormData();
-    formData.append('name', form.name);
-    formData.append('email', form.email);
-    formData.append('nationalId', form.nationalId);
-    // The 'id' field from the form contains the file object from the Uploader
-    formData.append('id', form.id);
-
+    setIsProcessing(true);
     try {
-      navigation.navigate('password',{formData})
-    }catch(err){
-      console.error(err);
+      // 1. Read the image file and convert it to a Base64 string.
+      const base64Image = await FileSystem.readAsStringAsync(form.id.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // 2. Create a plain JavaScript object to pass to the next screen.
+      // This is more reliable than passing a FormData object through navigation.
+      const signupData = {
+        name: form.name,
+        email: form.email,
+        national_number: form.national_number,
+        birthdate: birthdate,
+        age: age,
+        gender: gender,
+        isChild: !!isChild,
+        // Your API expects the 'id' field to contain the image data.
+        id: base64Image,
+        type:'patient'
+      };
+      // 3. Navigate to the password screen with the prepared data.
+      navigation.navigate('password', { signupData });
+    } catch (err) {
+      console.error("Failed to process image or navigate:", err);
+      Alert.alert("Error", "Could not process the selected image. Please try again.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -82,20 +101,24 @@ const Signup = () => {
           onChangeText={(text) => handleChange('email', text)}
           error={errors.email}
         />
-        <FormField 
-          required
-          title={'الرقم القومي'}
-          placeholder={'ادخل رقمك القومي'}
-          value={form.nationalId}
-          onChangeText={(text) => handleChange('nationalId', text)}
-          keyboardType="numeric"
-          error={errors.nationalId}
-        />  
+        {!isChild && (
+          <>
+            <FormField 
+              required
+              title={'الرقم القومي'}
+              placeholder={'ادخل الرقم القومي'}
+              value={form.national_number}
+              onChangeText={(text) => handleChange('national_number', text)}
+              keyboardType="numeric"
+              error={errors.national_number}
+            />
+          </>
+        )}
       </View>
       
       <Uploader
         required
-        title={'البطاقة الشخصية'}
+        title={isChild ? t('profile.birth_certificate', { defaultValue: 'شهادة الميلاد' }) : t('auth.national_id', { defaultValue: 'البطاقة الشخصية' })}
         color='#80D28040'
         onFileSelect={(file) => handleChange('id', file)}
         error={errors.id}
@@ -104,11 +127,11 @@ const Signup = () => {
       <TouchableOpacity
         onPress={handleSignup}
         activeOpacity={0.7}
-        //disabled={!formIsValid || isAuthLoading}
-        style={styles.submitButton}
+        disabled={!formIsValid || isProcessing}
+        style={[styles.submitButton, (!formIsValid || isProcessing) && styles.disabledButton]}
         
       >
-        {isAuthLoading ? (
+        {isProcessing ? (
           <ActivityIndicator color="#fff" />
         ) : (
           <Text style={styles.submitButtonText}>التالي</Text>

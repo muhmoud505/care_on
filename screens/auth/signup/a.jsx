@@ -1,26 +1,28 @@
 import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
+import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { hp, wp } from '../../../utils/responsive';
 
 
 const S1 = () => {
-  const navigation=useNavigation()
-  const handlePress=(text)=>{
-    navigation.navigate(`${text}`)
-  }
+  const navigation = useNavigation();
+  const { t } = useTranslation();
+
   return (
-    <SafeAreaView style={styles.safeContainer} className=' '>
-      <Image style={styles.img} source={require('..//..//../assets2/images/img1.png')}/>
+    <SafeAreaView style={styles.safeContainer} >
+      <Image style={styles.img} source={require('../../../assets2/images/img1.png')}/>
      <View style={styles.v1} >
-  <Text style={styles.txt1} >صحتك <Text style={styles.txt2}>في</Text> جيبك</Text>
-  <Text style={styles.txt3}>أي وقت - أي مكان</Text>
+  <Text style={styles.txt1} >
+    {t('marketing.health_in_pocket_part1', { defaultValue: 'صحتك' })} <Text style={styles.txt2}>{t('marketing.health_in_pocket_part2', { defaultValue: 'في' })}</Text> {t('marketing.health_in_pocket_part3', { defaultValue: 'جيبك' })}
+  </Text>
+  <Text style={styles.txt3}>{t('marketing.anytime_anywhere', { defaultValue: 'أي وقت - أي مكان' })}</Text>
 </View>
       <View style={styles.v2}>
         <TouchableOpacity 
          style={styles.btn1}
-         onPress={()=>handlePress('signin')}
+         onPress={() => navigation.navigate('signin')}
          activeOpacity={0.7}
          
          >
@@ -28,7 +30,7 @@ const S1 = () => {
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.btn1,{backgroundColor:'#80D280'}]}
-        onPress={()=>handlePress('Signup')}
+        onPress={() => navigation.navigate('s2')}
          activeOpacity={0.7}
       >
          
