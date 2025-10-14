@@ -1,7 +1,12 @@
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  StatusBar,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,59 +22,98 @@ import { hp, wp } from '../../../utils/responsive';
 const AfterCode = () => {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
-  const { login } = useAuth(); // Using login to transition to the main app
+  const route = useRoute();
+  const { nationalId, code } = route.params || {};
+  const { resetPasswordAfterCode, isAuthLoading } = useAuth();
   const { form, errors, handleChange, checkFormValidity } = useForm({
-    newPassword: '',
-    confirmPassword: '',
+    password: '',
+    password_confirmation: '',
   });
 
-  const formIsValid = checkFormValidity() && form.newPassword === form.confirmPassword;
+  const [isPasswordSecure, setIsPasswordSecure] = useState(true);
+  const [isConfirmPasswordSecure, setIsConfirmPasswordSecure] = useState(true);
+
+  const passwordsMatch = form.password && form.password_confirmation && form.password === form.password_confirmation;
+  const formIsValid = checkFormValidity() && passwordsMatch;
 
   const handleConfirm = async () => {
-    if (!formIsValid) return;
-    console.log('New password set:', form.newPassword);
-    // After successfully setting the password, log the user in
-    // and the AuthProvider will navigate to the home stack.
-    await login({ name: 'User', email: 'user@example.com' });
+    if (!formIsValid) {
+      if (!passwordsMatch) {
+        Alert.alert(t('common.error'), t('auth.passwords_do_not_match'));
+      }
+      return;
+    }
+
+    try {
+      await resetPasswordAfterCode({
+        national_id: nationalId,
+        code: code,
+        password: form.password,
+        password_confirmation: form.password_confirmation,
+      });
+
+      Alert.alert(
+        t('common.success'),
+        t('auth.password_reset_success_login'),
+        [{ text: t('common.ok'), onPress: () => navigation.navigate('signin') }]
+      );
+    } catch (error) {
+      Alert.alert(t('common.error'), error.message);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <CustomHeader text={t('auth.reset_password', { defaultValue: 'اعادة تعيين كلمة السر' })} />
-      <View style={[styles.container, { direction: i18n.dir() }]}>
-        <Text style={styles.txt1}>{t('auth.enter_new_password', { defaultValue: 'برجاء ادخال كلمة السر الجديدة' })}</Text>
-        <View style={styles.minContainer}>
-          <FormField
-            title={t('auth.new_password', { defaultValue: 'كلمة السر الجديدة' })}
-            value={form.newPassword}
-            onChangeText={(text) => handleChange('newPassword', text)}
-            error={errors.newPassword}
-            required
-            placeholder={t('auth.enter_password', { defaultValue: 'ادخل كلمة السر' })}
-            type={'password'}
-          />
-          <FormField
-            title={t('auth.confirm_password', { defaultValue: 'تأكيد كلمة السر' })}
-            value={form.confirmPassword}
-            onChangeText={(text) => handleChange('confirmPassword', text)}
-            error={errors.confirmPassword || (form.confirmPassword && form.newPassword !== form.confirmPassword ? t('auth.passwords_do_not_match') : '')}
-            required
-            placeholder={t('auth.reenter_password', { defaultValue: 'اعد ادخال كلمة السر' })}
-            type={'password'}
-          />
-          <Text style={styles.txt2} numberOfLines={2}>
-            {t('auth.password_rules', { defaultValue: 'يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)' })}
-          </Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <CustomHeader text={t('auth.reset_password', { defaultValue: 'اعادة تعيين كلمة السر' })} />
+        <View style={[styles.container, { direction: i18n.dir() }]}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Text style={styles.txt1}>{t('auth.enter_new_password', { defaultValue: 'برجاء ادخال كلمة السر الجديدة' })}</Text>
+            <View style={styles.minContainer}>
+              <FormField
+                title={t('auth.new_password', { defaultValue: 'كلمة السر الجديدة' })}
+                value={form.password}
+                onChangeText={(text) => handleChange('password', text)}
+                error={errors.password}
+                required
+                placeholder={t('auth.enter_password', { defaultValue: 'ادخل كلمة السر' })}
+                type={'password'}
+                secureTextEntry={isPasswordSecure}
+                onToggleSecureEntry={() => setIsPasswordSecure(!isPasswordSecure)}
+              />
+              <FormField
+                title={t('auth.confirm_password', { defaultValue: 'تأكيد كلمة السر' })}
+                value={form.password_confirmation}
+                onChangeText={(text) => handleChange('password_confirmation', text)}
+                error={errors.password_confirmation || (form.password_confirmation && !passwordsMatch ? t('auth.passwords_do_not_match') : '')}
+                required
+                placeholder={t('auth.reenter_password', { defaultValue: 'اعد ادخال كلمة السر' })}
+                type={'password'}
+                secureTextEntry={isConfirmPasswordSecure}
+                onToggleSecureEntry={() => setIsConfirmPasswordSecure(!isConfirmPasswordSecure)}
+              />
+              <Text style={styles.txt2} numberOfLines={2}>
+                {t('auth.password_rules', { defaultValue: 'يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)' })}
+              </Text>
+            </View>
+          </ScrollView>
+          <TouchableOpacity
+            style={[styles.nextButton, (!formIsValid || isAuthLoading) && styles.disabledButton]}
+            onPress={handleConfirm}
+            disabled={!formIsValid || isAuthLoading}
+            activeOpacity={0.7}
+          >
+            {isAuthLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.nextButtonText}>{t('common.confirm', { defaultValue: 'تأكيد' })}</Text>
+            )}
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[styles.nextButton, !formIsValid && styles.disabledButton]}
-          onPress={handleConfirm}
-          disabled={!formIsValid}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.nextButtonText}>{t('common.confirm', { defaultValue: 'تأكيد' })}</Text>
-        </TouchableOpacity>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
@@ -81,10 +125,9 @@ const styles = StyleSheet.create({
 
     flex: 1,
     backgroundColor: '#fff',
-    marginTop:StatusBar.currentHeight
   },
   container: {
-    flex: 1,
+    flex: 1, 
     paddingHorizontal: wp(5),
     paddingTop: hp(2),
   },
@@ -112,8 +155,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    marginTop: 'auto',
-    marginBottom: hp(4),
+    marginBottom: hp(2),
   },
   nextButtonText: {
     color: '#fff',

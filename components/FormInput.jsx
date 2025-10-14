@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(4),
     borderWidth: 1,
     borderColor: 'rgba(128, 128, 128, 0.55)',
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
   },
   errorInput: { // Added error input style

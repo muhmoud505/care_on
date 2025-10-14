@@ -1,117 +1,107 @@
-import { useNavigation } from "@react-navigation/native"
-import { useState } from "react"
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
-import CustomHeader from "../../components/CustomHeader"
-import { PopUp } from "../../components/permissionPopUp"
-import Images from '../../constants2/images'
+import { useNavigation } from "@react-navigation/native";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import CustomHeader from "../../components/CustomHeader";
+import PopUp from "../../components/PopUp";
+import Images from '../../constants2/images';
+import { hp, wp } from "../../utils/responsive";
 
 const LocationScreen=()=>{
- const [expanded, setExpanded] = useState(false);
- const navigation=useNavigation();
+    const [isPopUpVisible, setPopUpVisible] = useState(false);
+    const navigation = useNavigation();
+    const { t, i18n } = useTranslation();
 
-       const handlePopUpexpand = ( isExpanded) => {
-    setExpanded(prev => setExpanded(isExpanded)
-    );
-  };
+    const handleLocationGranted = (coords) => {
+        // Navigate back to the previous screen and pass the location data
+        navigation.navigate('Service', { location: coords });
+    };
+
     return(
-        <SafeAreaView
-           
-        >
-            <CustomHeader text={'أقرب خدمة طبية'}/>
-            <View
-                 style={{
-                direction:'rtl',
-                marginHorizontal:15
-
-            }}
-
-            >
-                {
-                    expanded&&(
-                <PopUp 
-                expanded={expanded}
-                onExpandedChange={(isExpanded) => handlePopUpexpand( isExpanded)}
+        <SafeAreaView style={styles.safeArea}>
+            <CustomHeader text={t('services.nearest_service_title', { defaultValue: 'أقرب خدمة طبية' })}/>
+            <View style={[styles.container, { direction: i18n.dir() }]}>
                 
-                />
+                {isPopUpVisible && (
+                    <PopUp 
+                        expanded={isPopUpVisible}
+                        onExpandedChange={setPopUpVisible}
+                        onLocationGranted={handleLocationGranted}
+                    />
+                )}
 
-                    )
-                }
-                 <View
-                                    style={styles.cont2}
-                                >
-                                <Image
-                                    source={Images.routing}
-                                />
-                                <Text
-                                    style={styles.txt1}
-                                >يرجي منح التطبيق اذن الوصول لموقعك باحدي الطريقتين</Text>
-                            </View>
-            
-                         <TouchableOpacity
-                             style={styles.cont3}
-                             onPress={(e=>setExpanded(!expanded))}
-                         >
-                             <Image
-                                 source={Images.gps}
-                                 style={{tintColor:'#000000'}}
-                             />
-                             <Text
-                                 style={[styles.txt1,{color:'#000000'}]}
-                             >
-                                 استخدم موقعك الحالي
-                             </Text>
-                         </TouchableOpacity>
-                          <TouchableOpacity
-                             style={styles.cont3}
-                             onPress={()=>navigation.navigate('location2')}
-                         >
-                             <Image
-                                 source={Images.location}
-                                 style={{tintColor:'#000000'}}
-                             />
-                             <Text
-                                 style={[styles.txt1,{color:'#000000'}]}
-                             >
-                                 ادخال يدوي لموقعك
-                             </Text>
-                         </TouchableOpacity>
+                <View style={styles.promptContainer}>
+                    <Image source={Images.routing} />
+                    <Text style={styles.promptText}>
+                        {t('services.location_permission_options_prompt', { defaultValue: 'يرجي منح التطبيق اذن الوصول لموقعك باحدي الطريقتين' })}
+                    </Text>
+                </View>
+    
+                <TouchableOpacity
+                    style={styles.optionButton}
+                    onPress={() => setPopUpVisible(true)}
+                >
+                    <Image source={Images.gps} style={styles.optionIcon} />
+                    <Text style={styles.optionText}>
+                        {t('services.use_current_location', { defaultValue: 'استخدم موقعك الحالي' })}
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.optionButton}
+                    onPress={() => navigation.navigate('location2')}
+                >
+                    <Image source={Images.location} style={styles.optionIcon} />
+                    <Text style={styles.optionText}>
+                        {t('services.enter_location_manually', { defaultValue: 'ادخال يدوي لموقعك' })}
+                    </Text>
+                </TouchableOpacity>
             </View>
         </SafeAreaView>
     )
 }
 
 const styles=StyleSheet.create({
-    cont2:{
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+    },
+    container: {
+        flex: 1,
+        marginHorizontal: wp(4),
+        paddingTop: hp(2),
+        gap: hp(2),
+    },
+    promptContainer:{
         flexDirection:'row',
         alignItems:'center',
-        columnGap:10,
-        marginBottom:10
-      
+        gap: wp(3),
     },
-    txt1:{
-        fontSize:10,
-        fontWeight:700,
-        color:'#014CC4'
+    promptText:{
+        fontSize: hp(1.8),
+        fontWeight: '700',
+        color:'#014CC4',
+        flex: 1, // Allow text to wrap
     },
-    txt1:{
-        fontSize:10,
-        fontWeight:700,
-        color:'#014CC4'
-    },
-    cont3:{
-        width:327,
-        height:56,
-        borderRadius:12,
-        borderWidth:1,
+    optionButton:{
+        height: hp(7),
+        borderRadius: 12,
+        borderWidth: 1,
         borderColor:'#EEEEEE',
         backgroundColor:'#FFFFFF',
-        paddingHorizontal:10,
+        paddingHorizontal: wp(3),
         flexDirection:'row',
-        columnGap:10,
+        gap: wp(3),
         alignItems:'center',
-        marginTop:5
-        
-    }
+    },
+    optionIcon: {
+        tintColor: '#000000',
+    },
+    optionText: {
+        fontSize: hp(1.8),
+        fontWeight: '700',
+        color: '#000000',
+    },
 })
 export default LocationScreen

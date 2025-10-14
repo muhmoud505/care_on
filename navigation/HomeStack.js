@@ -6,6 +6,7 @@ import LastReports from "../screens/home/lastReports";
 import Medicines from "../screens/home/medicines";
 import Reports from "../screens/home/reports";
 import Results from "../screens/home/results";
+import Survey from "../screens/home/survey";
 
 const Stack=createNativeStackNavigator();
 export default function HomeStack(){
@@ -18,6 +19,7 @@ export default function HomeStack(){
       <Stack.Screen component={Reports} name='reports' options={{ title: t('home.reports_title', { defaultValue: 'تقارير الدكاترة' }) }} />
       <Stack.Screen component={LastReports} name='last' options={{ title: t('home.last_reports_title', { defaultValue: 'التقارير السابقة' }) }} />
       <Stack.Screen  component={Medicines} name='medicines' options={{ title: t('home.medicines_title', { defaultValue: 'الادوية' }) }} />
+      <Stack.Screen component={Survey} name='survey' options={{ title: t('survey.title', { defaultValue: 'استبيان' }) }} />
     </Stack.Navigator>
   )
 }

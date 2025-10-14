@@ -1,16 +1,18 @@
 import { useNavigation } from '@react-navigation/native'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { CustomHeader } from '../../components/CustomHeader'
 import FormField from '../../components/FormInput'
 import DatePick from '../../components/datePicker'
+import { useMedicalRecords } from '../../contexts/medicalRecordsContext'
 import useForm from '../../hooks/useForm'
 import { hp, wp } from '../../utils/responsive'
 
 
 const Add = () => {
   const navigation=useNavigation();
+  const { addMedicine, loading } = useMedicalRecords();
   const { t, i18n } = useTranslation()
   const { form, errors, handleChange, checkFormValidity } = useForm({
     name: '',
@@ -24,13 +26,8 @@ const Add = () => {
   const handleSave = () => {
     if (!formIsValid) return;
 
-    // Navigate to the 'App' navigator (which contains the tabs),
-    // then to the 'medicines' screen within it, passing the new data.
-    navigation.navigate('App', {
-      screen: 'medicines',
-      params: { newMedicine: { id: Date.now().toString(), ...form } },
-      merge: true, // This ensures the tab navigator state is merged correctly
-    });
+    addMedicine(form);
+    navigation.goBack();
   };
 
   return (
@@ -71,7 +68,11 @@ const Add = () => {
            onPress={handleSave}
            disabled={!formIsValid}
        >
-         <Text style={styles.nextButtonText}>{t('common.save', { defaultValue: 'حفظ' })}</Text>
+         {loading.medicines ? (
+            <ActivityIndicator color="#fff" />
+         ) : (
+            <Text style={styles.nextButtonText}>{t('common.save', { defaultValue: 'حفظ' })}</Text>
+         )}
        </TouchableOpacity>
       </View>
     </SafeAreaView>

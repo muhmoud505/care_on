@@ -1,6 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import {
+  ActivityIndicator,
+  Alert,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -10,6 +12,7 @@ import {
 } from 'react-native';
 import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
+import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 
@@ -17,15 +20,23 @@ const Forget = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const { form, errors, handleChange, checkFormValidity } = useForm({
-    nationalId: '',
+    email: '',
   });
+  const { forgotPassword, isAuthLoading } = useAuth();
 
   const formIsValid = checkFormValidity();
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!formIsValid) return;
-    // Navigate to the code verification screen
-    navigation.navigate('code', { nationalId: form.nationalId });
+    try {
+      // Call the API to request a password reset code
+      await forgotPassword({ email: form.email });
+
+      // On success, navigate to the code verification screen
+      navigation.navigate('code', { email: form.email });
+    } catch (error) {
+      Alert.alert(t('common.error', { defaultValue: 'Error' }), error.message);
+    }
   };
 
   return (
@@ -33,26 +44,30 @@ const Forget = () => {
       <CustomHeader text={t('auth.reset_password', { defaultValue: 'إعادة تعيين كلمة السر' })} />
       <View style={styles.container}>
         <Text style={styles.infoText}>
-          {t('auth.enter_national_id_to_reset', { defaultValue: 'برجاء إدخال رقمك القومي لإعادة تعيين كلمة السر' })}
+          {t('auth.enter_email_to_reset', { defaultValue: 'برجاء إدخال بريدك الإلكتروني لإعادة تعيين كلمة السر' })}
         </Text>
 
         <FormField
-          title={t('auth.national_id', { defaultValue: 'الرقم القومي' })}
-          value={form.nationalId}
-          onChangeText={(text) => handleChange('nationalId', text)}
-          error={errors.nationalId}
-          keyboardType="numeric"
+          title={t('auth.email', { defaultValue: 'البريد الالكتروني' })}
+          value={form.email}
+          onChangeText={(text) => handleChange('email', text)}
+          error={errors.email}
+          keyboardType="email-address"
           required
-          placeholder={t('auth.enter_national_id', { defaultValue: 'ادخل رقمك القومي' })}
+          placeholder={t('auth.enter_email', { defaultValue: 'ادخل بريدك الالكتروني' })}
         />
 
         <TouchableOpacity
-          style={[styles.button, !formIsValid && styles.disabledButton]}
+          style={[styles.button, (!formIsValid || isAuthLoading) && styles.disabledButton]}
           onPress={handleNext}
-          disabled={!formIsValid}
+          disabled={!formIsValid || isAuthLoading}
           activeOpacity={0.7}
         >
-          <Text style={styles.buttonText}>{t('common.next', { defaultValue: 'التالي' })}</Text>
+          {isAuthLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>{t('common.next', { defaultValue: 'التالي' })}</Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -69,6 +84,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    paddingHorizontal: wp(5),
     paddingTop: hp(5),
   },
   infoText: {
@@ -84,8 +100,9 @@ const styles = StyleSheet.create({
     borderRadius: wp(4),
     justifyContent: 'center',
     alignItems: 'center',
-    width: wp(90),
-    marginTop: hp(5),
+    width: '100%',
+    marginTop: 'auto',
+    marginBottom: hp(8),
   },
   buttonText: {
     color: '#fff',

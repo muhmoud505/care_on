@@ -2,16 +2,28 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Images from '../constants2/images';
+import { useAuth } from '../contexts/authContext';
 
-export const HomeHeader=()=>{
+export const HomeHeader=({ showUserInfo = true })=>{
+  const {user}=useAuth()
+  
+  
+  const nationalid=user?.data?.user?.resource?.national_number;
+  
   const navigation=useNavigation()
   const { t } = useTranslation();
+
+  const maskedNationalId = nationalid && nationalid.length > 0
+    ? `${nationalid.charAt(0)+nationalid.charAt(1)+nationalid.charAt(2)+nationalid.charAt(3)  }${'x'.repeat(nationalid.length - 4)}`
+    : '';
+  
   return(
     <View style={styles.headerContainer}>
                 <TouchableOpacity
                 
                   onPress={()=>navigation.getParent()?.toggleDrawer()}
                 >
+
                   <Image
                 style={{width:24,height:24,}}
                   source={Images.menu}
@@ -19,15 +31,17 @@ export const HomeHeader=()=>{
                 />
                 </TouchableOpacity>
                 
-                <View style={[{flexDirection:'row'}]}>
-                  <Text style={[styles.txt1,{direction:'rtl'}]}>
-                     {t('home.results.hello')} <Text style={styles.txt2}>2030xxxxxxxxxx</Text><Text style={{color:'#888888'}}>!</Text>
-                  </Text>
-                  <Image
-                    source={Images.wave}
-                    style={{marginLeft:10,marginRight:5}}
-                  />
-                </View>
+                {showUserInfo && (
+                  <View style={[{flexDirection:'row'}]}>
+                    <Text style={[styles.txt1,{direction:'rtl'}]}>
+                      {t('home.results.hello')} <Text style={styles.txt2}>{maskedNationalId}</Text><Text style={{color:'#888888'}}>!</Text>
+                    </Text>
+                    <Image
+                      source={Images.wave}
+                      style={{marginLeft:10,marginRight:5}}
+                    />
+                  </View>
+                )}
                 <Image
                   source={Images.notification}
                 />

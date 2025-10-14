@@ -1,30 +1,37 @@
 
-import { Link } from '@react-navigation/native'
-import { useTranslation } from 'react-i18next'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import CustomHeader from '../../components/CustomHeader'
-import FormField from '../../components/FormInput'
-import Images from '../../constants2/images'
-import { useAuth } from '../../contexts/authContext'
-import useForm from '../../hooks/useForm'
-import { hp, wp } from '../../utils/responsive'
+import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomHeader from '../../components/CustomHeader';
+import FormField from '../../components/FormInput';
+import Images from '../../constants2/images';
+import { useAuth } from '../../contexts/authContext';
+import useForm from '../../hooks/useForm';
+import { hp, wp } from '../../utils/responsive';
 
 const SignIn = () => {
-  const { login } = useAuth();
+  const navigation = useNavigation();
+  const { login, isAuthLoading } = useAuth();
   const { form, errors, handleChange, checkFormValidity } = useForm({
-    nationalId: '',
+    email: '',
     password: '',
   });
 
   const formIsValid = checkFormValidity();
 
   const handleSignIn = async () => {
-    if (!formIsValid) return;
-    // In a real app, you would call your login API here.
-    // For now, we'll simulate a login.
-    await login({ name: 'User', email: 'user@example.com' });
-    // Navigation will be handled automatically by the AuthProvider
+    if (formIsValid) {
+      try {
+        await login({
+          email: form.email,
+          password: form.password,
+        });
+        // Navigation will be handled automatically by the AuthProvider
+      } catch (error) {
+        Alert.alert(t('auth.login_failed', { defaultValue: 'Login Failed' }), error.message);
+      }
+    }
   };
 
   const { t } = useTranslation()
@@ -36,13 +43,13 @@ const SignIn = () => {
         <View style={styles.smcontainer}>
 
         <FormField 
-        title={t('auth.national_id', { defaultValue: 'الرقم القومي' })}
-        value={form.nationalId}
-        onChangeText={(text) => handleChange('nationalId', text)}
-        error={errors.nationalId}
-        keyboardType="numeric"
+        title={t('auth.email', { defaultValue: 'البريد الالكتروني' })}
+        value={form.email}
+        onChangeText={(text) => handleChange('email', text)}
+        error={errors.email}
+        keyboardType="email-address"
         required
-        placeholder={t('auth.enter_national_id', { defaultValue: 'ادخل رقمك القومي' })}
+        placeholder={t('auth.enter_email', { defaultValue: 'ادخل بريدك الالكتروني' })}
         />
         <FormField 
         title={t('auth.password', { defaultValue: 'كلمة السر' })}
@@ -53,11 +60,16 @@ const SignIn = () => {
         required
         placeholder={t('auth.enter_password', { defaultValue: 'ادخل كلمة السر' })}
         />
-        <Link style={styles.link} to={{ screen: 'forget' }}><Text style={styles.txt1} >{t('auth.forgot_password_q', { defaultValue: 'نسيت كلمة السر؟' })}</Text></Link>
+        <TouchableOpacity style={styles.link} onPress={() => navigation.navigate('forget')}>
+          <Text style={styles.txt1} >{t('auth.forgot_password_q', { defaultValue: 'نسيت كلمة السر؟' })}</Text>
+        </TouchableOpacity>
         </View>
-          <TouchableOpacity style={[styles.nextButton, !formIsValid && styles.disabledButton]} onPress={handleSignIn} disabled={!formIsValid} activeOpacity={0.7}>
-
-                       <Text style={styles.nextButtonText}>{t('auth.signin', { defaultValue: 'تسجيل الدخول' })}</Text>
+          <TouchableOpacity style={[styles.nextButton, (!formIsValid || isAuthLoading) && styles.disabledButton]} onPress={handleSignIn} disabled={!formIsValid || isAuthLoading} activeOpacity={0.7}>
+            {isAuthLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.nextButtonText}>{t('auth.signin', { defaultValue: 'تسجيل الدخول' })}</Text>
+            )}
                     </TouchableOpacity>
       </View>
     </SafeAreaView>

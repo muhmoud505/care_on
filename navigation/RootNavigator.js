@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useAuth } from '../contexts/authContext';
+import { MedicalRecordsProvider } from '../contexts/medicalRecordsContext';
 import SplashScreen from '../screens/home/splash';
 import WelcomeScreen from '../screens/home/welcome';
 import AppStack from './AppStack';
@@ -26,7 +27,9 @@ const RootNavigator = () => {
       <NavigationContainer>
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
           {isAuthenticated ? (
-            <RootStack.Screen name="App" component={AppStack} />
+            <RootStack.Screen name="App">
+              {() => <MedicalRecordsProvider><AppStack /></MedicalRecordsProvider>}
+            </RootStack.Screen>
           ) : (
             <>
               <RootStack.Screen name="Auth" component={AuthStack} />

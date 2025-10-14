@@ -34,17 +34,36 @@ export const AuthProvider = ({ children }) => {
   const login = async (userData) => {
     setIsAuthLoading(true);
     try {
-      // TODO: Replace this with a real API call to your login endpoint.
-      // For example:
-      // const response = await fetch(`${API_URL}/api/v1/auth/login`, { ... });
-      // const loggedInUser = await response.json();
+      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+        method: 'POST',
+        body: JSON.stringify(userData),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
 
-      // For now, we'll simulate a successful login after a short delay.
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const loggedInUser = { ...userData, token: 'fake-jwt-token' };
+      const responseText = await response.text();
+      let data;
 
-      await AsyncStorage.setItem('user', JSON.stringify(loggedInUser));
-      setUser(loggedInUser);
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        // JSON parsing failed
+      }
+
+      if (!response.ok) {
+        const errorMessage = data?.message || `Server error: ${response.status}`;
+        console.error("Login failed with non-OK response:", responseText);
+        throw new Error(errorMessage);
+      }
+
+      if (!data) {
+        throw new Error('Received an invalid or empty response from the server.');
+      }
+
+      await AsyncStorage.setItem('user', JSON.stringify(data));
+      setUser(data);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -112,6 +131,41 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const forgotPassword = async (payload) => {
+    setIsAuthLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/auth/password/email`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log(data);
+        
+      } catch (e) { /* Ignore if not JSON */ }
+
+      if (!response.ok) {
+        const errorMessage = data?.message || `Server error: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      // No need to set user, just resolve successfully
+      return data;
+    } catch (error) {
+      console.error("Forgot Password failed:", error);
+      throw error;
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
   // The value provided to consuming components
   const value = {
     user,
@@ -121,6 +175,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     signup,
+    forgotPassword,
   };
 
   return (

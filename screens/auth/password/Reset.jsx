@@ -1,79 +1,110 @@
 import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
+import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 
 const Reset = () => {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
+  const { resetPassword, isAuthLoading } = useAuth();
   const { form, errors, handleChange, checkFormValidity } = useForm({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    current_password: '',
+    password: '',
+    password_confirmation: '',
   });
 
-  const formIsValid = checkFormValidity() && form.newPassword === form.confirmPassword;
+  const [isCurrentPasswordSecure, setIsCurrentPasswordSecure] = useState(true);
+  const [isNewPasswordSecure, setIsNewPasswordSecure] = useState(true);
+  const [isConfirmPasswordSecure, setIsConfirmPasswordSecure] = useState(true);
 
-  const handleConfirm = () => {
-    if (!formIsValid) return;
-    console.log('Password reset logic here');
-    // On success, you might navigate away or show a success message
-    navigation.goBack();
+  const passwordsMatch = form.password && form.password_confirmation && form.password === form.password_confirmation;
+  const formIsValid = checkFormValidity() && passwordsMatch;
+
+  const handleConfirm = async () => {
+    if (!formIsValid) {
+      if (!passwordsMatch) {
+        Alert.alert(t('common.error', { defaultValue: 'Error' }), t('auth.passwords_do_not_match', { defaultValue: 'Passwords do not match' }));
+      }
+      return;
+    }
+
+    try {
+      await resetPassword({
+        current_password: form.current_password,
+        password: form.password,
+        password_confirmation: form.password_confirmation,
+      });
+
+      Alert.alert(
+        t('common.success', { defaultValue: 'Success' }),
+        t('auth.password_reset_success', { defaultValue: 'Your password has been reset successfully.' }),
+        [{ text: 'OK', onPress: () => navigation.goBack() }]
+      );
+    } catch (error) {
+      Alert.alert(t('common.error', { defaultValue: 'Error' }), error.message);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <CustomHeader text={t('auth.reset_password', { defaultValue: 'اعادة تعيين كلمة السر' })} />
-      <View style={[styles.container,]}>
+      <View style={[styles.container,{direction:'ltr'}]}>
         <Text style={styles.txt1}>{t('auth.enter_passwords', { defaultValue: 'برجاء ادخال كلمات السر' })}</Text>
         <View style={styles.minContainer}>
           <FormField
-            title={t('auth.current_password', { defaultValue: 'كلمة السر الحالية' })}
-            value={form.currentPassword}
-            onChangeText={(text) => handleChange('currentPassword', text)}
-            error={errors.currentPassword}
+          required
+          title={t('auth.current_password', { defaultValue: 'كلمة المرور الحالية' })}
+          placeholder={t('auth.enter_current_password', { defaultValue: 'ادخل كلمة المرور الحالية' })}
+          value={form.current_password}
+          onChangeText={(text) => handleChange('current_password', text)}
+          error={errors.current_password}
+          secureTextEntry={isCurrentPasswordSecure}
+          type={'password'}
+          onToggleSecureEntry={() => setIsCurrentPasswordSecure(!isCurrentPasswordSecure)}
+        />
+          <FormField
+            title={t('auth.new_password', { defaultValue: 'كلمة المرور الجديدة' })}
+            value={form.password}
+            onChangeText={(text) => handleChange('password', text)}
+            error={errors.password}
             required
-            placeholder={t('auth.enter_password', { defaultValue: 'ادخل كلمة السر' })}
+            placeholder={t('auth.enter_new_password', { defaultValue: 'ادخل كلمة المرور الجديدة' })}
             type={'password'}
+            secureTextEntry={isNewPasswordSecure}
+            onToggleSecureEntry={() => setIsNewPasswordSecure(!isNewPasswordSecure)}
           />
           <FormField
-            title={t('auth.new_password', { defaultValue: 'كلمة السر الجديدة' })}
-            value={form.newPassword}
-            onChangeText={(text) => handleChange('newPassword', text)}
-            error={errors.newPassword}
+            title={t('auth.confirm_new_password', { defaultValue: 'تأكيد كلمة المرور الجديدة' })}
+            value={form.password_confirmation}
+            onChangeText={(text) => handleChange('password_confirmation', text)}
+            error={errors.password_confirmation || (form.password_confirmation && !passwordsMatch ? t('auth.passwords_do_not_match') : '')}
             required
-            placeholder={t('auth.enter_password', { defaultValue: 'ادخل كلمة السر' })}
+            placeholder={t('auth.reenter_new_password', { defaultValue: 'اعد ادخال كلمة المرور الجديدة' })}
             type={'password'}
-          />
-          <FormField
-            title={t('auth.confirm_password', { defaultValue: 'تأكيد كلمة السر' })}
-            value={form.confirmPassword}
-            onChangeText={(text) => handleChange('confirmPassword', text)}
-            error={errors.confirmPassword || (form.confirmPassword && form.newPassword !== form.confirmPassword ? t('auth.passwords_do_not_match') : '')}
-            required
-            placeholder={t('auth.reenter_password', { defaultValue: 'اعد ادخال كلمة السر' })}
-            type={'password'}
+            secureTextEntry={isConfirmPasswordSecure}
+            onToggleSecureEntry={() => setIsConfirmPasswordSecure(!isConfirmPasswordSecure)}
           />
           <Text style={styles.txt2} numberOfLines={2}>
             {t('auth.password_rules', { defaultValue: 'يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)' })}
           </Text>
         </View>
         <TouchableOpacity
-          style={[styles.nextButton, !formIsValid && styles.disabledButton]}
+          style={[styles.nextButton, (!formIsValid || isAuthLoading) && styles.disabledButton]}
           onPress={handleConfirm}
-          disabled={!formIsValid}
+          disabled={!formIsValid || isAuthLoading}
           activeOpacity={0.7}
         >
-          <Text style={styles.nextButtonText}>{t('common.confirm', { defaultValue: 'تأكيد' })}</Text>
+          {isAuthLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.nextButtonText}>{t('common.confirm', { defaultValue: 'تأكيد' })}</Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -108,7 +139,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     width: wp(85),
     marginTop: hp(1),
-  },
+  }, 
   nextButton: {
     backgroundColor: '#014CC4',
     height: hp(7),
@@ -116,13 +147,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    marginTop: 'auto',
-    marginBottom: hp(4),
+    marginTop: hp(8),
   },
   nextButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: Math.min(wp(6), 24),
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
   disabledButton: {
     opacity: 0.5,

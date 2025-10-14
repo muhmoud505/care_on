@@ -10,7 +10,7 @@ const ServiceStack=()=>{
     const { t } = useTranslation();
     return(
         <Stack.Navigator screenOptions={{
-            headerShown:true
+            headerShown:false
         }}>
             <Stack.Screen component={ServiceScreen} name="service" options={{ title: t('services.nearest_service', { defaultValue: 'أقرب خدمة طبية' }) }} />
             <Stack.Screen component={LocationScreen} name="location" options={{ title: t('services.nearest_service', { defaultValue: 'أقرب خدمة طبية' }) }} />

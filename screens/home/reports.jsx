@@ -1,40 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
+import ListContainer from '../../components/ListContainer';
 import Report from '../../components/reportCoponent';
 import Images from '../../constants2/images';
+import { useAuth } from '../../contexts/authContext';
+import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
-
 
 const Reports = () => {
   const [expandedItems, setExpandedItems] = useState({});
   const { t, i18n } = useTranslation();
-  const [data, setData] = useState([
-    {
-      id: '1',
-      title: 'دكتور ، 09/05/2025',
-      description: ` Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
-                    Lorem Ipsum has been the industry's standard dummy text ever since the 1500s`,
-      date: '09/05/2025',
-      icon: Images.reports
-    },
-    // Add more data items here if needed
-  ]);
+  const { user } = useAuth();
+  const { reports, loading, error, fetchReports } = useMedicalRecords();
+
+  useEffect(() => {
+    if (user?.token) {
+      fetchReports();
+    }
+  }, [user, fetchReports]);
 
   const handleItemExpand = (id, isExpanded) => {
-    setExpandedItems(prev => ({
-      ...prev,
-      [id]: isExpanded
-    }));
+    setExpandedItems(prev => ({ ...prev, [id]: isExpanded }));
   };
 
-  const areAllExpanded = data.length > 0 && data.every(item => expandedItems[item.id]);
+  const areAllExpanded = reports.length > 0 && reports.every(item => expandedItems[item.id]);
 
   const toggleAll = () => {
     const nextExpandedState = !areAllExpanded;
-    const newExpandedState = data.reduce((acc, item) => {
+    const newExpandedState = reports.reduce((acc, item) => {
       acc[item.id] = nextExpandedState;
       return acc;
     }, {});
@@ -43,33 +39,31 @@ const Reports = () => {
 
   const renderItem = ({ item }) => (
     <Report
-      title={item.title}
-      description={item.description}
-      date={item.date}
-      icon={item.icon}
+      {...item}
       expanded={expandedItems[item.id] || false}
       onExpandedChange={(isExpanded) => handleItemExpand(item.id, isExpanded)}
     />
   );
 
   return (
-    <SafeAreaView style={[styles.container,{direction: t ? (i18n.dir()) : 'rtl'}]}>
-      <CustomHeader text={t('home.reports_title', { defaultValue: 'تقارير الدكاترة' })}/>
-      <FlatList
-        data={data}
+    <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
+      <CustomHeader text={t('home.reports_title', { defaultValue: 'تقارير الدكاترة' })} />
+      <ListContainer
+        loading={loading.reports}
+        error={error.reports}
+        data={reports}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
+        onRefresh={() => fetchReports({ force: true })}
+        refreshing={loading.reports}
         contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        showsVerticalScrollIndicator={false}
+        emptyListMessage={t('home.no_doctor_reports_found', { defaultValue: 'No doctor reports found.' })}
       />
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={toggleAll}
-        style={styles.ele}
-      >
-        <Image source={areAllExpanded ? Images.shrink : Images.r6} />
-      </TouchableOpacity>
+      {reports.length > 0 && !loading.reports && (
+        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.ele}>
+          <Image source={areAllExpanded ? Images.shrink : Images.r6} />
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 };
@@ -83,11 +77,12 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingVertical: hp(1.2),
-    gap: hp(1.2)
+    paddingHorizontal: wp(4),
+    gap: hp(1.2),
   },
-  ele:{
-    position:'absolute',
+  ele: {
+    position: 'absolute',
     bottom: hp(10),
-    left: wp(10)
-  }
+    left: wp(10),
+  },
 });

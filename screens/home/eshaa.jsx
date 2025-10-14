@@ -1,27 +1,28 @@
-import { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
 import Eshaa from '../../components/eshaaComponent';
+import ListContainer from '../../components/ListContainer';
 import Images from '../../constants2/images';
+import { useAuth } from '../../contexts/authContext';
+import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
 
 const Eshaas = () => { 
    const [expandedItems, setExpandedItems] = useState({});
    const { t, i18n } = useTranslation();
-   const [data, setData] = useState([
-    {
-      id: '1',
-      title: 'X-ray Arm',
-      description: ` Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
-                    Lorem Ipsum has been the industry's standard dummy text ever since the 1500s`,
-      date: '09/05/2025',
-      labName: 'معمل الاسراء',
-      icon: Images.eshaa
-    },
-    // Add more data items here if needed
-  ]);
+   const navigation = useNavigation();
+   const { user } = useAuth();
+   const { eshaa, loading, error, fetchEshaas } = useMedicalRecords();
+
+   useEffect(() => {
+    if (user?.token) {
+      fetchEshaas();
+    }
+  }, [user, fetchEshaas]);
 
   const handleItemExpand = (id, isExpanded) => {
     setExpandedItems(prev => ({
@@ -30,11 +31,11 @@ const Eshaas = () => {
     }));
   };
 
-  const areAllExpanded = data.length > 0 && data.every(item => expandedItems[item.id]);
+  const areAllExpanded = eshaa.length > 0 && eshaa.every(item => expandedItems[item.id]);
 
   const toggleAll = () => {
     const nextExpandedState = !areAllExpanded;
-    const newExpandedState = data.reduce((acc, item) => {
+    const newExpandedState = eshaa.reduce((acc, item) => {
       acc[item.id] = nextExpandedState;
       return acc;
     }, {});
@@ -56,21 +57,22 @@ const Eshaas = () => {
   return (
     <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
       <CustomHeader text={t('home.xray_title', { defaultValue: 'الاشعة' })}/>
-      <FlatList
-        data={data}
+      <ListContainer
+        loading={loading.eshaa}
+        error={error.eshaa}
+        data={eshaa}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        showsVerticalScrollIndicator={false}
+        onRefresh={() => fetchEshaas({ force: true })}
+        refreshing={loading.eshaa}
+        emptyListMessage={t('home.no_xrays_found', { defaultValue: 'No X-rays found.' })}
       />
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={toggleAll}
-        style={styles.ele}
-      >
-        <Image source={areAllExpanded ? Images.shrink : Images.r6} />
-      </TouchableOpacity>
+      {eshaa.length > 0 && !loading.eshaa && (
+        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.ele}>
+          <Image source={areAllExpanded ? Images.shrink : Images.r6} />
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 };
@@ -84,11 +86,12 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingVertical: hp(1.2),
-    gap: hp(1.2)
+    paddingHorizontal: wp(4),
+    gap: hp(1.2),
   },
   ele:{
     position:'absolute',
     bottom: hp(10),
     left: wp(10)
-  }
+  },
 });

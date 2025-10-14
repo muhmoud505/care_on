@@ -35,7 +35,7 @@ const DrawerNavigator = () => {
       />
       <Drawer.Screen name="ProfileStack" component={ProfileStack} options={{ drawerLabel: 'الملف الشخصي' }} />
       <Drawer.Screen name="PaymentStack" component={PaymentStack} options={{ drawerLabel: 'الفواتير والمدفوعات' }} />
-      <Drawer.Screen name="ServiceStack" component={ServiceStack} options={{ drawerLabel: 'البحث عن أقرب خدمة' }} />
+      <Drawer.Screen name="ServiceStack" component={ServiceStack} options={{ drawerLabel: 'البحث عن أقرب خدمة',headerShown:false }} />
   
     </Drawer.Navigator>
   );
