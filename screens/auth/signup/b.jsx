@@ -1,5 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
-import { useCallback, useMemo, useState } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -16,13 +16,26 @@ import FormField from '../../../components/FormInput';
 import { hp, wp } from '../../../utils/responsive';
 
 const S2 = () => {
+  const route = useRoute();
   const navigation = useNavigation();
+  const { userType, isParentAddingChild } = route.params || {};
+  console.log('S2 Screen Params:', route.params); // Debugging line
+     
   const { t } = useTranslation();
-  const [flowType, setFlowType] = useState(null); // 'adult' or 'child'
+  // If userType is passed (from account screen), set it, otherwise start fresh.
+  const [flowType, setFlowType] = useState(userType || null); // 'adult' or 'child'
   const [formData, setFormData] = useState({
     birthdate: null,
     gender: '',
   });
+
+  // This effect ensures that if the screen receives new parameters (e.g., from the Account screen),
+  // it updates its internal state to reflect the new flow.
+  useEffect(() => {
+    if (userType) {
+      setFlowType(userType);
+    }
+  }, [userType]);
 
   const handleFieldChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -56,7 +69,9 @@ const S2 = () => {
     const dataToPass = { 
       ...formData, 
       birthdate: formattedApiDate, // Use the API-friendly format
-      age };
+      age,
+      isParentAddingChild: !!isParentAddingChild, // Ensure the flag is passed as a boolean
+    };
 
     if (flowType === 'adult') {
       if (age < 18) {
@@ -82,7 +97,12 @@ const S2 = () => {
 
   const resetFlow = () => {
     setFlowType(null);
-    setFormData({ birthdate: null, gender: '' });
+    setFormData({ birthdate: null, gender: '' }); 
+    // If we came from the account screen, pressing back should go back to the account screen,
+    // not the selection page within S2.
+    if (isParentAddingChild) {
+      navigation.goBack();
+    }
   };
 
   return (

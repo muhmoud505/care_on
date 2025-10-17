@@ -47,7 +47,7 @@ export const HomeHeader=({ showUserInfo = true })=>{
                 />
                 <Image
                   style={styles.img}
-                  source={Images.p}
+                  source={Images.profile}
                   
                 />
                 

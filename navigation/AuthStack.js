@@ -42,7 +42,10 @@ const RootNavigator = () => {
   return (
     <Stack.Navigator>
       {user ? (
-        <Stack.Screen name="MainApp" component={DrawerNavigator} options={{ headerShown: false }} />
+        <Stack.Group>
+          <Stack.Screen name="MainApp" component={DrawerNavigator} options={{ headerShown: false }} />
+          <Stack.Screen name="signupBaby" component={Signup2} />
+        </Stack.Group>
       ) : (
         <Stack.Screen name="Auth" component={AuthScreens} options={{ headerShown: false }} />
       )}

@@ -119,10 +119,8 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Received an invalid or empty response from the server.');
       }
 
-      // On successful signup, store the user data and update the state.
-      // Assuming the server response 'data' contains the user object and a token.
-      await AsyncStorage.setItem('user', JSON.stringify(data));
-      setUser(data);
+      // Always return the response data so the calling component can use it (e.g., to get the child's token).
+      return data;
     } catch (error) {
       console.error("Signup failed:", error);
       throw error; // Re-throw to be handled by the UI component

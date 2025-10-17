@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import images from '../constants2/images';
@@ -58,7 +58,10 @@ const CustomDrawerContent = (props) => {
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <View style={styles.profileHeader}>
-          <TouchableOpacity style={styles.editButton}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => navigation.navigate('accounts')}
+          >
             <Text style={styles.editText}>{t('drawer.linked_accounts', { defaultValue: 'الحسابات المرتبطة' })}</Text>
           </TouchableOpacity>
 

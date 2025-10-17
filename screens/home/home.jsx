@@ -25,25 +25,21 @@ const Home = () => {
   const { user } = useAuth(); // Get the current user from the auth context
   useEffect(() => {
     const checkSurveyStatus = async () => {
-      console.log('hi');
       
       // Safely access the user's age using optional chaining.
       const age = user?.data?.user?.resource?.age;
       const userId = user?.data?.user?.id; // Get the user's ID
-      console.log(userId);
-      console.log(age);
+
       
       
       // Only proceed if the user is logged in and their age is below the limit.
       if (!userId || !age || age >= CHILD_AGE_LIMIT) {
         return;
       }
-      console.log('hi2');
       
 
       // Create a user-specific key for AsyncStorage
       const surveyStatusKey = `hasCompletedSurvey_${userId}`;
-      console.log(surveyStatusKey);
       
       try {
         // Check if the survey has already been completed by this user.

@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import CustomHeader from '../../../components/CustomHeader';
+import CustomHeader from '../../../components/CustomHeader'; // Assuming CustomHeader exists
 import FormField from '../../../components/FormInput';
 import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
@@ -20,7 +21,7 @@ import { hp, wp } from '../../../utils/responsive';
 const PasswordScreen = ({ route }) => { // Accept route as a prop
   const { t, i18n } = useTranslation();
   const navigation =useNavigation()
-  const { signup, isAuthLoading } = useAuth();
+  const { signup, isAuthLoading, login } = useAuth(); // Get login function from context
   const { form, errors, handleChange, checkFormValidity } = useForm({
     password: '',
     password_confirmation: '',
@@ -68,9 +69,31 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
 
     try {
       // Perform the signup API call
-      await signup(signupData);
-      // On success, reset the navigation stack to the 'welcome' screen
-      navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'welcome' }] }));
+      const response = await signup(signupData);
+      console.log(response);
+      
+
+      // Check if a parent is adding a child
+      if (signupData.isParentAddingChild) {
+        // 1. Store the new child's token. We'll store it under a key related to the parent.
+        if (response && response.token) {
+          // A more robust solution would be to get existing child accounts and append the new one.
+          const existingChildAccounts = await AsyncStorage.getItem('child_accounts');
+          const childAccounts = existingChildAccounts ? JSON.parse(existingChildAccounts) : [];
+          childAccounts.push({ id: response.user.id, token: response.token, name: response.user.name });
+          await AsyncStorage.setItem('child_accounts', JSON.stringify(childAccounts));
+        }
+        
+        // 2. Navigate back to the 'accounts' screen instead of the child's homepage.
+        navigation.navigate('accounts');
+        Alert.alert("Success", "Child account created successfully.");
+      } else {
+        // For a regular signup, manually log the new user in by saving their data.
+        await AsyncStorage.setItem('user', JSON.stringify(response));
+        // This will trigger the user state change in the context and navigate to the main app.
+        // We can just reset to a known screen in the main stack.
+        navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'welcome' }] }));
+      }
     } catch (error) {
       Alert.alert(t('common.error', { defaultValue: 'Error' }), error.message);
     }

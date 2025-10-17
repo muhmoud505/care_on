@@ -44,7 +44,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: hp(12),
     flexDirection: 'row',
-    marginTop: -hp(4),
   },
   rtlContainer: {
     alignItems: 'flex-start',

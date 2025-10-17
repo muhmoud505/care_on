@@ -3,9 +3,11 @@ import * as FileSystem from 'expo-file-system';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
+  Dimensions,
+  // I18nManager, // Removed unsolicited import
   SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,16 +16,27 @@ import {
 import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
 import Uploader from '../../../components/Uploader';
+import { useAuth } from '../../../contexts/authContext'; // Using Auth context to get parent user
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Responsive helper functions
+const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
+const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 const Signup2 = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { birthdate, gender, age } = route.params || {};
+  const { birthdate, gender, age, isParentAddingChild } = route.params || {};
+
+  // Get parent user from global state (e.g., Redux).
+  const { user: parentUser } = useAuth();
+
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
-    email: '', // Add email field for the parent/guardian
+    email: '', // This is for the child's unique email
     national_number: '',
     birthCertificate: null,
   });
@@ -35,7 +48,7 @@ const Signup2 = () => {
   const isFormValid = useMemo(() => {
     return (
       formData.name &&
-      formData.email && // Ensure parent's email is provided
+      formData.email && // Ensure child's email is provided
       formData.national_number &&
       formData.birthCertificate
     );
@@ -60,6 +73,11 @@ const Signup2 = () => {
         isChild: true,
         id: base64Image, // Birth certificate image
         type: 'patient',
+        // Add parent_id if a parent is creating this account.
+        // The backend will use this to link the accounts.
+        // Also, pass the flag along to the next screen.
+        isParentAddingChild: isParentAddingChild,
+        ...(isParentAddingChild && parentUser && { parent_id: parentUser.id }),
       };
 
       navigation.navigate('password', { signupData });
@@ -92,10 +110,11 @@ const Signup2 = () => {
           
           <FormField 
             required
-            title={'البريد الالكتروني للوالدين'}
-            placeholder={'ادخل بريدك الالكتروني'}
+            title={'البريد الالكتروني للطفل'}
+            placeholder={'ادخل البريد الالكتروني للطفل'}
             value={formData.email}
             onChangeText={(text) => handleFieldChange('email', text)}
+            keyboardType="email-address"
           />
 
           <FormField 
@@ -138,17 +157,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   container: {
-    marginTop:StatusBar.currentHeight,
-    paddingBottom: 40,
+    paddingBottom: hp(5),
   },
   headerTextContainer: {
-    marginTop: 16,
-    marginBottom: 24,
+    marginTop: hp(2),
+    marginBottom: hp(3),
     alignSelf: 'center',
-    maxWidth: 340,
+    width: wp(90),
   },
   headerText: {
-    fontSize: 22,
+    fontSize: wp(5.5),
     fontWeight: 'bold',
     textAlign: 'right',
   },
@@ -156,17 +174,17 @@ const styles = StyleSheet.create({
     color: '#80D280',
   },
   formContainer: {
-    // Container for FormField components
+    gap: hp(2),
   },
   nextButton: {
     backgroundColor: '#014CC4',
-    width: '90%',
-    height: 50,
-    borderRadius: 12,
+    width: wp(90),
+    height: hp(6.5),
+    borderRadius: wp(3),
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
-    marginTop: 30,
+    marginTop: hp(4),
   },
   disabledButton: {
     opacity: 0.5,
@@ -174,7 +192,7 @@ const styles = StyleSheet.create({
   nextButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 24,
+    fontSize: wp(6),
   },
 });
 
