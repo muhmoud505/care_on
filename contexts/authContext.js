@@ -6,16 +6,28 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [childAccounts, setChildAccounts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   
   useEffect(() => {
     const loadUserFromStorage = async () => {
       try {
-        const storedUser = await AsyncStorage.getItem('user');
+        const storedUser = await AsyncStorage.getItem('primary_user');
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
+          // Also load any stored children
+          const storedChildren = await AsyncStorage.getItem('child_accounts');
+          if (storedChildren) {
+            setChildAccounts(JSON.parse(storedChildren));
+          }
+          // Securely trigger a background refresh of children only if a token exists.
+          if (parsedUser?.data?.token?.value) {
+            console.log(parsedUser?.data?.token?.value);
+            
+            fetchChildren(parsedUser);
+          }
         }
       } catch (error) {
         console.error("Failed to load user from storage", error);
@@ -29,7 +41,53 @@ export const AuthProvider = ({ children }) => {
     Promise.all([loadUserFromStorage(), minimumDisplayTime]).finally(() => {
       setIsLoading(false);
     });
-  }, []);
+  }, []); // The fetchChildren dependency is managed inside the effect
+
+  const fetchChildren = async (token) => {
+    console.log('here iam');
+    
+    if (!token) {
+    console.log('here iam2');
+      
+      console.log("No token provided, cannot fetch children.");
+      return;
+    }
+    try {
+      console.log('here iam 3');
+      
+      const response = await fetch(`${API_URL}/api/v1/auth/users`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'lang':'en'
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch children');
+      }
+
+      const data = await response.json();
+      
+      
+      // Assuming the API returns an array of child user objects in `data.data`
+      const fetchedChildren = data.data || [];
+
+      // We need to store children with their tokens. The GET /users endpoint might not return tokens.
+      // For now, we'll just store the user info. The logic in PasswordScreen handles new children with tokens.
+      // A more robust solution might need to merge this list with the one in AsyncStorage that has tokens.
+      setChildAccounts(fetchedChildren);
+      console.log(fetchedChildren);
+      
+      await AsyncStorage.setItem('child_accounts', JSON.stringify(fetchedChildren));
+    } catch (error) {
+      console.error("Failed to fetch children:", error);
+      // Don't throw, as this might not be a critical failure
+    }
+  };
 
   const login = async (userData) => {
     setIsAuthLoading(true);
@@ -40,8 +98,11 @@ export const AuthProvider = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'lang':'en'
         },
       });
+      console.log('hello from login');
+      
 
       const responseText = await response.text();
       let data;
@@ -62,8 +123,11 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Received an invalid or empty response from the server.');
       }
 
-      await AsyncStorage.setItem('user', JSON.stringify(data));
+      // Store as the primary user
+      await AsyncStorage.setItem('primary_user', JSON.stringify(data));
       setUser(data);
+      // After successful login, fetch the children associated with this user
+      await fetchChildren(data.token);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -72,10 +136,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // This function is for setting the session after a signup, not a form-based login
+  const setSession = async (sessionData) => {
+    // sessionData should be { user: object, token: string }
+    if (!sessionData || !sessionData.user || !sessionData.token) {
+      throw new Error("Invalid session data provided to setSession.");
+    }
+    // Store as the primary user
+    await AsyncStorage.setItem('primary_user', JSON.stringify(sessionData));
+    setUser(sessionData);
+    // After setting the new user, fetch their children (which should be an empty list)
+    await fetchChildren(sessionData.token);
+  };
+
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem('user');
+      await AsyncStorage.removeItem('primary_user');
+      await AsyncStorage.removeItem('child_accounts');
       setUser(null);
+      setChildAccounts([]);
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -167,12 +246,15 @@ export const AuthProvider = ({ children }) => {
   // The value provided to consuming components
   const value = {
     user,
+    children: childAccounts,
     isAuthenticated: !!user, // Derived state
     isLoading,
     isAuthLoading,
     login,
+    setSession,
     logout,
     signup,
+    fetchChildren,
     forgotPassword,
   };
 
@@ -191,3 +273,20 @@ export const useAuth = () => {
   }
   return context;
 };
+
+/*
+Data Structure Notes:
+
+In AsyncStorage, we will now have:
+
+1. 'primary_user': {
+     "token": "primary_user_token",
+     "user": { "id": 1, "name": "Parent Name", ... }
+   }
+
+2. 'child_accounts': [
+     { "id": 10, "name": "Child One", "token": "child_one_token" },
+     { "id": 11, "name": "Child Two", "token": "child_two_token" }
+   ]
+   (Note: The token is added during the child creation process in PasswordScreen)
+*/

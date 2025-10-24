@@ -1,17 +1,18 @@
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import React from 'react';
 import {
   Dimensions,
-  I18nManager,
   Image,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-
   View
 } from 'react-native';
 import CustomHeader from '../../components/CustomHeader';
 import Images from '../../constants2/images';
+import { useAuth } from '../../contexts/authContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -19,20 +20,37 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
 const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
-// Enable RTL for Arabic
-I18nManager.forceRTL(true);
-
 const Account = () => {
-  const type='child'
   const navigation = useNavigation();
-  // TODO: Replace with actual user data and logic
-  const handleLogin = () => {
-    console.log('Login pressed');
+  // Get user, children, and the fetch function from the Auth context
+  const { user, children, fetchChildren, logout } = useAuth();
+
+  // Use useFocusEffect to refetch children every time the screen is viewed
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('hiiii');
+      
+      if (user) {
+        console.log('hi2');
+
+        console.log(user?.data?.token?.value);
+        
+        
+        fetchChildren(user?.data?.token?.value);
+      }
+    }, [user]) // Re-run if the user token changes
+  );
+
+  const handleSwitchAccount = (childAccount) => {
+    // TODO: Implement the full account switching logic in authContext
+    // For now, we can log the action.
+    console.log('Switching to account:', childAccount.name);
+    // Example of what it might look like:
+    // switchAccount({ type: 'child', id: childAccount.id });
   };
 
   const handleAddAccount = () => {
-    // To navigate to a screen in a nested navigator, you must specify the parent navigator's name first.
-    // Here, 'auth' is the navigator and 's2' is the screen within it.
+    // Navigate to the signup flow, passing a flag to indicate a parent is adding a child.
     navigation.navigate('auth', {
       screen: 's2',
       params: { userType: 'child', isParentAddingChild: true },
@@ -41,32 +59,45 @@ const Account = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <CustomHeader text="الحسابات المرتبطة" />
-      <View style={styles.content}>
-        {/* Profile Section */}
-        <View style={styles.profileCard}>
-          {/* Avatar */}
-          <View style={styles.avatar}>
-            <Image source={Images.profile} style={styles.avatarImage} />
+      <CustomHeader text="الحسابات المرتبطة" onLogout={logout} showLogout />
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* Primary Profile Section */}
+        {user && (
+          <View style={styles.profileCard}>
+            <View style={styles.avatar}>
+              <Image source={Images.profile} style={styles.avatarImage} />
+            </View>
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>{user.user?.name || 'Primary User'}</Text>
+              <Text style={styles.phoneNumber}>{user.user?.phone_number || 'No phone number'}</Text>
+            </View>
+            <View style={styles.activeBadge}>
+              <Text style={styles.activeBadgeText}>الحساب الحالي</Text>
+            </View>
           </View>
+        )}
 
-          {/* User Info */}
-          <View style={styles.userInfo}>
-            <Text style={styles.phoneNumber}>053xxxxxxxxx</Text>
-            <Text style={styles.userName}>مشارك أبشر حالل</Text>
+        {/* Child Accounts Section */}
+        {children && children.map((child) => (
+          <View key={child.id} style={styles.profileCard}>
+            <View style={styles.avatar}>
+              <Image source={Images.profile} style={styles.avatarImage} />
+            </View>
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>{child.name}</Text>
+              <Text style={styles.phoneNumber}>{child.phone_number || ''}</Text>
+            </View>
+            <TouchableOpacity style={styles.loginButton} onPress={() => handleSwitchAccount(child)}>
+              <Text style={styles.loginButtonText}>تمثيل المستخدم</Text>
+            </TouchableOpacity>
           </View>
-
-          {/* Login Button */}
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>تمثيل المستخدم</Text>
-          </TouchableOpacity>
-        </View>
-
+        ))}
+      </ScrollView>
+      
+      {/* This view ensures the button stays at the bottom */}
+      <View style={styles.bottomContainer}>
         {/* Add Account Button */}
-        <TouchableOpacity
-          style={styles.addAccountButton}
-          onPress={handleAddAccount}
-        >
+        <TouchableOpacity style={styles.addAccountButton} onPress={handleAddAccount}>
           <Text style={styles.addAccountText}>إضافة حساب آخر</Text>
         </TouchableOpacity>
       </View>
@@ -83,27 +114,23 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'space-between',
     padding: wp(4),
   },
   profileCard: {
     backgroundColor: '#FFFFFF',
-    columnGap:wp(5),
     borderRadius: wp(3),
-    justifyContent:'center',
-  
+    padding: wp(4),
     alignItems: 'center',
     shadowColor: '#000',
-    paddingTop:hp(2),
     shadowOffset: {
       width: 0,
       height: 2,
-
     },
-    flexDirection:'row',
+    flexDirection: 'row',
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
+    marginBottom: hp(2), // Space between cards
   },
   avatar: {
     width: wp(15),
@@ -111,7 +138,6 @@ const styles = StyleSheet.create({
     borderRadius: wp(10),
     backgroundColor: '#E8E8E8',
     justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: hp(2),
     overflow: 'hidden', // To keep the image within the circle
   },
@@ -121,31 +147,49 @@ const styles = StyleSheet.create({
     
   },
   userInfo: {
-    alignItems: 'center',
-    marginBottom: hp(3),
-    flexDirection:'column-reverse',
+    flex: 1, // Takes up available space
+    alignItems: 'flex-start', // Align text to the start (right in RTL)
+    marginHorizontal: wp(4),
   },
   phoneNumber: {
     fontSize: wp(3.5),
     color: '#666',
-    marginBottom: hp(1),
   },
   userName: {
-    fontSize: wp(3.2),
+    fontSize: wp(4),
     color: '#333',
     fontWeight: '600',
+    marginBottom: hp(0.5),
   },
   loginButton: {
     backgroundColor: '#1E88E5',
     paddingVertical: hp(1),
     paddingHorizontal: wp(4),
     borderRadius: wp(2),
-    bottom:hp(1.5)
+    justifyContent: 'center',
+  },
+  activeBadge: {
+    backgroundColor: '#E0E0E0',
+    paddingVertical: hp(1),
+    paddingHorizontal: wp(4),
+    borderRadius: wp(2),
+    justifyContent: 'center',
+  },
+  activeBadgeText: {
+    color: '#333',
+    fontSize: wp(3),
+    fontWeight: '600',
   },
   loginButtonText: {
     color: '#FFFFFF',
     fontSize: wp(3),
     fontWeight: '600',
+  },
+  bottomContainer: {
+    padding: wp(4),
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    backgroundColor: '#FFFFFF',
   },
   addAccountButton: {
     backgroundColor: '#81C784',

@@ -1,5 +1,5 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StatusBar, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,21 +16,23 @@ const Medicines = () => {
   const route = useRoute();
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  console.log(user.data.token.value);
+  
   const { medicines, loading, error, fetchMedicines, addMedicine } = useMedicalRecords();
   console.log(medicines);
 
+  // Use a focus listener to fetch data when the screen comes into view.
   useEffect(() => {
-    
-    if (user?.token) {
-     
-    
-      
-      
-      fetchMedicines();
+    const unsubscribe = navigation.addListener('focus', () => {
+      // The user?.token check is still a good safeguard.
+      if (user?.data?.token?.value) {
+        fetchMedicines();
+      }
+    });
 
-
-    }
-  }, [user, fetchMedicines]);
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [navigation,user?.data?.token?.value ]);
 
   useEffect(() => {
     if (route.params?.newMedicine) {
@@ -39,7 +41,13 @@ const Medicines = () => {
       // Clear the parameter so it's not added again on re-render
       navigation.setParams({ newMedicine: null });
     }
-  }, [route.params?.newMedicine]);
+  }, [route.params?.newMedicine, addMedicine, navigation]);
+
+  // Memoize the onRefresh function to prevent unnecessary re-renders of ListContainer
+  const onRefresh = useCallback(() => {
+    // You can pass { force: true } if your context supports it for pull-to-refresh
+    fetchMedicines();
+  }, [fetchMedicines]);
 
   const renderItem = ({ item }) => (
     <Medicine
@@ -62,8 +70,8 @@ const Medicines = () => {
         error={error.medicines}
         data={medicines}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        onRefresh={() => fetchMedicines({ force: true })}
+        keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
+        onRefresh={onRefresh}
         refreshing={loading.medicines}
         contentContainerStyle={styles.listContent}
       />

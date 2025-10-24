@@ -83,7 +83,7 @@ export const MedicalRecordsProvider = ({ children }) => {
         return;
       }
 
-      if (!user?.token) {
+      if (!user?.data?.token?.value) {
         setError(prev => ({ ...prev, [stateKey]: t('common.unauthorized', { defaultValue: 'Authentication token not found.' }) }));
         return;
       }
@@ -94,14 +94,17 @@ export const MedicalRecordsProvider = ({ children }) => {
       const headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': `Bearer ${user.token}`,
+        'Authorization': `Bearer ${user?.data?.token?.value}`,
       };
   
       try {
         const fetchPromises = types.map(async ({ apiType, componentType }) => {
           const response = await fetch(`${BASE_URL}/api/v1/medical-records?type=${apiType}`, { headers });
+          
+          
           if (!response.ok) throw new Error(`Failed to fetch type ${apiType}`);
           const json = await response.json();
+          
           return Array.isArray(json.data)
             ? json.data.map(item => mapApiDataToComponentProps(item, componentType))
             : [];
@@ -118,6 +121,8 @@ export const MedicalRecordsProvider = ({ children }) => {
         // 2. On successful fetch, update the timestamp.
         setLastFetched(prev => ({ ...prev, [stateKey]: Date.now() }));
       } catch (e) {
+        
+        
         console.error(`Failed to fetch ${stateKey}:`, e);
         setError(prev => ({ ...prev, [stateKey]: t('common.error_fetching_data', { defaultValue: `Failed to load ${stateKey}.` }) }));
       } finally {
@@ -168,7 +173,7 @@ export const MedicalRecordsProvider = ({ children }) => {
   });
 
   const addMedicine = useCallback(async (newMedicineData) => {
-    if (!user?.token) {
+    if (!user?.data?.token?.value) {
       setError(prev => ({ ...prev, medicines: t('common.unauthorized', { defaultValue: 'Authentication required to add medicine.' }) }));
       return;
     }
@@ -187,7 +192,7 @@ export const MedicalRecordsProvider = ({ children }) => {
     const headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Authorization': `Bearer ${user.token}`,
+      'Authorization': `Bearer ${user.data.token.value}`,
     };
 
     try {

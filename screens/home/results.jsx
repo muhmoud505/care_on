@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,11 +20,19 @@ const Results = () => {
  const { results, loading, error, fetchResults } = useMedicalRecords();
 
  useEffect(() => {
-   if (user?.token) {
-     fetchResults();
-   }
- }, [user, fetchResults]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (user?.data?.token?.value) {
+        fetchResults();
+      }
+    });
 
+    return unsubscribe;
+  }, [navigation, user?.data?.token?.value]);
+
+  const onRefresh = useCallback(() => {
+    fetchResults({ force: true });
+  }, [fetchResults]);
+  
   const handleItemExpand = (id, isExpanded) => {
     setExpandedItems(prev => ({ ...prev, [id]: isExpanded }));
   };
@@ -58,7 +66,7 @@ const Results = () => {
         data={results}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        onRefresh={() => fetchResults({ force: true })}
+        onRefresh={onRefresh}
         refreshing={loading.results}
         contentContainerStyle={styles.listContent}
         emptyListMessage={t('home.no_results_found', { defaultValue: 'No analysis results found.' })}

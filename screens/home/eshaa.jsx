@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,11 +19,19 @@ const Eshaas = () => {
    const { eshaa, loading, error, fetchEshaas } = useMedicalRecords();
 
    useEffect(() => {
-    if (user?.token) {
-      fetchEshaas();
-    }
-  }, [user, fetchEshaas]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (user?.data?.token?.value) {
+        fetchEshaas();
+      }
+    });
 
+    return unsubscribe;
+  }, [navigation, user?.data?.token?.value]);
+
+  const onRefresh = useCallback(() => {
+    fetchEshaas({ force: true });
+  }, [fetchEshaas]);
+  
   const handleItemExpand = (id, isExpanded) => {
     setExpandedItems(prev => ({
       ...prev,
@@ -63,9 +71,9 @@ const Eshaas = () => {
         data={eshaa}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContent}
-        onRefresh={() => fetchEshaas({ force: true })}
+        onRefresh={onRefresh}
         refreshing={loading.eshaa}
+        contentContainerStyle={styles.listContent}
         emptyListMessage={t('home.no_xrays_found', { defaultValue: 'No X-rays found.' })}
       />
       {eshaa.length > 0 && !loading.eshaa && (

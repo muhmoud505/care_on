@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,14 +14,23 @@ import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 
 const LastReports = () => {
   const { t, i18n } = useTranslation();
+  const navigation = useNavigation();
   const { user } = useAuth();
   const { allRecords, loading, error, fetchAllRecords } = useMedicalRecords();
+
   useEffect(() => {
-    // Only fetch records if the user object with a token exists.
-    if (user?.token) {
-      fetchAllRecords();
-    }
-  }, [user, fetchAllRecords]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (user?.data?.token?.value) {
+        fetchAllRecords();
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, user?.data?.token?.value]);
+
+  const onRefresh = useCallback(() => {
+    fetchAllRecords({ force: true });
+  }, [fetchAllRecords]);
 
   const renderItem = ({ item }) => {
     switch(item.type) {
@@ -45,8 +55,8 @@ const LastReports = () => {
         error={error.all}
         data={allRecords}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        onRefresh={() => fetchAllRecords({ force: true })}
+        keyExtractor={(item) => `${item.type}-${item.id}`}
+        onRefresh={onRefresh}
         refreshing={loading.all}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
