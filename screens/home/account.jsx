@@ -36,7 +36,7 @@ const Account = () => {
         console.log(user?.data?.token?.value);
         
         
-        fetchChildren(user?.data?.token?.value);
+        fetchChildren(user);
       }
     }, [user]) // Re-run if the user token changes
   );

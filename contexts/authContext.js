@@ -45,8 +45,10 @@ export const AuthProvider = ({ children }) => {
 
   const fetchChildren = async (token) => {
     console.log('here iam');
+    const ut=token?.data?.token?.value
+    console.log('ut '+ut);
     
-    if (!token) {
+    if (!ut) {
     console.log('here iam2');
       
       console.log("No token provided, cannot fetch children.");
@@ -54,27 +56,42 @@ export const AuthProvider = ({ children }) => {
     }
     try {
       console.log('here iam 3');
+      console.log(ut);
       
-      const response = await fetch(`${API_URL}/api/v1/auth/users`, {
+      
+      const response = await fetch(`${API_URL}api/v1/auth/users`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${ut}`,
           'lang':'en'
         },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch children');
+      // Read the response body as text first to avoid JSON parsing errors on non-JSON responses.
+      const responseText = await response.text();
+      let data;
+      console.log('here iam 00'+ response.text);
+      
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        // The response was not valid JSON. We'll check response.ok and use the raw text in the error if needed.
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        // Use the parsed message if available, otherwise use the raw text or a generic error.
+        const errorMessage = data?.message || responseText || 'Failed to fetch children';
+        throw new Error(errorMessage);
+      }
+      console.log('here iam 4');
+      
+      console.log(data);
       
       
-      // Assuming the API returns an array of child user objects in `data.data`
-      const fetchedChildren = data.data || [];
+      // If data parsing failed but the response was 'ok', data might be undefined.
+      const fetchedChildren = data?.data || [];
 
       // We need to store children with their tokens. The GET /users endpoint might not return tokens.
       // For now, we'll just store the user info. The logic in PasswordScreen handles new children with tokens.
@@ -92,7 +109,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (userData) => {
     setIsAuthLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+      const response = await fetch(`${API_URL}api/v1/auth/login`, {
         method: 'POST',
         body: JSON.stringify(userData),
         headers: {
@@ -127,7 +144,7 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem('primary_user', JSON.stringify(data));
       setUser(data);
       // After successful login, fetch the children associated with this user
-      await fetchChildren(data.token);
+      await fetchChildren(data);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -146,7 +163,7 @@ export const AuthProvider = ({ children }) => {
     await AsyncStorage.setItem('primary_user', JSON.stringify(sessionData));
     setUser(sessionData);
     // After setting the new user, fetch their children (which should be an empty list)
-    await fetchChildren(sessionData.token);
+    await fetchChildren(sessionData);
   };
 
   const logout = async () => {
@@ -164,7 +181,7 @@ export const AuthProvider = ({ children }) => {
     // userData is now a plain JavaScript object
     setIsAuthLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/users`, {
+      const response = await fetch(`${API_URL}api/v1/auth/users`, {
         method: 'POST',
         body: JSON.stringify(userData), // Convert the object to a JSON string
         headers: {
@@ -211,7 +228,7 @@ export const AuthProvider = ({ children }) => {
   const forgotPassword = async (payload) => {
     setIsAuthLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/auth/password/email`, {
+      const response = await fetch(`${API_URL}api/auth/password/email`, {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: {
