@@ -17,6 +17,8 @@ const Images = {
   
   // Icons
   add: require('../assets2/images/add.png'),
+  verify:require('../assets2/images/verify.png'),
+  nonVerify:require('../assets2/images/non-verify.png'),
   alarm: require('../assets2/images/alarm.png'),
   arrowDown: require('../assets2/images/arrD.png'),
   arrowLeft: require('./icons/left-arrow.png'),

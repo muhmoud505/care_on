@@ -15,6 +15,8 @@
 
   "common": {
     "save": "Save",
+    "continue": "Continue"
+    ,
     "skip": "Skip",
     "send": "Send",
     "next": "Next",
@@ -32,7 +34,15 @@
     "lets_go": "Let's go!",
     "later": "Later!"
   },
-
+ "add_selector": {
+    "title": "Add New Record",
+    "prompt": "What would you like to add?",
+    "placeholder": "Select a record type...",
+    "add_result": "Add Lab Result",
+    "add_xray": "Add X-ray",
+    "add_report": "Add Doctor Report",
+    "add_medicine": "Add Medicine"
+  },
   "auth": {
     "signin": "Sign in",
     "signup": "Sign up",

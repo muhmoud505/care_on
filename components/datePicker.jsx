@@ -27,7 +27,8 @@ const DatePick = ({
   required,
   ...props
 }) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
   const [showModal, setShowModal] = useState(false);
   
   const handleDateSelect = (dateString) => {
@@ -35,17 +36,16 @@ const DatePick = ({
     const dateObj = new Date(dateString);
     const formattedDate = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
     
-    onDateSelect&&onDateSelect(formattedDate);
+    onDateSelect && onDateSelect(formattedDate);
     //  console.log('date from datePicker: ',dateString);
      
     setShowModal(false);
   };
 
   return (
-    <View 
-      style={[styles.container, otherStyles, { alignItems: i18n.dir() === 'ltr' ? 'flex-end' : 'flex-start' }]}
-    >
-      <Text style={styles.title}>
+    <View style={[styles.container, otherStyles]}>
+      {/* Title with dynamic text alignment */}
+      <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
         {title}
         {required && <Text style={styles.required}> *</Text>}
       </Text>
@@ -54,10 +54,11 @@ const DatePick = ({
         style={styles.inputContainer}
         onPress={() => setShowModal(true)}
       >
-        <Text style={[styles.inputText, value ? styles.selectedDate : styles.placeholder]}>
+        {/* Input text with dynamic text alignment */}
+        <Text style={[styles.inputText, value ? styles.selectedDate : styles.placeholder, { textAlign: isRTL ? 'right' : 'left' }]}>
           {value || placeholder}
         </Text>
-        
+
         <Image
           source={require('../assets2/images/c2.png')}
           style={styles.icon}
@@ -79,7 +80,7 @@ const DatePick = ({
               style={styles.closeButton}
               onPress={() => setShowModal(false)}
             >
-              <Text style={styles.closeButtonText}>إغلاق</Text>
+              <Text style={styles.closeButtonText}>{t('common.close', { defaultValue: 'Close' })}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -97,14 +98,13 @@ const styles = StyleSheet.create({
     fontSize: Math.min(wp(3.5), 14),
     fontWeight: '800',
     color: '#000',
-   
   },
   required: {
     color: '#FF0000',
   },
   inputContainer: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
+    flexDirection: 'row', // Let the parent View handle direction
+    alignItems: 'center', // Keep items vertically centered
     justifyContent: 'space-between',
     width: '100%',
     height: hp(7),
@@ -115,9 +115,10 @@ const styles = StyleSheet.create({
   },
   inputText: {
     fontSize: Math.min(wp(3.5), 14),
+    flex: 1, // Allow text to take up available space
     fontWeight: '700',
-    marginRight: wp(4),
-    color:'#7B7B8B'
+    color: '#7B7B8B',
+    marginHorizontal: wp(4),
   },
   selectedDate: {
     color: '#000',
@@ -128,8 +129,7 @@ const styles = StyleSheet.create({
   icon: {
     width: wp(6),
     height: wp(6),
-    marginHorizontal: wp(1.2)
-   
+    marginHorizontal: wp(2.5),
   },
   modalContainer: {
     flex: 1,

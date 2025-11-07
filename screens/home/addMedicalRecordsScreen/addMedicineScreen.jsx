@@ -1,33 +1,60 @@
 import { useNavigation } from '@react-navigation/native'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { CustomHeader } from '../../components/CustomHeader'
-import FormField from '../../components/FormInput'
-import DatePick from '../../components/datePicker'
-import { useMedicalRecords } from '../../contexts/medicalRecordsContext'
-import useForm from '../../hooks/useForm'
-import { hp, wp } from '../../utils/responsive'
+import CustomHeader from '../../../components/CustomHeader'
+
+import DatePick from '../../../components/datePicker'
+import FormField from '../../../components/FormInput'
+import { useAuth } from '../../../contexts/authContext'
+import { useMedicalRecords } from '../../../contexts/medicalRecordsContext'
+import useForm from '../../../hooks/useForm'
+import { hp, wp } from '../../../utils/responsive'
 
 
-const Add = () => {
+
+const addMedicineScreen = () => {
   const navigation=useNavigation();
-  const { addMedicine, loading } = useMedicalRecords();
+  const { addRecord } = useMedicalRecords();
+  const { user } = useAuth();
   const { t, i18n } = useTranslation()
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { form, errors, handleChange, checkFormValidity } = useForm({
-    name: '',
+    medicineName: '',
     dosage: '',
-    from: null,
-    to: null,
+    startDate: null,
+    endDate: null,
   });
 
   const formIsValid = checkFormValidity();
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formIsValid) return;
+    console.log('User national number being sent:', user.user.resource.national_number);
+    setIsSubmitting(true);
 
-    addMedicine(form);
-    navigation.goBack();
+    const descriptionObject = {
+      dosage: form.dosage,
+      startDate: form.startDate,
+      endDate: form.endDate,
+    };
+
+    const payload = {
+      user_national_number: user.user.resource.national_number,
+      type: 'prescription',
+      title: form.medicineName,
+      description: JSON.stringify(descriptionObject),
+    };
+
+    const result = await addRecord(payload);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      navigation.goBack();
+    } else {
+      Alert.alert(t('common.error'), result.error);
+    }
   };
 
   return (
@@ -35,12 +62,13 @@ const Add = () => {
       <CustomHeader text={t('home.medicines_title', { defaultValue: 'الادوية' })}/>
       <View style={styles.formContainer}>
         <Text style={[styles.txt,{textAlign:'right'}]}>{t('home.enter_following_data', { defaultValue: 'يرجي ادخال البيانات التالية' })} </Text>
-        <FormField 
+        <FormField
           title={t('home.medicine_name', { defaultValue: 'اسم الدواء' })}
           placeholder={t('home.enter_medicine_name', { defaultValue: 'ادخل اسم الدواء' })}
-          value={form.name}
-          onChangeText={(text) => handleChange('name', text)}
-          error={errors.name}
+          value={form.medicineName}
+          onChangeText={(text) => handleChange('medicineName', text)}
+          error={errors.medicineName}
+          required
         />
         <FormField
           title={t('home.medicines.dosage', { defaultValue: 'الجرعة' })}
@@ -48,27 +76,30 @@ const Add = () => {
           value={form.dosage}
           onChangeText={(text) => handleChange('dosage', text)}
           error={errors.dosage}
-        />  
+          required
+        />
         <DatePick
           title={t('common.from', { defaultValue: 'من' })}
           required
-          placeholder={t('home.enter_start_date', { defaultValue: 'ادخل تاريخ البداية' })}
-          onDateChange={(date) => handleChange('from', date)}
-          error={errors.from}
+          placeholder={t('home.enter_start_date', { defaultValue: 'ادخل تاريخ البداية' })} // Note: onDateChange is not a prop of DatePick, it should be onDateSelect
+          value={form.startDate}
+          onDateSelect={(date) => handleChange('startDate', date)}
+          error={errors.startDate}
         />
         <DatePick
            title={t('common.to', { defaultValue: 'الي' })}
           required
-          placeholder={t('home.enter_end_date', { defaultValue: 'ادخل تاريخ الانتهاء' })}
-          onDateChange={(date) => handleChange('to', date)}
-          error={errors.to}
+          value={form.endDate}
+          placeholder={t('home.enter_end_date', { defaultValue: 'ادخل تاريخ الانتهاء' })} // Note: onDateChange is not a prop of DatePick, it should be onDateSelect
+          onDateSelect={(date) => handleChange('endDate', date)}
+          error={errors.endDate}
         />
         <TouchableOpacity
            style={[styles.nextButton, !formIsValid && styles.disabledButton]}
            onPress={handleSave}
-           disabled={!formIsValid}
+           disabled={!formIsValid || isSubmitting}
        >
-         {loading.medicines ? (
+         {isSubmitting ? (
             <ActivityIndicator color="#fff" />
          ) : (
             <Text style={styles.nextButtonText}>{t('common.save', { defaultValue: 'حفظ' })}</Text>
@@ -79,7 +110,8 @@ const Add = () => {
   )
 }
 
-export default Add
+export default addMedicineScreen
+
 
 const styles = StyleSheet.create({
     container:{

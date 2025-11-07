@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
 import Eshaa from '../../components/eshaaComponent';
@@ -9,8 +9,10 @@ import ListContainer from '../../components/ListContainer';
 import Medicine from '../../components/medicineComponent';
 import Report from '../../components/reportCoponent';
 import Result from '../../components/resultComponents';
+import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
+import { hp, wp } from '../../utils/responsive';
 
 const LastReports = () => {
   const { t, i18n } = useTranslation();
@@ -62,6 +64,11 @@ const LastReports = () => {
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         emptyListMessage={t('home.no_reports_found', { defaultValue: 'No previous reports found.' })}
       />
+      {/* Add record button */}
+      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddRecordSelector')}>
+        <Image source={Images.add} />
+        <Text>here is button</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -78,5 +85,11 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 12,
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: hp(10), // Increased to position it above the bottom tab bar
+    right: wp(5),
+    zIndex: 1, // Ensure the button is rendered on top of other elements
   },
 });

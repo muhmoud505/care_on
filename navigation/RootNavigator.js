@@ -1,22 +1,18 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
 import { useAuth } from '../contexts/authContext';
 import { MedicalRecordsProvider } from '../contexts/medicalRecordsContext';
+import Code from '../screens/auth/password/Code';
+import Reset from '../screens/auth/password/Reset';
 import SplashScreen from '../screens/home/splash';
-import WelcomeScreen from '../screens/home/welcome';
 import AppStack from './AppStack';
 import AuthStack from './AuthStack';
 
-const RootStack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator();
 
-/**
- * This is the root navigator. It decides which stack to show
- * based on the authentication state from your AuthContext.
- */
 const RootNavigator = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return <SplashScreen />;
@@ -25,19 +21,25 @@ const RootNavigator = () => {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <RootStack.Navigator screenOptions={{ headerShown: false }}>
-          {isAuthenticated ? (
-            <RootStack.Screen name="App">
-              {() => <MedicalRecordsProvider><AppStack /></MedicalRecordsProvider>}
-            </RootStack.Screen>
-          ) : (
+        <Stack.Navigator>
+          {user ? (
             <>
-              <RootStack.Screen name="Auth" component={AuthStack} />
-              {/* WelcomeScreen is now a sibling to the Auth stack */}
-              <RootStack.Screen name="welcome" component={WelcomeScreen} />
+              <Stack.Screen name="App" options={{ headerShown: false }}>
+                {() => (
+                  <MedicalRecordsProvider>
+                    <AppStack />
+                  </MedicalRecordsProvider>
+                )}
+              </Stack.Screen>
             </>
+          ) : (
+            <Stack.Screen name="Auth" component={AuthStack} options={{ headerShown: false }} />
           )}
-        </RootStack.Navigator>
+          <Stack.Group screenOptions={{ presentation: 'modal', headerShown: false }}>
+            <Stack.Screen name="code" component={Code} />
+            <Stack.Screen name="reset" component={Reset} />
+          </Stack.Group>
+        </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
   );

@@ -1,5 +1,6 @@
 import { API_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { jwtDecode } from 'jwt-decode';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 const AuthContext = createContext(null);
@@ -16,18 +17,20 @@ export const AuthProvider = ({ children }) => {
         const storedUser = await AsyncStorage.getItem('primary_user');
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
+          // The user object might be nested under a 'data' key.
+          // We set the user state to the nested object to maintain a consistent structure.
+          const userObject = parsedUser.data || parsedUser;
+          
+          setUser(userObject);
+          ;
+          
           // Also load any stored children
           const storedChildren = await AsyncStorage.getItem('child_accounts');
           if (storedChildren) {
             setChildAccounts(JSON.parse(storedChildren));
           }
-          // Securely trigger a background refresh of children only if a token exists.
-          if (parsedUser?.data?.token?.value) {
-            console.log(parsedUser?.data?.token?.value);
-            
-            fetchChildren(parsedUser);
-          }
+          // Always fetch children using the consistent user object structure.
+          fetchChildren(userObject);
         }
       } catch (error) {
         console.error("Failed to load user from storage", error);
@@ -43,23 +46,74 @@ export const AuthProvider = ({ children }) => {
     });
   }, []); // The fetchChildren dependency is managed inside the effect
 
+  const refreshToken = async () => {
+    if (!user?.token?.value) {
+      console.log('No user or token available to refresh.');
+      return user; // Return current user state
+    }
+
+    try {
+      let decodedToken;
+      try {
+        decodedToken = jwtDecode(user.token.value);
+      } catch (e) {
+        console.error('Failed to decode token:', e);
+        // If token is invalid, treat it as expired and log out.
+        await logout();
+        return null;
+      }
+      const now = Date.now() / 1000;
+      const buffer = 300; // Refresh if token expires in the next 5 minutes (300 seconds)
+
+      // If the token is not close to expiring, no need to refresh.
+      if (decodedToken.exp > now + buffer) {
+        return user;
+      }
+
+      console.log('Token is expiring soon, attempting to refresh...');
+      const response = await fetch(`${API_URL}/api/v1/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${user.token.value}`,
+        },
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Failed to refresh token.');
+      }
+
+      // Assuming the refresh endpoint returns a new user object with a new token
+      const newUserState = responseData.data;
+      await AsyncStorage.setItem('primary_user', JSON.stringify(newUserState));
+      setUser(newUserState);
+      console.log('Token refreshed successfully.');
+      return newUserState;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      // If refresh fails, log the user out as the session is likely invalid.
+      await logout();
+      throw error; // Re-throw the error to be caught by the calling function
+    }
+  };
+
   const fetchChildren = async (token) => {
-    console.log('here iam');
-    const ut=token?.data?.token?.value
-    console.log('ut '+ut);
+    const currentUser = await refreshToken();
+    const ut = currentUser?.token?.value;
     
     if (!ut) {
-    console.log('here iam2');
+    
       
       console.log("No token provided, cannot fetch children.");
       return;
     }
     try {
-      console.log('here iam 3');
-      console.log(ut);
+      console.log(ut+' from try catch');
       
-      
-      const response = await fetch(`${API_URL}api/v1/auth/users`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/users`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -68,16 +122,22 @@ export const AuthProvider = ({ children }) => {
           'lang':'en'
         },
       });
+      
+      
 
       // Read the response body as text first to avoid JSON parsing errors on non-JSON responses.
       const responseText = await response.text();
+      console.log('Response from /api/v1/auth/users:', responseText);
       let data;
-      console.log('here iam 00'+ response.text);
       
       try {
         data = JSON.parse(responseText);
       } catch (e) {
         // The response was not valid JSON. We'll check response.ok and use the raw text in the error if needed.
+        // If the response is not ok, the responseText itself is likely the error message.
+        if (!response.ok) {
+          throw new Error(responseText || 'Failed to fetch children');
+        }
       }
 
       if (!response.ok) {
@@ -85,10 +145,6 @@ export const AuthProvider = ({ children }) => {
         const errorMessage = data?.message || responseText || 'Failed to fetch children';
         throw new Error(errorMessage);
       }
-      console.log('here iam 4');
-      
-      console.log(data);
-      
       
       // If data parsing failed but the response was 'ok', data might be undefined.
       const fetchedChildren = data?.data || [];
@@ -97,7 +153,6 @@ export const AuthProvider = ({ children }) => {
       // For now, we'll just store the user info. The logic in PasswordScreen handles new children with tokens.
       // A more robust solution might need to merge this list with the one in AsyncStorage that has tokens.
       setChildAccounts(fetchedChildren);
-      console.log(fetchedChildren);
       
       await AsyncStorage.setItem('child_accounts', JSON.stringify(fetchedChildren));
     } catch (error) {
@@ -109,7 +164,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (userData) => {
     setIsAuthLoading(true);
     try {
-      const response = await fetch(`${API_URL}api/v1/auth/login`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: 'POST',
         body: JSON.stringify(userData),
         headers: {
@@ -140,11 +195,11 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Received an invalid or empty response from the server.');
       }
 
-      // Store as the primary user
-      await AsyncStorage.setItem('primary_user', JSON.stringify(data));
-      setUser(data);
+      // Store only the 'data' object as the primary user to maintain a consistent object structure.
+      await AsyncStorage.setItem('primary_user', JSON.stringify(data.data));
+      setUser(data.data);
       // After successful login, fetch the children associated with this user
-      await fetchChildren(data);
+      await fetchChildren(data.data);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -155,13 +210,16 @@ export const AuthProvider = ({ children }) => {
 
   // This function is for setting the session after a signup, not a form-based login
   const setSession = async (sessionData) => {
-    // sessionData should be { user: object, token: string }
-    if (!sessionData || !sessionData.user || !sessionData.token) {
+    // Normalize the session data. The signup response nests the user object under a 'data' key.
+    // We want to store the nested object to be consistent with the login flow.
+    const userObject = sessionData.data || sessionData;
+
+    if (!userObject || !userObject.user || !userObject.token) {
       throw new Error("Invalid session data provided to setSession.");
     }
     // Store as the primary user
-    await AsyncStorage.setItem('primary_user', JSON.stringify(sessionData));
-    setUser(sessionData);
+    await AsyncStorage.setItem('primary_user', JSON.stringify(userObject));
+    setUser(userObject);
     // After setting the new user, fetch their children (which should be an empty list)
     await fetchChildren(sessionData);
   };
@@ -181,7 +239,7 @@ export const AuthProvider = ({ children }) => {
     // userData is now a plain JavaScript object
     setIsAuthLoading(true);
     try {
-      const response = await fetch(`${API_URL}api/v1/auth/users`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/users`, {
         method: 'POST',
         body: JSON.stringify(userData), // Convert the object to a JSON string
         headers: {
@@ -228,7 +286,7 @@ export const AuthProvider = ({ children }) => {
   const forgotPassword = async (payload) => {
     setIsAuthLoading(true);
     try {
-      const response = await fetch(`${API_URL}api/auth/password/email`, {
+      const response = await fetch(`${API_URL}/api/auth/password/email`, {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: {
@@ -273,6 +331,7 @@ export const AuthProvider = ({ children }) => {
     signup,
     fetchChildren,
     forgotPassword,
+    refreshToken, // Expose the refresh token function
   };
 
   return (

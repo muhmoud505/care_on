@@ -1,11 +1,8 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useTranslation } from 'react-i18next';
-import { useAuth } from "../contexts/authContext";
 
 // Import Screens and Navigators
-import Code from "../screens/auth/password/Code";
 import Forget from "../screens/auth/password/Forget";
-import Reset from "../screens/auth/password/Reset";
 import AfterCode from "../screens/auth/password/ResetAfterCode";
 import SignIn from "../screens/auth/signin";
 import S1 from "../screens/auth/signup/a";
@@ -13,11 +10,10 @@ import S2 from "../screens/auth/signup/b";
 import PasswordScreen from "../screens/auth/signup/passwork";
 import Signup from "../screens/auth/signup/signup";
 import Signup2 from "../screens/auth/signup/signupBaby";
-import DrawerNavigator from "./DrawerNavigator"; // Assuming this is your main app navigator
 
 const Stack = createNativeStackNavigator();
 
-const AuthScreens = () => {
+export const AuthScreens = () => {
   const { t } = useTranslation();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -35,27 +31,4 @@ const AuthScreens = () => {
   );
 };
 
-const RootNavigator = () => {
-  const { user } = useAuth();
-  const { t } = useTranslation();
-
-  return (
-    <Stack.Navigator>
-      {user ? (
-        <Stack.Group>
-          <Stack.Screen name="MainApp" component={DrawerNavigator} options={{ headerShown: false }} />
-          <Stack.Screen name="signupBaby" component={Signup2} />
-        </Stack.Group>
-      ) : (
-        <Stack.Screen name="Auth" component={AuthScreens} options={{ headerShown: false }} />
-      )}
-      {/* Modal screens available globally on top of the Root group */}
-      <Stack.Group screenOptions={{ presentation: 'modal', headerShown: false }}>
-        <Stack.Screen name='code' component={Code} />
-        <Stack.Screen name='reset' component={Reset} />
-      </Stack.Group>
-    </Stack.Navigator>
-  );
-};
-
-export default RootNavigator;
+export default AuthScreens;

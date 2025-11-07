@@ -37,14 +37,14 @@ const FormField = ({
 }) => {
   // Removed internal state to rely on parent props
   const { i18n } = useTranslation();
-  const [date, setDate] = useState(new Date());
+  const isRTL = i18n.dir() === 'rtl';
   const [show, setShow] = useState(false);
   const [showList,setShowList]=useState(false)
 
   const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
+    const currentDate = selectedDate || value; // Use value prop for date
     setShow(false);
-    setDate(currentDate);
+    onChangeText(currentDate); // Pass date back to parent
   };
 
   // Find the label for the current value to display in the TextInput
@@ -52,15 +52,16 @@ const FormField = ({
 
   return (
     <View 
-      style={[styles.container, { direction:'ltr'}, otherStyles]}
+      style={[styles.container, { direction:i18n.dir()}, otherStyles]}
     >
-      <Text style={[styles.title, {textAlign: 'right'}]}>
+      <Text style={[styles.title, { textAlign: isRTL ? 'left' : 'right' }]}>
         {title}
         {required && <Text style={styles.required}> *</Text>}
       </Text>
 
       <View style={[
         styles.inputContainer,
+        { flexDirection: isRTL ? 'row' : 'row-reverse' },
         error && styles.errorInput // Added error styling
         ,type=='long'&&styles.textArea
       ]}>
@@ -75,13 +76,13 @@ const FormField = ({
           )
         }
         {type === 'picker' ? (
-          <TouchableOpacity style={styles.pickerTouchable} onPress={() => setShowList(!showList)}>
-            <Text style={[styles.input, styles.pickerInput]}>{selectedLabel}</Text>
+          <TouchableOpacity style={[styles.pickerTouchable, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => setShowList(!showList)}>
+            <Text style={[styles.input, styles.pickerInput, { textAlign: isRTL ? 'right' : 'left' }]}>{selectedLabel}</Text>
             <Image source={Images.arrD} style={styles.icon} resizeMode="contain" />
           </TouchableOpacity>
         ) : (
           <TextInput
-            style={[styles.input]}
+            style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
             value={value}
             numberOfLines={type === 'long' ? 5 : 1}
             editable={type !== 'drop' && type !== 'date'}
@@ -115,7 +116,7 @@ const FormField = ({
 
         {show && (
           <DatePick
-            value={date}
+            value={value || new Date()}
             mode="date"
             display="spinner"
             onChange={onChange}
@@ -135,7 +136,7 @@ const FormField = ({
       
       {/* Error message display */}
       {error && (
-        <Text style={styles.errorText}>
+        <Text style={[styles.errorText, { textAlign: isRTL ? 'right' : 'left' }]}>
           {error}
         </Text>
       )}
@@ -153,13 +154,17 @@ const FormField = ({
           data={type === 'picker' ? pickerItems : data}
           renderItem={({item})=>(
             <TouchableOpacity
-             style={styles.itemStyle}
-             onPress={() => {
-              onChangeText(type === 'picker' ? item.value : item);
-              setShowList(false);
-            }}
+              style={[styles.itemStyle, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+              onPress={() => {
+                onChangeText(type === 'picker' ? item.value : item);
+                // The list will no longer close on selection.
+              }}
             >
-              <Text style={styles.listItemText}>{type === 'picker' ? item.label : item}</Text>
+              <Text style={[styles.listItemText, { textAlign: isRTL ? 'right' : 'left' }]}>{type === 'picker' ? item.label : item}</Text>
+              {
+                (type === 'picker' ? item.value === value : item === value)
+                  ? <Image source={Images.verify}/> : <Image source={Images.nonVerify}/>
+              }
             </TouchableOpacity>
           )
             
@@ -167,7 +172,7 @@ const FormField = ({
           showsVerticalScrollIndicator={false}
           style={styles.list}
           contentContainerStyle={styles.daysGrid}
-           keyExtractor={(item, index) => `${index}`}
+           keyExtractor={(item) => (type === 'picker' ? item.value : String(item))}
          
         />
 
@@ -204,7 +209,6 @@ const styles = StyleSheet.create({
     borderRadius: wp(4),
     borderWidth: 1,
     borderColor: 'rgba(128, 128, 128, 0.55)',
-    flexDirection: 'row-reverse',
     alignItems: 'center',
   },
   errorInput: { // Added error input style
@@ -215,7 +219,6 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: '600',
     fontSize: Math.min(wp(4), 16),
-    textAlign: 'right',
   },
   icon: {
     width: wp(6),
@@ -225,14 +228,12 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: Math.min(wp(3), 12),
     marginTop: hp(0.5),
-    textAlign: 'right',
   },
   pickerInput: {
     color: '#000', // Ensure selected value is visible
   },
   pickerTouchable: {
     flex: 1,
-    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
     height: hp(25),
     alignSelf:'center',
     borderRadius: wp(4),
-    borderColor:'#DDD',
+    borderColor:'#014CC4',
     borderWidth:1,
     backgroundColor: '#FFF',
     padding: wp(2.5),
@@ -262,9 +263,8 @@ const styles = StyleSheet.create({
   itemStyle:{
     width: wp(75),
     height: hp(4),
-    justifyContent:'center',
-    alignItems:'center'
-    
+    justifyContent:'space-between',
+    alignItems:'center',
   }
 });
 

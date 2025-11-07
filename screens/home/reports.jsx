@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,14 +14,23 @@ import { hp, wp } from '../../utils/responsive';
 const Reports = () => {
   const [expandedItems, setExpandedItems] = useState({});
   const { t, i18n } = useTranslation();
+  const navigation = useNavigation();
   const { user } = useAuth();
   const { reports, loading, error, fetchReports } = useMedicalRecords();
 
   useEffect(() => {
-    if (user?.token) {
-      fetchReports();
-    }
-  }, [user, fetchReports]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (user?.data?.token?.value) {
+        fetchReports();
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, user?.data?.token?.value]);
+
+  const onRefresh = useCallback(() => {
+    fetchReports({ force: true });
+  }, [fetchReports]);
 
   const handleItemExpand = (id, isExpanded) => {
     setExpandedItems(prev => ({ ...prev, [id]: isExpanded }));
@@ -54,7 +64,7 @@ const Reports = () => {
         data={reports}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        onRefresh={() => fetchReports({ force: true })}
+        onRefresh={onRefresh}
         refreshing={loading.reports}
         contentContainerStyle={styles.listContent}
         emptyListMessage={t('home.no_doctor_reports_found', { defaultValue: 'No doctor reports found.' })}
@@ -64,6 +74,10 @@ const Reports = () => {
           <Image source={areAllExpanded ? Images.shrink : Images.r6} />
         </TouchableOpacity>
       )}
+      {/* Add report button */}
+      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('addReport')}>
+        <Image source={Images.add} />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -84,5 +98,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: hp(10),
     left: wp(10),
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: hp(3),
+    right: wp(5),
   },
 });

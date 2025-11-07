@@ -69,7 +69,7 @@ export const MedicalRecordsProvider = ({ children }) => {
   const [error, setError] = useState({ all: null, medicines: null, results: null, eshaa: null, reports: null });
 
   const { t } = useTranslation();
-  const { user } = useAuth(); // Get the authenticated user from AuthContext
+  const { user, refreshToken } = useAuth(); // Get the authenticated user and refreshToken from AuthContext
 
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
@@ -83,21 +83,24 @@ export const MedicalRecordsProvider = ({ children }) => {
         return;
       }
 
-      if (!user?.data?.token?.value) {
-        setError(prev => ({ ...prev, [stateKey]: t('common.unauthorized', { defaultValue: 'Authentication token not found.' }) }));
-        return;
-      }
-  
       setLoading(prev => ({ ...prev, [stateKey]: true }));
       setError(prev => ({ ...prev, [stateKey]: null }));
   
-      const headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${user?.data?.token?.value}`,
-      };
-  
       try {
+        // First, ensure the token is fresh.
+        const currentUser = await refreshToken();
+        const token = currentUser?.token?.value;
+
+        if (!token) {
+          throw new Error(t('common.unauthorized', { defaultValue: 'Authentication token not found.' }));
+        }
+
+        const headers = {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        };
+
         const fetchPromises = types.map(async ({ apiType, componentType }) => {
           const response = await fetch(`${BASE_URL}/api/v1/medical-records?type=${apiType}`, { headers });
           
@@ -128,7 +131,7 @@ export const MedicalRecordsProvider = ({ children }) => {
       } finally {
         setLoading(prev => ({ ...prev, [stateKey]: false }));
       }
-    }, [user, t, stateSetter, stateKey, types, sort, lastFetched]);
+    }, [user, t, refreshToken, stateSetter, stateKey, types, sort, lastFetched]);
   };
   
   const fetchAllRecords = createFetcher({
@@ -173,11 +176,6 @@ export const MedicalRecordsProvider = ({ children }) => {
   });
 
   const addMedicine = useCallback(async (newMedicineData) => {
-    if (!user?.data?.token?.value) {
-      setError(prev => ({ ...prev, medicines: t('common.unauthorized', { defaultValue: 'Authentication required to add medicine.' }) }));
-      return;
-    }
-
     // 1. Optimistic Update: Add a temporary version to the UI immediately
     const tempId = `temp-${Date.now()}`;
     const optimisticMedicine = {
@@ -188,15 +186,22 @@ export const MedicalRecordsProvider = ({ children }) => {
     };
     setMedicines(prev => [optimisticMedicine, ...prev]);
 
-    // 2. API Call: Try to save the data to the server
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${user.data.token.value}`,
-    };
-
     try {
+      // 2. Ensure token is fresh before making the API call
+      const currentUser = await refreshToken();
+      const token = currentUser?.token?.value;
+
+      if (!token) {
+        throw new Error(t('common.unauthorized', { defaultValue: 'Authentication required to add medicine.' }));
+      }
+
       // NOTE: The endpoint and body format are an assumption. Adjust to your actual API.
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      };
+
       const response = await fetch(`${BASE_URL}/api/v1/medical-records`, {
         method: 'POST',
         headers,
@@ -208,15 +213,84 @@ export const MedicalRecordsProvider = ({ children }) => {
       const savedMedicine = await response.json();
       const finalMedicine = mapApiDataToComponentProps(savedMedicine.data, 'medicine');
 
-      // 3. Success: Replace the temporary item with the final one from the server
-      setMedicines(prev => prev.map(m => (m.id === tempId ? finalMedicine : m)));
     } catch (e) {
       console.error("Failed to add medicine:", e);
       // 4. Failure: Rollback the optimistic update by removing the temporary item
       setMedicines(prev => prev.filter(m => m.id !== tempId));
       setError(prev => ({ ...prev, medicines: t('errors.add_medicine_failed', { defaultValue: 'Could not save medicine. Please try again.' }) }));
+    } // No finally block needed as we handle UI state via rollback
+  }, [t, user, refreshToken]);
+
+  const addRecord = useCallback(async (newRecordData) => {
+    const formData = new FormData();
+    Object.keys(newRecordData).forEach(key => {
+      if (key === 'documents' && Array.isArray(newRecordData[key])) {
+        newRecordData[key].forEach((doc, index) => {
+          // doc should be a file-like object for react-native
+          // e.g., { uri: '...', type: 'image/jpeg', name: 'photo.jpg' }
+          formData.append(`documents[${index}]`, doc);
+        });
+      } else {
+        formData.append(key, newRecordData[key]);
+      }
+    });
+
+    try {
+      // Ensure token is fresh before making the API call
+      const currentUser = await refreshToken();
+      const token = currentUser?.token?.value;
+      
+
+      if (!token) {
+        const unauthorizedError = t('common.unauthorized', { defaultValue: 'Authentication required to add record.' });
+        throw new Error(unauthorizedError);
+      }
+
+      const headers = {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        // 'Content-Type' is not set for FormData, fetch handles it.
+      };
+      console.log('before request');
+      console.log(user);
+      
+      console.log('--- Logging Request Payload ---', newRecordData);
+
+      const response = await fetch(`${BASE_URL}/api/v1/medical-records`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+      console.log('after request');
+
+      // Read the response body as text ONCE. This consumes the body stream.
+      const responseText = await response.text();
+      console.log('--- Server Response ---', responseText);
+
+      let responseData;
+      try {
+        // Try to parse the text as JSON.
+        responseData = JSON.parse(responseText);
+      } catch (e) {
+        // If parsing fails, responseData will be undefined.
+        // We can still use the raw responseText for error messages if needed.
+      }
+
+      
+      if (!response.ok) {
+        // Use the parsed message if available, otherwise use the raw text or a generic error.
+        const errorMessage = responseData?.message || (responseData?.errors && Object.values(responseData.errors).flat().join(', ')) || responseText || 'Failed to save record to the server.';
+        throw new Error(errorMessage); // Throw the error here to stop execution
+      }
+
+      return { success: true, data: responseData };
+    } catch (e) {
+      console.error("Failed to add record:", e.message);
+      const addRecordFailedError = e.message || t('errors.add_record_failed', { defaultValue: 'Could not save record. Please try again.' });
+      setError(prev => ({ ...prev, all: addRecordFailedError }));
+      return { success: false, error: addRecordFailedError };
     }
-  }, [t, user]);
+  }, [t, user, refreshToken]);
 
   const value = {
     allRecords,
@@ -232,6 +306,7 @@ export const MedicalRecordsProvider = ({ children }) => {
     fetchEshaas,
     fetchReports,
     addMedicine,
+    addRecord,
   };
 
   return (

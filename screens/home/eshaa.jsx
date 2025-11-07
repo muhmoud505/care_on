@@ -102,4 +102,9 @@ const styles = StyleSheet.create({
     bottom: hp(10),
     left: wp(10)
   },
+  addButton: {
+    position: 'absolute',
+    bottom: hp(3),
+    right: wp(5),
+  },
 });
