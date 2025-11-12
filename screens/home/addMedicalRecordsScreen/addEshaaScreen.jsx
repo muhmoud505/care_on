@@ -72,61 +72,51 @@ const AddEshaaScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
-      <CustomHeader text={t('add_eshaa.title', { defaultValue: 'Add X-ray' })} />
+      <CustomHeader text={t('add_eshaa.title')} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
           <FormField
-            title={t('add_eshaa.xray_name', { defaultValue: 'X-ray Name' })}
-            placeholder={t('add_eshaa.xray_name_placeholder', {
-              defaultValue: 'e.g., Chest X-ray',
-            })}
+            title={t('add_eshaa.xray_name')}
+            placeholder={t('add_eshaa.xray_name_placeholder')}
             value={form.xrayName}
             onChangeText={(text) => handleChange('xrayName', text)}
             error={errors.xrayName}
             required
           />
           <DatePick
-            title={t('add_eshaa.date', { defaultValue: 'Date' })}
-            placeholder={t('add_eshaa.date_placeholder', {
-              defaultValue: 'Select date',
-            })}
+            title={t('add_eshaa.date')}
+            placeholder={t('add_eshaa.date_placeholder')}
             value={form.date}
             onDateSelect={(date) => handleChange('date', date)}
             error={errors.date}
             required
           />
           <FormField
-            title={t('add_eshaa.lab_name', { defaultValue: 'Lab Name' })}
-            placeholder={t('add_eshaa.lab_name_placeholder', {
-              defaultValue: 'Enter lab or hospital name',
-            })}
+            title={t('add_eshaa.lab_name')}
+            placeholder={t('add_eshaa.lab_name_placeholder')}
             value={form.labName}
             onChangeText={(text) => handleChange('labName', text)}
             error={errors.labName}
             required
           />
           <FormField
-            title={t('add_eshaa.doctor_name', { defaultValue: 'Doctor Name' })}
-            placeholder={t('add_eshaa.doctor_name_placeholder', {
-              defaultValue: 'Enter doctor\'s name',
-            })}
+            title={t('add_eshaa.doctor_name')}
+            placeholder={t('add_eshaa.doctor_name_placeholder')}
             value={form.doctorName}
             onChangeText={(text) => handleChange('doctorName', text)}
             error={errors.doctorName}
             required
           />
           <FormField
-            title={t('add_eshaa.notes', { defaultValue: 'Notes' })}
-            placeholder={t('add_eshaa.notes_placeholder', {
-              defaultValue: 'Notes (optional)',
-            })}
+            title={t('add_eshaa.notes')}
+            placeholder={t('add_eshaa.notes_placeholder')}
             value={form.notes}
             onChangeText={(text) => handleChange('notes', text)}
             error={errors.notes}
             type="long"
           />
           <Uploader
-            title={t('add_eshaa.upload_file', { defaultValue: 'Upload X-ray Image' })}
+            title={t('add_eshaa.upload_file')}
             onFileSelect={(file) => handleChange('documents', file)}
             error={errors.documents}
             required
@@ -135,7 +125,7 @@ const AddEshaaScreen = () => {
             {isSubmitting ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.saveButtonText}>{t('common.save', { defaultValue: 'Save' })}</Text>
+              <Text style={styles.saveButtonText}>{t('common.save')}</Text>
             )}
           </TouchableOpacity>
         </View>

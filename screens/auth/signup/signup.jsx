@@ -69,8 +69,8 @@ const Signup = () => {
       // 3. Navigate to the password screen with the prepared data.
       navigation.navigate('password', { signupData });
     } catch (err) {
-      console.error("Failed to process image or navigate:", err);
-      Alert.alert("Error", "Could not process the selected image. Please try again.");
+      console.error("Failed to process image or navigate:", err); 
+      Alert.alert(t('common.error'), t('errors.image_processing_failed'));
     } finally {
       setIsProcessing(false);
     }
@@ -78,25 +78,29 @@ const Signup = () => {
 
   return (
     <SafeAreaView style={[styles.safeArea,{direction:'rtl'}]}>
-      <CustomHeader text={route.params?.title || t('auth.create_account', { defaultValue: 'إنشاء حساب' })}/>
+      <CustomHeader text={route.params?.title || t('auth.create_account')}/>
       <View style={[styles.headerTextContainer, { direction: i18n.dir() }]}>
-        <Text numberOfLines={2} style={styles.txt1}>
-          لإنشاء <Text style={{color: '#014CC4'}}>حسابك</Text> يرجي ملئ البيانات التالية ..
+        <Text numberOfLines={2} style={styles.txt1}> 
+          {t('auth.create_account_prompt', {
+              account: t('auth.your_account'),
+              interpolation: { escapeValue: false },
+            }).replace(t('auth.your_account'), '')}
+          <Text style={{color: '#014CC4'}}>{t('auth.your_account')}</Text>
         </Text>
       </View>
       
       <View style={styles.formContainer}>
         <FormField 
-          title={'الاسم'}
-          placeholder={'ادخل اسمك'}
+          title={t('common.name')}
+          placeholder={t('common.name_placeholder')}
           value={form.name}
           onChangeText={(text) => handleChange('name', text)}
           error={errors.name}
         />  
         <FormField 
           required
-          title={'البريد الالكتروني'}
-          placeholder={'ادخل بريدك الالكتروني'}
+          title={t('auth.email')}
+          placeholder={t('auth.enter_email')}
           value={form.email}
           onChangeText={(text) => handleChange('email', text)}
           error={errors.email}
@@ -105,8 +109,8 @@ const Signup = () => {
           <>
             <FormField 
               required
-              title={'الرقم القومي'}
-              placeholder={'ادخل الرقم القومي'}
+              title={t('auth.national_id')}
+              placeholder={t('auth.national_id_placeholder')}
               value={form.national_number}
               onChangeText={(text) => handleChange('national_number', text)}
               keyboardType="numeric"
@@ -117,8 +121,8 @@ const Signup = () => {
       </View>
       
       <Uploader
-        required
-        title={isChild ? t('profile.birth_certificate', { defaultValue: 'شهادة الميلاد' }) : t('auth.national_id', { defaultValue: 'البطاقة الشخصية' })}
+        required 
+        title={isChild ? t('profile.birth_certificate') : t('auth.national_id')}
         color='#80D28040'
         onFileSelect={(file) => handleChange('id', file)}
         error={errors.id}
@@ -134,7 +138,7 @@ const Signup = () => {
         {isProcessing ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.submitButtonText}>التالي</Text>
+          <Text style={styles.submitButtonText}>{t('common.next')}</Text>
         )}
       </TouchableOpacity>
     </SafeAreaView>

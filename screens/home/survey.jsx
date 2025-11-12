@@ -1,6 +1,7 @@
 import { API_URL } from '@env';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Check from '../../components/check';
@@ -13,6 +14,7 @@ import { useAuth } from '../../contexts/authContext'; // 1. Import useAuth
 
 const Survey = () => {
   const navigation = useNavigation();
+  const { t } = useTranslation();
   const [questions, setQuestions] = useState([]);
   const [isQuestionsLoading, setIsQuestionsLoading] = useState(true);
   const [questionsError, setQuestionsError] = useState(null);
@@ -128,18 +130,18 @@ const Survey = () => {
       const result = await response.json();
 
       if (response.ok) {
-        Alert.alert('نجاح', 'تم إرسال الاستبيان بنجاح.');
+        Alert.alert(t('survey.success_title'), t('survey.success_message'));
         navigation.goBack();
       } else {
-        Alert.alert('خطأ', result.message || 'فشل في إرسال الاستبيان.');
+        Alert.alert(t('common.error'), result.message || t('survey.submit_failed'));
       }
     } catch (error) {
       console.error('Submission Error:', error);
       // Provide a more specific error message for network failures.
       if (error instanceof TypeError && error.message === 'Network request failed') {
-        Alert.alert('خطأ في الشبكة', 'تعذر الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت وإعدادات الخادم.');
+        Alert.alert(t('survey.network_error'), t('survey.network_error_message'));
       } else {
-        Alert.alert('خطأ', 'حدث خطأ غير متوقع.');
+        Alert.alert(t('common.error'), t('survey.unexpected_error'));
       }
     } finally {
       setIsSubmitting(false);
@@ -152,7 +154,7 @@ const Survey = () => {
         <HomeHeader showUserInfo={false}/>
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#80D280" />
-          <Text>جاري تحميل الأسئلة...</Text>
+          <Text>{t('survey.loading_questions')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -163,7 +165,7 @@ const Survey = () => {
       <SafeAreaView style={styles.mainContainer}>
         <HomeHeader showUserInfo={false}/>
         <View style={styles.centered}>
-          <Text style={styles.errorText}>خطأ: {questionsError}</Text>
+          <Text style={styles.errorText}>{t('survey.error_prefix')}{questionsError}</Text>
         </View>
       </SafeAreaView>
     );
@@ -186,25 +188,25 @@ const Survey = () => {
         ))}
 
         <FormField
-          title={'اذا كنت ترغب في مشاركة اي ملاحظات'}
-          placeholder={'ملاحظات'}
+          title={t('survey.notes_prompt')}
+          placeholder={t('survey.notes_placeholder')}
           value={notes}
           onChangeText={setNotes} // Assuming 'FormField' has an onChangeText prop
           type="long" // Make the text input multiline for better UX
         />
 
         <Uploader
-          title={'اذا كنت ترغب في مشاركة اي ملف'}
+          title={t('survey.file_prompt')}
           onFileSelect={setFile} // Assuming 'Uploader' has an onFileSelect prop
         />
         <TouchableOpacity
           onPress={handleSubmit} // The 'disabled' prop handles pressability
           activeOpacity={0.7}
-          style={[styles.btn, (!isFormValid || isSubmitting) && styles.disabledBtn]}
+          style={[styles.btn, (!isFormValid || isSubmitting) && styles.disabledBtn]} // eslint-disable-line react-native/no-inline-styles
           disabled={!isFormValid || isSubmitting}
         >
           <Text style={styles.txt}>
-            {isSubmitting ? 'جاري الإرسال...' : 'ارسال'}
+            {isSubmitting ? t('survey.submitting') : t('survey.submit')}
           </Text>
         </TouchableOpacity>
       </ScrollView>

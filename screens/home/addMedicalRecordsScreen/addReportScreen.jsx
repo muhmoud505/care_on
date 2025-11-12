@@ -72,61 +72,51 @@ const AddReportScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
-      <CustomHeader text={t('add_report.title', { defaultValue: 'Add Report' })} />
+      <CustomHeader text={t('add_report.title')} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
           <FormField
-            title={t('add_report.report_title', { defaultValue: 'Report Title' })}
-            placeholder={t('add_report.report_title_placeholder', {
-              defaultValue: 'e.g., Cardiology Consultation',
-            })}
+            title={t('add_report.report_title')}
+            placeholder={t('add_report.report_title_placeholder')}
             value={form.reportTitle}
             onChangeText={(text) => handleChange('reportTitle', text)}
             error={errors.reportTitle}
             required
           />
           <FormField
-            title={t('add_report.doctor_name', { defaultValue: 'Doctor Name' })}
-            placeholder={t('add_report.doctor_name_placeholder', {
-              defaultValue: 'Enter doctor\'s name',
-            })}
+            title={t('add_report.doctor_name')}
+            placeholder={t('add_report.doctor_name_placeholder')}
             value={form.doctorName}
             onChangeText={(text) => handleChange('doctorName', text)}
             error={errors.doctorName}
             required
           />
           <FormField
-            title={t('add_report.specialty', { defaultValue: 'Specialty' })}
-            placeholder={t('add_report.specialty_placeholder', {
-              defaultValue: 'e.g., Cardiology',
-            })}
+            title={t('add_report.specialty')}
+            placeholder={t('add_report.specialty_placeholder')}
             value={form.specialty}
             onChangeText={(text) => handleChange('specialty', text)}
             error={errors.specialty}
             required
           />
           <DatePick
-            title={t('add_report.date', { defaultValue: 'Date' })}
-            placeholder={t('add_report.date_placeholder', {
-              defaultValue: 'Select date',
-            })}
+            title={t('add_report.date')}
+            placeholder={t('add_report.date_placeholder')}
             value={form.date}
             onDateSelect={(date) => handleChange('date', date)}
             error={errors.date}
             required
           />
           <FormField
-            title={t('add_report.notes', { defaultValue: 'Notes' })}
-            placeholder={t('add_report.notes_placeholder', {
-              defaultValue: 'Notes (optional)',
-            })}
+            title={t('add_report.notes')}
+            placeholder={t('add_report.notes_placeholder')}
             value={form.notes}
             onChangeText={(text) => handleChange('notes', text)}
             error={errors.notes}
             type="long"
           />
           <Uploader
-            title={t('add_report.upload_file', { defaultValue: 'Upload Report File' })}
+            title={t('add_report.upload_file')}
             onFileSelect={(file) => handleChange('documents', file)}
             error={errors.documents}
             required
@@ -135,7 +125,7 @@ const AddReportScreen = () => {
             {isSubmitting ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.saveButtonText}>{t('common.save', { defaultValue: 'Save' })}</Text>
+              <Text style={styles.saveButtonText}>{t('common.save')}</Text>
             )}
           </TouchableOpacity>
         </View>

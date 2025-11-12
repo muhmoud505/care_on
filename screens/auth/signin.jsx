@@ -1,5 +1,6 @@
 
 import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,6 +18,7 @@ const SignIn = () => {
     email: '',
     password: '',
   });
+  const [isPasswordSecure, setIsPasswordSecure] = useState(true);
 
   const formIsValid = checkFormValidity();
 
@@ -29,46 +31,48 @@ const SignIn = () => {
         });
         // Navigation will be handled automatically by the AuthProvider
       } catch (error) {
-        Alert.alert(t('auth.login_failed', { defaultValue: 'Login Failed' }), error.message);
-      }
+        Alert.alert(t('auth.login_failed'), error.message);
+      } 
     }
   };
 
   const { t } = useTranslation()
   return (
     <SafeAreaView>
-      <CustomHeader text={t('auth.signin', { defaultValue: 'تسجيل الدخول' })} />
+      <CustomHeader text={t('auth.signin')} />
       <View style={styles.container} >
         <Image style={styles.img} source={Images.login}/>
-        <View style={styles.smcontainer}>
-
-        <FormField 
-        title={t('auth.email', { defaultValue: 'البريد الالكتروني' })}
-        value={form.email}
-        onChangeText={(text) => handleChange('email', text)}
-        error={errors.email}
-        keyboardType="email-address"
-        required
-        placeholder={t('auth.enter_email', { defaultValue: 'ادخل بريدك الالكتروني' })}
-        />
-        <FormField 
-        title={t('auth.password', { defaultValue: 'كلمة السر' })}
-        value={form.password}
-        onChangeText={(text) => handleChange('password', text)}
-        error={errors.password}
+        <View style={styles.smcontainer}> 
+ 
+        <FormField  
+        title={t('auth.email')}
+        value={form.email} 
+        onChangeText={(text) => handleChange('email', text)} 
+        error={errors.email} 
+        keyboardType="email-address" 
+        required 
+        placeholder={t('auth.email_placeholder')}
+        /> 
+        <FormField  
+        title={t('auth.password')}
+        value={form.password} 
+        onChangeText={(text) => handleChange('password', text)} 
+        error={errors.password} 
         type="password"
-        required
-        placeholder={t('auth.enter_password', { defaultValue: 'ادخل كلمة السر' })}
-        />
-        <TouchableOpacity style={styles.link} onPress={() => navigation.navigate('forget')}>
-          <Text style={styles.txt1} >{t('auth.forgot_password_q', { defaultValue: 'نسيت كلمة السر؟' })}</Text>
+        secureTextEntry={isPasswordSecure}
+        onToggleSecureEntry={() => setIsPasswordSecure(!isPasswordSecure)}
+        required 
+        placeholder={t('auth.password_placeholder')}
+        /> 
+        <TouchableOpacity style={styles.link} onPress={() => navigation.navigate('forget')}> 
+          <Text style={styles.txt1} >{t('auth.forgot_password_q')}</Text>
         </TouchableOpacity>
         </View>
           <TouchableOpacity style={[styles.nextButton, (!formIsValid || isAuthLoading) && styles.disabledButton]} onPress={handleSignIn} disabled={!formIsValid || isAuthLoading} activeOpacity={0.7}>
             {isAuthLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.nextButtonText}>{t('auth.signin', { defaultValue: 'تسجيل الدخول' })}</Text>
+              <Text style={styles.nextButtonText}>{t('auth.signin')}</Text>
             )}
                     </TouchableOpacity>
       </View>

@@ -21,7 +21,7 @@ import { hp, wp } from '../../../utils/responsive';
 const PasswordScreen = ({ route }) => { // Accept route as a prop
   const { t, i18n } = useTranslation();
   const navigation =useNavigation()
-  const { signup, isAuthLoading, login } = useAuth(); // Get login function from context
+  const { signup, isAuthLoading, setSession } = useAuth(); // Get setSession function from context
   const { form, errors, handleChange, checkFormValidity } = useForm({
     password: '',
     password_confirmation: '',
@@ -48,7 +48,7 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
 
   const handleSignup = async () => {
     if (!formIsValid || form.password !== form.password_confirmation) {
-        Alert.alert(t('common.error', { defaultValue: 'Error' }), t('auth.passwords_do_not_match', { defaultValue: 'Passwords do not match' }));
+        Alert.alert(t('common.error'), t('auth.passwords_do_not_match'));
 
         return;
     };
@@ -58,7 +58,7 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
     // Defensive check to ensure signupData exists before using it.
     if (!signupData) {
       console.error("Critical Error: signupData is missing in PasswordScreen.");
-      Alert.alert("Error", "An unexpected error occurred. Please start the signup process again.");
+      Alert.alert(t('common.error'), t('errors.unexpected_signup_error'));
       return;
     }
 
@@ -86,33 +86,33 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
         
         // 2. Navigate back to the 'accounts' screen instead of the child's homepage.
         navigation.navigate('accounts');
-        Alert.alert("Success", "Child account created successfully.");
+        Alert.alert(t('common.success'), t('auth.child_account_created'));
       } else {
-        // For a regular signup, manually log the new user in by saving their data.
-        await AsyncStorage.setItem('user', JSON.stringify(response));
-        // This will trigger the user state change in the context and navigate to the main app.
-        // We can just reset to a known screen in the main stack.
-        navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'welcome' }] }));
+        // For a regular signup, navigate to the WelcomeScreen and pass the session data.
+        // The WelcomeScreen will then handle setting the session.
+        navigation.dispatch(
+          CommonActions.reset({ index: 0, routes: [{ name: 'welcome', params: { sessionData: response } }] })
+        );
       }
     } catch (error) {
-      Alert.alert(t('common.error', { defaultValue: 'Error' }), error.message);
+      Alert.alert(t('common.error'), error.message);
     }
   };
 
   return (
     <SafeAreaView style={[styles.safeArea, { direction: 'rtl' }]}>
-      <CustomHeader text={route.params?.title || t('auth.create_account', { defaultValue: 'إنشاء حساب' })}/>
+      <CustomHeader text={route.params?.title || t('auth.create_account')}/>
       <View style={[styles.headerTextContainer, { direction: i18n.dir() }]}>
-        <Text numberOfLines={2} style={styles.txt1}>
-          الخطوة الأخيرة، <Text style={{ color: '#014CC4' }}>كلمة المرور</Text>
+        <Text numberOfLines={2} style={styles.txt1}> 
+          {t('auth.final_step_password').replace(t('auth.password'), '')}<Text style={{ color: '#014CC4' }}>{t('auth.password')}</Text>
         </Text>
       </View>
 
       <View style={styles.formContainer}>
         <FormField
           required
-          title={'كلمة المرور'}
-          placeholder={'ادخل كلمة المرور'}
+          title={t('auth.password')}
+          placeholder={t('auth.password_placeholder')}
           value={form.password}
           onChangeText={(text) => handleChange('password', text)}
           error={errors.password}
@@ -122,8 +122,8 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
         />
         <FormField
           required
-          title={'تأكيد كلمة المرور'}
-          placeholder={'أعد إدخال كلمة المرور'}
+          title={t('auth.confirm_password')}
+          placeholder={t('auth.confirm_password_placeholder')}
           value={form.password_confirmation}
           onChangeText={(text) => handleChange('password_confirmation', text)}
           error={errors.password_confirmation}
@@ -143,7 +143,7 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
         {isAuthLoading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.submitButtonText}>{t('auth.create_account_button', { defaultValue: 'إنشاء الحساب' })}</Text>
+          <Text style={styles.submitButtonText}>{t('auth.create_account_button')}</Text>
         )}
       </TouchableOpacity>
     </SafeAreaView>

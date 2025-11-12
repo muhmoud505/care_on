@@ -61,35 +61,35 @@ const AddResultScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
-      <CustomHeader text={t('add_result.title', { defaultValue: 'Add Result' })} />
+      <CustomHeader text={t('add_result.title')} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
           <FormField
-            title={t('add_result.test_name', { defaultValue: 'Test Name' })}
-            placeholder={t('add_result.test_name_placeholder', { defaultValue: 'Test Name' })}
+            title={t('add_result.test_name')}
+            placeholder={t('add_result.test_name_placeholder')}
             value={form.testName}
             onChangeText={(text) => handleChange('testName', text)}
             error={errors.testName}
             required
           />
           <FormField
-            title={t('add_result.result_value', { defaultValue: 'Result Value' })}
-            placeholder={t('add_result.result_value_placeholder', { defaultValue: 'Result Value' })}
+            title={t('add_result.result_value')}
+            placeholder={t('add_result.result_value_placeholder')}
             value={form.resultValue}
             onChangeText={(text) => handleChange('resultValue', text)}
             error={errors.resultValue}
             required
           />
           <FormField
-            title={t('add_result.notes', { defaultValue: 'Notes' })}
-            placeholder={t('add_result.notes_placeholder', { defaultValue: 'Notes (optional)' })}
+            title={t('add_result.notes')}
+            placeholder={t('add_result.notes_placeholder')}
             value={form.notes}
             onChangeText={(text) => handleChange('notes', text)}
             error={errors.notes}
             type="long"
           />
           <Uploader
-            title={t('add_result.upload_file', { defaultValue: 'Upload File' })}
+            title={t('add_result.upload_file')}
             onFileSelect={(file) => handleChange('documents', file)}
             error={errors.documents}
           />
@@ -97,7 +97,7 @@ const AddResultScreen = () => {
             {isSubmitting ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.saveButtonText}>{t('common.save', { defaultValue: 'Save' })}</Text>
+              <Text style={styles.saveButtonText}>{t('common.save')}</Text>
             )}
           </TouchableOpacity>
         </View>

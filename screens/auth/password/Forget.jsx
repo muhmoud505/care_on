@@ -35,26 +35,26 @@ const Forget = () => {
       // On success, navigate to the code verification screen
       navigation.navigate('code', { email: form.email });
     } catch (error) {
-      Alert.alert(t('common.error', { defaultValue: 'Error' }), error.message);
+      Alert.alert(t('common.error'), error.message);
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <CustomHeader text={t('auth.reset_password', { defaultValue: 'إعادة تعيين كلمة السر' })} />
+      <CustomHeader text={t('auth.reset_password')} />
       <View style={styles.container}>
         <Text style={styles.infoText}>
-          {t('auth.enter_email_to_reset', { defaultValue: 'برجاء إدخال بريدك الإلكتروني لإعادة تعيين كلمة السر' })}
+          {t('auth.enter_email_to_reset')}
         </Text>
 
         <FormField
-          title={t('auth.email', { defaultValue: 'البريد الالكتروني' })}
+          title={t('auth.email')}
           value={form.email}
           onChangeText={(text) => handleChange('email', text)}
           error={errors.email}
           keyboardType="email-address"
           required
-          placeholder={t('auth.enter_email', { defaultValue: 'ادخل بريدك الالكتروني' })}
+          placeholder={t('auth.email_placeholder')}
         />
 
         <TouchableOpacity
@@ -66,7 +66,7 @@ const Forget = () => {
           {isAuthLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>{t('common.next', { defaultValue: 'التالي' })}</Text>
+            <Text style={styles.buttonText}>{t('common.next')}</Text>
           )}
         </TouchableOpacity>
       </View>

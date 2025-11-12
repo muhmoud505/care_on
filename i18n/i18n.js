@@ -16,8 +16,15 @@ if(isRTL){
     I18nManager.forceRTL(true);
     I18nManager.allowRTL(true)
 }
-const deviceLanguage = Localization.getLocales()[0].languageCode;
-const defaultLanguage = ['en', 'ar'].includes(deviceLanguage) ? deviceLanguage : 'en';
+
+// Get the primary language code from the device's locale settings.
+const deviceLanguageCode = Localization.getLocales()[0]?.languageCode;
+
+// Determine the default language. If the device language is Arabic (any region),
+// use 'ar'. Otherwise, default to 'en'.
+const defaultLanguage = deviceLanguageCode?.startsWith('ar')
+  ? 'ar'
+  : 'en';
 
 i18next
   .use(initReactI18next)

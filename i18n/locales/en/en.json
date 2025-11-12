@@ -1,5 +1,8 @@
 {
-  "welcome": "Welcome to our Application",
+  "welcome": {
+    "registered_successfully": "Registered Successfully",
+    "welcome_to": "Welcome to"
+  },
   "intro": "This is a complete example of how to implement localization in Expo apps. You can switch between English and Arabic with full RTL support.",
   "features": {
     "title": "Key Features:",
@@ -10,6 +13,8 @@
       "Formatted numbers and dates"
     ]
   },
+  "Care": "Care",
+  "On": "On",
   "more": "This is additional",
   "switch_language": "Switch to Arabic",
 
@@ -24,6 +29,7 @@
     "download": "Download",
     "from": "From",
     "to": "To",
+    "back": "Back",
     "date": "Date",
     "description": "Description",
     "error": "Error",
@@ -32,7 +38,9 @@
     "yes": "Yes",
     "no": "No",
     "lets_go": "Let's go!",
-    "later": "Later!"
+    "later": "Later!",
+    "unauthorized": "Authentication token not found.",
+    "error_fetching_data": "Failed to load {{stateKey}}."
   },
  "add_selector": {
     "title": "Add New Record",
@@ -43,7 +51,58 @@
     "add_report": "Add Doctor Report",
     "add_medicine": "Add Medicine"
   },
+  "add_result": {
+    "title": "Add Lab Result",
+    "test_name": "Test Name",
+    "test_name_placeholder": "e.g., Blood Sugar Test",
+    "result_value": "Result Value",
+    "result_value_placeholder": "e.g., 120 mg/dL",
+    "notes": "Notes",
+    "notes_placeholder": "Notes (optional)",
+    "upload_file": "Upload Result File"
+  },
+  "add_eshaa": {
+    "title": "Add X-ray",
+    "xray_name": "X-ray Name",
+    "xray_name_placeholder": "e.g., Chest X-ray",
+    "date": "Date",
+    "date_placeholder": "Select date",
+    "lab_name": "Lab Name",
+    "lab_name_placeholder": "Enter lab or hospital name",
+    "doctor_name": "Doctor Name",
+    "doctor_name_placeholder": "Enter doctor's name",
+    "notes": "Notes",
+    "notes_placeholder": "Notes (optional)",
+    "upload_file": "Upload X-ray Image"
+  },
+  "add_report": {
+    "title": "Add Doctor Report",
+    "report_title": "Report Title",
+    "report_title_placeholder": "e.g., Cardiology Consultation",
+    "doctor_name": "Doctor Name",
+    "doctor_name_placeholder": "Enter doctor's name",
+    "specialty": "Specialty",
+    "specialty_placeholder": "e.g., Cardiology",
+    "date": "Date",
+    "date_placeholder": "Select date",
+    "notes": "Notes",
+    "notes_placeholder": "Notes (optional)",
+    "upload_file": "Upload Report File"
+  },
+  "add_medicine": {
+    "title": "Add Medicine",
+    "enter_following_data": "Please enter the following data",
+    "medicine_name": "Medicine Name",
+    "medicine_name_placeholder": "Enter medicine name",
+    "dosage": "Dosage",
+    "dosage_placeholder": "e.g., 500mg, 1 tablet",
+    "start_date": "Start Date",
+    "start_date_placeholder": "Select start date",
+    "end_date": "End Date",
+    "end_date_placeholder": "Select end date"
+  },
   "auth": {
+    
     "signin": "Sign in",
     "signup": "Sign up",
     "login": "Log in",
@@ -52,6 +111,10 @@
     "password": "Password",
     "enter_password": "Enter your password",
     "forgot_password_q": "Forgot password?",
+    "password_placeholder": "Enter your password",
+    
+    "confirm_password_placeholder": "Re-enter password",
+    "email_placeholder": "Enter your email",
     "enter_email_send_code": "Enter your email, a code will be sent",
     "send_code": "Send code",
     "enter_code": "Please enter the code",
@@ -60,6 +123,12 @@
     "create_your_account_prompt": "To create your account, please fill in the following data..",
     "create_child_account_prompt": "To create your child's account, please fill in the following data..",
     "linked_accounts": "Linked accounts",
+    "choose_account_type": "Choose account type",
+    "personal_account": "Personal account",
+    "create_child_account": "Create child account",
+    "child_account": "Child account",
+    "enter_your_data": "Enter your data",
+    "enter_child_data": "Enter child's data",
     "add_another_account": "Add another account",
     "impersonate_user": "Impersonate user",
     "reset_password": "Reset password",
@@ -70,7 +139,44 @@
     "new_password": "New password",
     "confirm_password": "Confirm password",
     "reenter_password": "Re-enter password",
-    "password_rules": "Must include: at least 8 characters, English letters, symbols (@, #, $ ...)"
+    "password_rules": "Must include: at least 8 characters, English letters, symbols (@, #, $ ...)",
+    "enter_email_to_reset": "Please enter your email to reset your password",
+    "under_18_error": "Users must be 18 or older to create a personal account.",
+    "over_18_error": "For users 18 and over, please create a personal account."
+  },
+  "errors": {
+    "add_medicine_failed": "Could not save medicine. Please try again.",
+    "add_record_failed": "Could not save record. Please try again."
+  },
+  "account": {
+    "linked_accounts": "Linked Accounts",
+    "primary_user": "Primary User",
+    "no_phone_number": "No phone number",
+    "current_account": "Current Account",
+    "impersonate_user": "Impersonate User",
+    "add_another_account": "Add Another Account"
+  },
+  "survey": {
+    "title": "Survey",
+    "notes_prompt": "If you would like to share any notes",
+    "notes_placeholder": "Notes",
+    "file_prompt": "If you would like to share any file",
+    "loading_questions": "Loading questions...",
+    "error_prefix": "Error: ",
+    "success_title": "Success",
+    "success_message": "The survey was sent successfully.",
+    "submit_failed": "Failed to submit the survey.",
+    "network_error": "Network Error",
+    "network_error_message": "Could not reach the server. Please check your internet connection and server settings.",
+    "unexpected_error": "An unexpected error occurred.",
+    "submitting": "Submitting...",
+    "submit": "Submit",
+    "popup_title": "Take a Quick Survey",
+    "popup_message": "Help us improve your experience by answering a few quick questions.",
+    "lets_go": "Let's go!",
+    "later": "Later",
+    "popup_description": "Please take a quick survey for the child",
+    "take_survey": "Let's go!"
   },
 
   "home": {
@@ -82,12 +188,12 @@
     "reports_title": "Doctors' reports",
     "medicines_title": "Medicines",
     "last_reports_title": "Previous reports",
+    "hello": "Hello,",
     "results": {
       "analysis_name": "Test name:",
       "lab_name": "Lab name:",
       "test_date": "Test date:",
-      "description": "Description:",
-      "hello": "Hello,"
+      "description": "Description:"
     },
     "reports": {
       "doctor_name": "Doctor name:",
@@ -145,5 +251,17 @@
   "uploader": {
     "pick_failed": "Image selection failed",
     "upload": "Upload"
+  },
+  "payment": {
+    "currency": "EGP",
+    "masked_name": "Jilan A*** G***",
+    "masked_phone": "0123456789"
+  },
+  "drawer": {
+    "user_name_placeholder": "User Name",
+    "profile": "Profile",
+    "billing": "Billing & Payments",
+    "find_service": "Find Nearest Service",
+    "contact_us": "Contact Us"
   }
 }

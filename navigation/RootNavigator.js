@@ -20,18 +20,19 @@ const RootNavigator = () => {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      {/* Add a navigationKey to ensure the navigation state is reset on auth change */}
+      <NavigationContainer key={user ? 'App' : 'Auth'}>
         <Stack.Navigator>
           {user ? (
-            <>
-              <Stack.Screen name="App" options={{ headerShown: false }}>
-                {() => (
-                  <MedicalRecordsProvider>
-                    <AppStack />
-                  </MedicalRecordsProvider>
-                )}
-              </Stack.Screen>
-            </>
+            // The MedicalRecordsProvider is now wrapped around AppStack itself,
+            // keeping the RootNavigator cleaner.
+            <Stack.Screen name="App" options={{ headerShown: false }}>
+              {() => (
+                <MedicalRecordsProvider>
+                  <AppStack />
+                </MedicalRecordsProvider>
+              )}
+            </Stack.Screen>
           ) : (
             <Stack.Screen name="Auth" component={AuthStack} options={{ headerShown: false }} />
           )}

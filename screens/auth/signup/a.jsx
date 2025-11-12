@@ -14,11 +14,11 @@ const S1 = () => {
     <SafeAreaView style={styles.safeContainer} >
       <Image style={styles.img} source={require('../../../assets2/images/img1.png')}/>
      <View style={styles.v1} >
-  <Text style={styles.txt1} >
-    {t('marketing.health_in_pocket_part1', { defaultValue: 'صحتك' })} <Text style={styles.txt2}>{t('marketing.health_in_pocket_part2', { defaultValue: 'في' })}</Text> {t('marketing.health_in_pocket_part3', { defaultValue: 'جيبك' })}
-  </Text>
-  <Text style={styles.txt3}>{t('marketing.anytime_anywhere', { defaultValue: 'أي وقت - أي مكان' })}</Text>
-</View>
+      <Text style={styles.txt1} >
+        {t('marketing.health_in_pocket_part1')} <Text style={styles.txt2}>{t('marketing.health_in_pocket_part2')}</Text> {t('marketing.health_in_pocket_part3')}
+      </Text>
+      <Text style={styles.txt3}>{t('marketing.anytime_anywhere')}</Text>
+    </View>
       <View style={styles.v2}>
         <TouchableOpacity 
          style={styles.btn1}
@@ -26,15 +26,15 @@ const S1 = () => {
          activeOpacity={0.7}
          
          >
-         <Text style={styles.btntxt}>تسجيل دخول</Text>
+         <Text style={styles.btntxt}>{t('auth.signin')}</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.btn1,{backgroundColor:'#80D280'}]}
         onPress={() => navigation.navigate('s2')}
          activeOpacity={0.7}
       >
-         
-         <Text style={styles.btntxt}>تسجيل</Text>
+          
+         <Text style={styles.btntxt}>{t('auth.signup')}</Text>
       </TouchableOpacity>
       </View>
       

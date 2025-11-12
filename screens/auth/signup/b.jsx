@@ -19,7 +19,6 @@ const S2 = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { userType, isParentAddingChild } = route.params || {};
-  console.log('S2 Screen Params:', route.params); // Debugging line
      
   const { t } = useTranslation();
   // If userType is passed (from account screen), set it, otherwise start fresh.
@@ -75,7 +74,7 @@ const S2 = () => {
 
     if (flowType === 'adult') {
       if (age < 18) {
-        Alert.alert("Error", "Users must be 18 or older to create a personal account.");
+        Alert.alert(t('common.error'), t('auth.under_18_error'));
         return;
       }
       navigation.navigate('Signup', {
@@ -85,7 +84,7 @@ const S2 = () => {
       });
     } else {
       if (age >= 18) {
-        Alert.alert("Error", "For users 18 and over, please create a personal account.");
+        Alert.alert(t('common.error'), t('auth.over_18_error'));
         return;
       }
       navigation.navigate('signupBaby', {
@@ -107,43 +106,43 @@ const S2 = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <CustomHeader text={t('auth.signup', { defaultValue: 'Sign up' })} />
-      
+      <CustomHeader text={t('auth.signup')} />
+       
       {!flowType ? (
         <View style={styles.container}>
-          <Text style={styles.title}>{t('auth.choose_account_type', { defaultValue: 'اختر نوع الحساب' })}</Text>
-
-          <TouchableOpacity style={styles.card} onPress={() => setFlowType('adult')} activeOpacity={0.7}>
+          <Text style={styles.title}>{t('auth.choose_account_type')}</Text>
+ 
+          <TouchableOpacity style={styles.card} onPress={() => setFlowType('adult')} activeOpacity={0.7}> 
             <Image source={require('../../../assets2/images/img1.png')} style={styles.icon} />
-            <Text style={styles.cardText}>{t('auth.personal_account', { defaultValue: 'حساب شخصي' })}</Text>
+            <Text style={styles.cardText}>{t('auth.personal_account')}</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.card} onPress={() => setFlowType('child')} activeOpacity={0.7}>
+ 
+          <TouchableOpacity style={styles.card} onPress={() => setFlowType('child')} activeOpacity={0.7}> 
             <Image source={require('../../../assets2/images/img2.png')} style={styles.icon} />
-            <Text style={styles.cardText}>{t('auth.child_account', { defaultValue: 'حساب لطفل' })}</Text>
-          </TouchableOpacity>
+            <Text style={styles.cardText}>{t('auth.child_account')}</Text>
+          </TouchableOpacity> 
         </View>
       ) : (
         <View style={styles.formContainer}>
           <Text style={styles.title}>
-            {flowType === 'adult' ? 'ادخل بياناتك' : 'ادخل بيانات الطفل'}
+            {flowType === 'adult' ? t('auth.enter_your_data') : t('auth.enter_child_data')}
           </Text>
           <View style={{rowGap: hp(3)}}>
-          <DatePick 
-            title={t('profile.dob', { defaultValue: 'تاريخ الميلاد' })}
+          <DatePick  
+            title={t('profile.dob')}
             required
-            placeholder={'ادخل تاريخ الميلاد'}
+            placeholder={t('profile.dob_placeholder')}
             value={formData.birthdate}
             onDateSelect={(date) => handleFieldChange('birthdate', date)}
           />
           <FormField
             required
-            title={'الجنس'}
-            placeholder={'اختر الجنس'}
+            title={t('profile.gender')}
+            placeholder={t('profile.gender_placeholder')}
             value={formData.gender}
             onChangeText={(value) => handleFieldChange('gender', value)} // This line might need adjustment based on how your onChangeText works with picker
             type="picker"
-            pickerItems={[{ label: 'ذكر', value: 'male' }, { label: 'أنثى', value: 'female' }]}
+            pickerItems={[{ label: t('profile.male'), value: 'male' }, { label: t('profile.female'), value: 'female' }]}
           />
           </View>
           <TouchableOpacity
@@ -151,11 +150,11 @@ const S2 = () => {
             onPress={handleProceed}
             disabled={!isFormValid}
             activeOpacity={0.7}
-          >
-            <Text style={styles.nextButtonText}>{t('common.next', { defaultValue: 'Next' })}</Text>
+          > 
+            <Text style={styles.nextButtonText}>{t('common.next')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.backButton} onPress={resetFlow}>
-            <Text style={styles.backButtonText}>{t('common.back', { defaultValue: 'Back' })}</Text>
+          <TouchableOpacity style={styles.backButton} onPress={resetFlow}> 
+            <Text style={styles.backButtonText}>{t('common.back')}</Text>
           </TouchableOpacity>
         </View>
       )}

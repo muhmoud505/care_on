@@ -1,6 +1,7 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -28,6 +29,7 @@ const Signup2 = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { birthdate, gender, age, isParentAddingChild } = route.params || {};
+  const { t } = useTranslation();
 
   // Get parent user from global state (e.g., Redux).
   const { user: parentUser } = useAuth();
@@ -83,7 +85,7 @@ const Signup2 = () => {
       navigation.navigate('password', { signupData });
     } catch (err) {
       console.error("Failed to process image or navigate:", err);
-      Alert.alert("Error", "Could not process the selected image. Please try again.");
+      Alert.alert(t('common.error'), t('errors.image_processing_failed'));
     } finally {
       setIsProcessing(false);
     }
@@ -92,26 +94,27 @@ const Signup2 = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <CustomHeader text='إنشاء حساب' />
+        <CustomHeader text={t('auth.create_account')} />
         
         <View style={styles.headerTextContainer}>
-          <Text style={styles.headerText}>
-            لإنشاء <Text style={styles.headerHighlight}>حساب طفلك</Text> يرجي ملئ البيانات التالية ..
+          <Text style={styles.headerText}> 
+            {t('auth.create_child_account_prompt').replace(t('auth.your_child_account'), '')}
+            <Text style={styles.headerHighlight}>{t('auth.your_child_account')}</Text>
           </Text>
         </View>
         
         <View style={styles.formContainer}>
           <FormField 
-            title={'اسم الطفل'}
-            placeholder={'ادخل اسم طفلك'}
+            title={t('auth.child_name')}
+            placeholder={t('auth.child_name_placeholder')}
             value={formData.name}
             onChangeText={(text) => handleFieldChange('name', text)}
           />
           
           <FormField 
             required
-            title={'البريد الالكتروني للطفل'}
-            placeholder={'ادخل البريد الالكتروني للطفل'}
+            title={t('auth.child_email')}
+            placeholder={t('auth.child_email_placeholder')}
             value={formData.email}
             onChangeText={(text) => handleFieldChange('email', text)}
             keyboardType="email-address"
@@ -119,8 +122,8 @@ const Signup2 = () => {
 
           <FormField 
             required
-            title={'الرقم القومي'}
-            placeholder={'ادخل الرقم القومي للطفل'}
+            title={t('auth.child_national_id')}
+            placeholder={t('auth.child_national_id_placeholder')}
             value={formData.national_number}
             onChangeText={(text) => handleFieldChange('national_number', text)}
             keyboardType="numeric"
@@ -129,7 +132,7 @@ const Signup2 = () => {
         
         <Uploader
           required
-          title={'شهادة ميلاد الطفل'}
+          title={t('auth.child_birth_certificate')}
           color='#80D28040'
           onFileSelect={(file) => handleFieldChange('birthCertificate', file)}
         />
@@ -143,7 +146,7 @@ const Signup2 = () => {
           {isProcessing ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.nextButtonText}>التالي</Text>
+            <Text style={styles.nextButtonText}>{t('common.next')}</Text>
           )}
         </TouchableOpacity>
       </ScrollView>

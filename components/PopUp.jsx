@@ -28,8 +28,8 @@ import { hp, wp } from '../utils/responsive';
       if (status === 'denied') {
         Alert.alert(
           t('permissions.location_denied_title', { defaultValue: 'Location Permission Denied' }),
-          t('permissions.location_denied_message', { defaultValue: 'Please enable location services in settings to use this feature.' }),
-          [{ text: t('common.ok', { defaultValue: 'OK' }) }, { text: t('permissions.open_settings', { defaultValue: 'Open Settings' }), onPress: Linking.openSettings }]
+          t('permissions.location_denied_message'),
+          [{ text: t('common.ok') }, { text: t('permissions.open_settings'), onPress: Linking.openSettings }]
         );
       }
       return false;
@@ -39,9 +39,9 @@ import { hp, wp } from '../utils/responsive';
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
-          title: t('permissions.location_title', { defaultValue: "Location Permission" }),
-          message: t('permissions.location_message', { defaultValue: "This app needs access to your location to find nearby services." }),
-          buttonNeutral: t('common.ask_me_later', { defaultValue: "Ask Me Later" }),
+          title: t('permissions.location_title'),
+          message: t('permissions.location_message'),
+          buttonNeutral: t('common.ask_me_later'),
           buttonNegative: t('common.cancel', { defaultValue: "Cancel" }),
           buttonPositive: t('common.ok', { defaultValue: "OK" }),
         },
@@ -59,7 +59,7 @@ import { hp, wp } from '../utils/responsive';
           handleClose(); // Close popup on success
         },
         (error) => {
-          console.log(error.code, error.message);
+          console.log(error.code, error.message); 
           Alert.alert(t('errors.location_fetch_error_title', { defaultValue: 'Location Error' }), t('errors.location_fetch_error_message', { defaultValue: 'Could not fetch location.' }));
           handleClose();
         },
@@ -102,13 +102,13 @@ import { hp, wp } from '../utils/responsive';
             </TouchableOpacity>
             <View style={styles.modalContent}>
                 <Image source={Images.location} style={styles.icon} />
-                <Text style={styles.title}>{t('permissions.location_access_title', { defaultValue: 'الوصول للموقع' })}</Text>
-                <Text style={styles.description}>
-                  {t('permissions.location_access_description', { defaultValue: 'للعثور على أقرب الخدمات الطبية لك، يرجى السماح للتطبيق بالوصول إلى موقعك.' })}
-                </Text>
+                <Text style={styles.title}>{t('permissions.location_access_title')}</Text>
+                <Text style={styles.description}> 
+                  {t('permissions.location_access_description')}
+                </Text> 
                 <View style={styles.btnContainer}>
                     <TouchableOpacity style={styles.button} onPress={handleAllow}>
-                        <Text style={styles.btnText}>{t('common.allow', { defaultValue: 'السماح' })}</Text>
+                        <Text style={styles.btnText}>{t('common.allow')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.button, styles.denyButton]} onPress={handleClose}>
                         <Text style={styles.btnText}>{t('common.dont_allow', { defaultValue: 'عدم السماح' })}</Text>

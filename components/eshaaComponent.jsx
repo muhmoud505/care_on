@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Image, ImageBackground, StyleSheet, Text, View } from 'react-native';
 import CollapsibleCard from './CollapsibleCard';
 
@@ -10,6 +11,7 @@ const Eshaa = ({
   onExpandedChange,
   icon
 }) => {
+  const { t } = useTranslation();
   return (
     <CollapsibleCard
       title={title}
@@ -20,22 +22,22 @@ const Eshaa = ({
       <>
         <View style={styles.miccontianer}>
           <Image source={require('../assets2/images/r2.png')} />
-          <Text style={styles.txt2}>اسم الاشعة:</Text>
+          <Text style={styles.txt2}>{t('eshaa.xray_name')}:</Text>
           <Text style={styles.txt3}>{title}</Text>
         </View>
         <View style={styles.miccontianer}>
           <Image source={require('../assets2/images/r3.png')} />
-          <Text style={styles.txt2}>اسم المعمل:</Text>
+          <Text style={styles.txt2}>{t('eshaa.lab_name')}:</Text>
           <Text style={styles.txt3}>{labName}</Text>
         </View>
         <View style={styles.miccontianer}>
           <Image source={require('../assets2/images/r4.png')} />
-          <Text style={styles.txt2}>تاريخ الاشعة:</Text>
+          <Text style={styles.txt2}>{t('eshaa.xray_date')}:</Text>
           <Text style={styles.txt3}>{date}</Text>
         </View>
         <View style={styles.miccontianer}>
           <Image source={require('../assets2/images/r5.png')} />
-          <Text style={styles.txt2}>الوصف:</Text>
+          <Text style={styles.txt2}>{t('eshaa.description')}:</Text>
           <Text style={styles.txt3}>{description}</Text>
         </View>
         
@@ -47,7 +49,7 @@ const Eshaa = ({
         >
           <View style={styles.overlay}>
             <Image source={require('../assets2/images/download.png')} />
-            <Text style={styles.txt4}>تنزيل</Text>
+            <Text style={styles.txt4}>{t('common.download')}</Text>
           </View>
         </ImageBackground>
       </>

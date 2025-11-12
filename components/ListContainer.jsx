@@ -20,7 +20,7 @@ const ListContainer = ({ loading, error, data, emptyListMessage, onRefresh, refr
   const renderEmpty = () => (
     <View style={styles.centeredContainer}>
       <Text style={styles.emptyText}>
-        {emptyListMessage || t('common.no_items_found', { defaultValue: 'No items found.' })}
+        {emptyListMessage || t('common.no_items_found')}
       </Text>
     </View>
   );

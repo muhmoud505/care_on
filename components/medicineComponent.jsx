@@ -10,7 +10,7 @@ const Medicine = ({
   dose,
   icon}
 ) => {
-      const { i18n } = useTranslation();
+      const { t, i18n } = useTranslation();
   return (
     <View style={{ alignSelf: 'stretch', marginHorizontal: wp(4), marginBottom: hp(1.2) }}>
       <CollapsibleCard title={title} icon={icon}>
@@ -19,7 +19,7 @@ const Medicine = ({
             <View style={styles.detailItem}>
               <Image source={require('../assets2/images/r3.png')} style={styles.detailIcon} />
               <View style={{flexDirection:'row',columnGap:5}}>
-                <Text style={styles.txt2}>من:</Text>
+                <Text style={styles.txt2}>{t('medicine.from')}:</Text>
                 <Text style={styles.txt3}>{from}</Text>
               </View>
             </View>
@@ -27,7 +27,7 @@ const Medicine = ({
             <View style={styles.detailItem}>
               <Image source={require('../assets2/images/r3.png')} style={styles.detailIcon} />
               <View style={{flexDirection:'row',columnGap:5}}>
-                <Text style={styles.txt2}>إلى:</Text>
+                <Text style={styles.txt2}>{t('medicine.to')}:</Text>
                 <Text style={styles.txt3}>{to}</Text>
               </View>
             </View>
@@ -37,7 +37,7 @@ const Medicine = ({
             <View style={styles.detailItem}>
               <Image source={require('../assets2/images/r5.png')} style={styles.detailIcon} />
               <View style={{flexDirection:'row',columnGap:5}}>
-                <Text style={styles.txt2}>الجرعة:</Text>
+                <Text style={styles.txt2}>{t('medicine.dosage')}:</Text>
                 <Text style={styles.txt3}>{dose}</Text>
               </View>
             </View>

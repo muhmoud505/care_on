@@ -86,7 +86,7 @@ const Home = () => {
        onPress={()=>navigation.navigate('results')}
       >
         <Image source={Images.results} />
-        <Text style={styles.txt1}>{t('home.results_title', { defaultValue: 'نتائج التحاليل' })}</Text>
+        <Text style={styles.txt1}>{t('home.results_title')}</Text>
       </TouchableOpacity>
       <TouchableOpacity 
       style={styles.secContainer}
@@ -94,7 +94,7 @@ const Home = () => {
       
       >
         <Image source={Images.eshaa} />
-        <Text style={styles.txt1}>{t('home.xray_title', { defaultValue: 'الاشعة' })}</Text>
+        <Text style={styles.txt1}>{t('home.xray_title')}</Text>
       </TouchableOpacity>
       <TouchableOpacity 
       style={styles.secContainer}
@@ -103,7 +103,7 @@ const Home = () => {
       
       >
         <Image source={Images.reports} />
-        <Text style={styles.txt1}>{t('home.reports_title', { defaultValue: 'تقارير الدكاترة' })}</Text>
+        <Text style={styles.txt1}>{t('home.reports_title')}</Text>
       </TouchableOpacity>
       <TouchableOpacity 
       style={styles.secContainer}
@@ -111,13 +111,13 @@ const Home = () => {
       
       >
         <Image source={Images.medicine} />
-        <Text style={styles.txt1}>{t('home.medicines_title', { defaultValue: 'الادوية' })}</Text>
+        <Text style={styles.txt1}>{t('home.medicines_title')}</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.secContainer}
         onPress={()=>navigation.navigate('last')}
       >
         <Image source={Images.last_reports} />
-        <Text style={styles.txt1}>{t('home.last_reports_title', { defaultValue: 'التقارير السابقة' })}</Text>
+        <Text style={styles.txt1}>{t('home.last_reports_title')}</Text>
       </TouchableOpacity>
   
 

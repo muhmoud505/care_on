@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Image, ImageBackground, StyleSheet, Text, View } from 'react-native';
 import CollapsibleCard from './CollapsibleCard';
 
@@ -9,6 +10,8 @@ const Report = ({
   onExpandedChange,
   icon
 }) => {
+
+  const { t } = useTranslation();
   return (
     <CollapsibleCard
       title={title}
@@ -19,17 +22,17 @@ const Report = ({
       <>
         <View style={styles.miccontianer}>
           <Image source={require('../assets2/images/r2.png')} />
-          <Text style={styles.txt2}>اسم الدكتور:</Text>
+          <Text style={styles.txt2}>{t('report.doctor_name')}:</Text>
           <Text style={styles.txt3}>{title}</Text>
         </View>
         <View style={styles.miccontianer}>
           <Image source={require('../assets2/images/r4.png')} />
-          <Text style={styles.txt2}>تاريخ الكشف:</Text>
+          <Text style={styles.txt2}>{t('report.report_date')}:</Text>
           <Text style={styles.txt3}>{date}</Text>
         </View>
         <View style={styles.miccontianer}>
           <Image source={require('../assets2/images/r5.png')} />
-          <Text style={styles.txt2}>الوصف:</Text>
+          <Text style={styles.txt2}>{t('result.description')}:</Text>
           <Text style={styles.txt3}>{description}</Text>
         </View>
         <ImageBackground 
@@ -40,7 +43,7 @@ const Report = ({
         >
           <View style={styles.overlay}>
             <Image source={require('../assets2/images/download.png')} />
-            <Text style={styles.txt4}>تنزيل</Text>
+            <Text style={styles.txt4}>{t('common.download')}</Text>
           </View>
         </ImageBackground>
       </>

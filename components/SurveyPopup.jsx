@@ -22,14 +22,14 @@ const SurveyPopup = ({ visible, onSkip, onTakeSurvey }) => {
         <View style={styles.modalContent}>
           <Image source={Images.survey} style={styles.modalIcon}/>
           <Text style={styles.modalDescription}>
-            {t('survey.popup_description', { defaultValue: ' يرجي عمل استبيان سريع للطفل' })}
+            {t('survey.popup_description')}
           </Text>
           <View style={styles.modalButtonContainer}>
             <TouchableOpacity style={[styles.modalButton, styles.skipButton]} onPress={onSkip}>
-              <Text style={styles.modalButtonText}>{t('common.skip', { defaultValue: 'تخطي' })}</Text>
+              <Text style={styles.modalButtonText}>{t('common.skip')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.modalButton, styles.surveyButton]} onPress={onTakeSurvey}>
-              <Text style={styles.modalButtonText}>{t('survey.take_survey', { defaultValue: 'هيا بنا !' })}</Text>
+              <Text style={styles.modalButtonText}>{t('survey.take_survey')}</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -1,8 +1,9 @@
-import { CommonActions, useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import images from '../../constants2/images';
+import { useAuth } from '../../contexts/authContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -11,8 +12,12 @@ const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
 const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 const WelcomeScreen = () => {
-  const navigation=useNavigation()
-  const { t } = useTranslation()
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { t } = useTranslation();
+  const { setSession } = useAuth();
+
+  const { sessionData } = route.params || {};
 
   return (
     <SafeAreaView >
@@ -21,22 +26,18 @@ const WelcomeScreen = () => {
               <Image
                 source={images.confirmed}
               />
-              <Text style={styles.text}>تم التسجيل بنجاح</Text>
-              <Text style={styles.text}>مرحبا بك في <Text style={{color: '#014CC4'}}>{t('Care')}</Text> <Text style={{color: '#80D280'}}>{t('On')}</Text></Text>
+              <Text style={styles.text}>{t('welcome.registered_successfully')}</Text>
+              <Text style={styles.text}>{t('welcome.welcome_to')} <Text style={{color: '#014CC4'}}>{t('Care')}</Text> <Text style={{color: '#80D280'}}>{t('On')}</Text></Text>
             </View>
             <TouchableOpacity
               style={styles.nextButton}
-               onPress={() => navigation.dispatch(
-                 CommonActions.reset({
-                   index: 0,
-                   routes: [
-                     { name: 'App' }, // Reset the stack to the main App navigator
-                   ],
-                 })
-               )}
-               
+              onPress={() => {
+                if (sessionData) {
+                  setSession(sessionData);
+                }
+              }}
             >
-               <Text style={styles.nextButtonText}>{t('home.get_started', { defaultValue: 'البدء' })}</Text>
+               <Text style={styles.nextButtonText}>{t('common.continue')}</Text>
             </TouchableOpacity>
          </View>
     </SafeAreaView>

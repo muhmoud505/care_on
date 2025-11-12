@@ -59,38 +59,38 @@ const addMedicineScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
-      <CustomHeader text={t('home.medicines_title', { defaultValue: 'الادوية' })}/>
+      <CustomHeader text={t('add_medicine.title')}/>
       <View style={styles.formContainer}>
-        <Text style={[styles.txt,{textAlign:'right'}]}>{t('home.enter_following_data', { defaultValue: 'يرجي ادخال البيانات التالية' })} </Text>
+        <Text style={[styles.txt,{textAlign:'right'}]}>{t('add_medicine.enter_following_data')} </Text>
         <FormField
-          title={t('home.medicine_name', { defaultValue: 'اسم الدواء' })}
-          placeholder={t('home.enter_medicine_name', { defaultValue: 'ادخل اسم الدواء' })}
+          title={t('add_medicine.medicine_name')}
+          placeholder={t('add_medicine.medicine_name_placeholder')}
           value={form.medicineName}
           onChangeText={(text) => handleChange('medicineName', text)}
           error={errors.medicineName}
           required
         />
         <FormField
-          title={t('home.medicines.dosage', { defaultValue: 'الجرعة' })}
-          placeholder={t('home.enter_dosage', { defaultValue: 'ادخل الجرعة' })}
+          title={t('add_medicine.dosage')}
+          placeholder={t('add_medicine.dosage_placeholder')}
           value={form.dosage}
           onChangeText={(text) => handleChange('dosage', text)}
           error={errors.dosage}
           required
         />
         <DatePick
-          title={t('common.from', { defaultValue: 'من' })}
+          title={t('add_medicine.start_date')}
           required
-          placeholder={t('home.enter_start_date', { defaultValue: 'ادخل تاريخ البداية' })} // Note: onDateChange is not a prop of DatePick, it should be onDateSelect
+          placeholder={t('add_medicine.start_date_placeholder')}
           value={form.startDate}
           onDateSelect={(date) => handleChange('startDate', date)}
           error={errors.startDate}
         />
         <DatePick
-           title={t('common.to', { defaultValue: 'الي' })}
+           title={t('add_medicine.end_date')}
           required
           value={form.endDate}
-          placeholder={t('home.enter_end_date', { defaultValue: 'ادخل تاريخ الانتهاء' })} // Note: onDateChange is not a prop of DatePick, it should be onDateSelect
+          placeholder={t('add_medicine.end_date_placeholder')}
           onDateSelect={(date) => handleChange('endDate', date)}
           error={errors.endDate}
         />
@@ -102,7 +102,7 @@ const addMedicineScreen = () => {
          {isSubmitting ? (
             <ActivityIndicator color="#fff" />
          ) : (
-            <Text style={styles.nextButtonText}>{t('common.save', { defaultValue: 'حفظ' })}</Text>
+            <Text style={styles.nextButtonText}>{t('common.save')}</Text>
          )}
        </TouchableOpacity>
       </View>

@@ -1,4 +1,5 @@
 import { API_URL } from '@env';
+import i18next from 'i18next';
 import { createContext, useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Images from '../constants2/images'; // Assuming this path is correct
@@ -92,21 +93,23 @@ export const MedicalRecordsProvider = ({ children }) => {
         const token = currentUser?.token?.value;
 
         if (!token) {
-          throw new Error(t('common.unauthorized', { defaultValue: 'Authentication token not found.' }));
+          throw new Error(t('common.unauthorized'));
         }
 
-        const headers = {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        };
-
         const fetchPromises = types.map(async ({ apiType, componentType }) => {
+          const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'lang': i18next.language
+          };
+          
           const response = await fetch(`${BASE_URL}/api/v1/medical-records?type=${apiType}`, { headers });
           
           
           if (!response.ok) throw new Error(`Failed to fetch type ${apiType}`);
           const json = await response.json();
+          console.log(`--- Data fetched for type: ${apiType} ---`, JSON.stringify(json, null, 2));
           
           return Array.isArray(json.data)
             ? json.data.map(item => mapApiDataToComponentProps(item, componentType))
@@ -127,7 +130,7 @@ export const MedicalRecordsProvider = ({ children }) => {
         
         
         console.error(`Failed to fetch ${stateKey}:`, e);
-        setError(prev => ({ ...prev, [stateKey]: t('common.error_fetching_data', { defaultValue: `Failed to load ${stateKey}.` }) }));
+        setError(prev => ({ ...prev, [stateKey]: t('common.error_fetching_data', { stateKey: stateKey }) }));
       } finally {
         setLoading(prev => ({ ...prev, [stateKey]: false }));
       }
@@ -138,11 +141,11 @@ export const MedicalRecordsProvider = ({ children }) => {
     stateKey: 'all',
     stateSetter: setAllRecords,
     types: [
-      { apiType: 1, componentType: 'result' },
-      { apiType: 2, componentType: 'eshaa' },
-      { apiType: 3, componentType: 'report' },
-      { apiType: 4, componentType: 'medicine' },
-      { apiType: 5, componentType: 'report' },
+      { apiType: 'lab_test', componentType: 'result' },
+      { apiType: 'radiology', componentType: 'eshaa' },
+      { apiType: 'diagnosis', componentType: 'report' },
+      { apiType: 'prescription', componentType: 'medicine' },
+      { apiType: 'consultation', componentType: 'report' },
     ],
     sort: true,
   });
@@ -150,27 +153,27 @@ export const MedicalRecordsProvider = ({ children }) => {
   const fetchMedicines = createFetcher({
     stateKey: 'medicines',
     stateSetter: setMedicines,
-    types: [{ apiType: 4, componentType: 'medicine' }],
+    types: [{ apiType: 'prescription', componentType: 'medicine' }],
   });
   
   const fetchResults = createFetcher({
     stateKey: 'results',
     stateSetter: setResults,
-    types: [{ apiType: 1, componentType: 'result' }],
+    types: [{ apiType: 'lab_test', componentType: 'result' }],
   });
   
   const fetchEshaas = createFetcher({
     stateKey: 'eshaa',
     stateSetter: setEshaa,
-    types: [{ apiType: 2, componentType: 'eshaa' }],
+    types: [{ apiType: 'radiology', componentType: 'eshaa' }],
   });
   
   const fetchReports = createFetcher({
     stateKey: 'reports',
     stateSetter: setReports,
     types: [
-      { apiType: 3, componentType: 'report' },
-      { apiType: 5, componentType: 'report' },
+      { apiType: 'diagnosis', componentType: 'report' },
+      { apiType: 'consultation', componentType: 'report' },
     ],
     sort: true,
   });
@@ -192,7 +195,7 @@ export const MedicalRecordsProvider = ({ children }) => {
       const token = currentUser?.token?.value;
 
       if (!token) {
-        throw new Error(t('common.unauthorized', { defaultValue: 'Authentication required to add medicine.' }));
+        throw new Error(t('common.unauthorized'));
       }
 
       // NOTE: The endpoint and body format are an assumption. Adjust to your actual API.
@@ -200,12 +203,13 @@ export const MedicalRecordsProvider = ({ children }) => {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': `Bearer ${token}`,
+        'lang': i18next.language
       };
 
       const response = await fetch(`${BASE_URL}/api/v1/medical-records`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ ...newMedicineData, type: 4 }), // Assuming type 4 is for medicine
+        body: JSON.stringify({ ...newMedicineData, type: 'prescription' }),
       });
 
       if (!response.ok) throw new Error('Failed to save medicine to the server.');
@@ -217,7 +221,7 @@ export const MedicalRecordsProvider = ({ children }) => {
       console.error("Failed to add medicine:", e);
       // 4. Failure: Rollback the optimistic update by removing the temporary item
       setMedicines(prev => prev.filter(m => m.id !== tempId));
-      setError(prev => ({ ...prev, medicines: t('errors.add_medicine_failed', { defaultValue: 'Could not save medicine. Please try again.' }) }));
+      setError(prev => ({ ...prev, medicines: t('errors.add_medicine_failed') }));
     } // No finally block needed as we handle UI state via rollback
   }, [t, user, refreshToken]);
 
@@ -242,13 +246,14 @@ export const MedicalRecordsProvider = ({ children }) => {
       
 
       if (!token) {
-        const unauthorizedError = t('common.unauthorized', { defaultValue: 'Authentication required to add record.' });
+        const unauthorizedError = t('common.unauthorized');
         throw new Error(unauthorizedError);
       }
 
       const headers = {
         'Accept': 'application/json',
         'Authorization': `Bearer ${token}`,
+        'lang': i18next.language
         // 'Content-Type' is not set for FormData, fetch handles it.
       };
       console.log('before request');
@@ -286,7 +291,7 @@ export const MedicalRecordsProvider = ({ children }) => {
       return { success: true, data: responseData };
     } catch (e) {
       console.error("Failed to add record:", e.message);
-      const addRecordFailedError = e.message || t('errors.add_record_failed', { defaultValue: 'Could not save record. Please try again.' });
+      const addRecordFailedError = e.message || t('errors.add_record_failed');
       setError(prev => ({ ...prev, all: addRecordFailedError }));
       return { success: false, error: addRecordFailedError };
     }

@@ -1,4 +1,4 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StatusBar, StyleSheet, TouchableOpacity } from 'react-native';
@@ -21,18 +21,14 @@ const Medicines = () => {
   const { medicines, loading, error, fetchMedicines, addMedicine } = useMedicalRecords();
   console.log(medicines);
 
-  // Use a focus listener to fetch data when the screen comes into view.
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      // The user?.token check is still a good safeguard.
+  // This effect runs every time the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
       if (user?.data?.token?.value) {
         fetchMedicines();
       }
-    });
-
-    // Return the function to unsubscribe from the event so it gets removed on unmount
-    return unsubscribe;
-  }, [navigation,user?.data?.token?.value ]);
+    }, [user?.data?.token?.value, fetchMedicines])
+  );
 
   useEffect(() => {
     if (route.params?.newMedicine) {
@@ -63,7 +59,7 @@ const Medicines = () => {
   return (
     <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
       
-      <CustomHeader text={t('home.medicines_title', { defaultValue: 'الادوية' })}/>
+      <CustomHeader text={t('home.medicines_title')}/>
 
       <ListContainer
         loading={loading.medicines}

@@ -10,7 +10,8 @@ import S2 from "../screens/auth/signup/b";
 import PasswordScreen from "../screens/auth/signup/passwork";
 import Signup from "../screens/auth/signup/signup";
 import Signup2 from "../screens/auth/signup/signupBaby";
-
+// Import the new WelcomeScreen
+import WelcomeScreen from "../screens/home/welcome";
 const Stack = createNativeStackNavigator();
 
 export const AuthScreens = () => {
@@ -18,6 +19,7 @@ export const AuthScreens = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="s1" component={S1} />
+      <Stack.Screen name="welcome" component={WelcomeScreen} />
       <Stack.Screen name="s2" component={S2} />
       <Stack.Screen name="signupBaby" component={Signup2} />
       <Stack.Screen name="Signup" component={Signup} options={{ title: t('auth.create_account', { defaultValue: 'إنشاء حساب' }) }} />

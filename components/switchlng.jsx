@@ -1,29 +1,33 @@
 import { useTranslation } from 'react-i18next';
-import { I18nManager, Pressable, Text } from 'react-native';
+import { I18nManager, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import RNRestart from 'react-native-restart';
 
 const LanguageSwitch = () => {
   const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language;
+  const newLanguage = currentLanguage.startsWith('ar') ? 'en' : 'ar';
 
   const toggleLanguage = () => {
-    const newLanguage = currentLanguage === 'en' ? 'ar' : 'en';
     i18n.changeLanguage(newLanguage).then(() => {
-      // Force RTL layout for Arabic
-      if (newLanguage === 'ar') {
-        I18nManager.forceRTL(true);
-      } else {
-        I18nManager.forceRTL(false);
-      }
+      const isRTL = newLanguage.startsWith('ar');
+      I18nManager.forceRTL(isRTL);
+      // Restart the app to apply RTL changes
+      RNRestart.Restart();
     });
   };
 
   return (
-    <Pressable onPress={toggleLanguage}>
-      <Text style={{ padding: 10, color: 'blue' }}>
-        {t('switch_language')}
-      </Text>
-    </Pressable>
+    <TouchableOpacity onPress={toggleLanguage} style={styles.container}>
+      <Text style={styles.text}>{newLanguage.toUpperCase()}</Text>
+    </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  text: {
+    fontWeight: 'bold',
+    color: '#014CC4',
+  },
+});
 
 export default LanguageSwitch;

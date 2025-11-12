@@ -16,22 +16,22 @@ const AddRecordSelector = () => {
   const recordTypes = [
     {
       key: 'addResult',
-      label: t('add_selector.add_result', { defaultValue: 'Add Lab Result' }),
+      label: t('add_selector.add_result'),
       screen: 'addResult',
     },
     {
       key: 'addEshaa',
-      label: t('add_selector.add_xray', { defaultValue: 'Add X-ray' }),
+      label: t('add_selector.add_xray'),
       screen: 'addEshaa',
     },
     {
       key: 'addReport',
-      label: t('add_selector.add_report', { defaultValue: 'Add Doctor Report' }),
+      label: t('add_selector.add_report'),
       screen: 'addReport',
     },
     {
       key: 'addMedicine',
-      label: t('add_selector.add_medicine', { defaultValue: 'Add Medicine' }),
+      label: t('add_selector.add_medicine'),
       screen: 'addMedicine',
     },
   ]
@@ -50,17 +50,11 @@ const AddRecordSelector = () => {
 
   return (
     <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
-      <CustomHeader
-        text={t('add_selector.title', { defaultValue: 'Add New Record' })}
-      />
+      <CustomHeader text={t('add_selector.title')} />
       <View style={styles.content}>
         <FormField
-          title={t('add_selector.prompt', {
-            defaultValue: 'What would you like to add?',
-          })}
-          placeholder={t('add_selector.placeholder', {
-            defaultValue: 'Select a record type...',
-          })}
+          title={t('add_selector.prompt')}
+          placeholder={t('add_selector.placeholder')}
           type="picker"
           pickerItems={pickerItems}
           value={selectedValue}
@@ -73,7 +67,7 @@ const AddRecordSelector = () => {
           disabled={!selectedValue}
           onPress={handleContinue}
         >
-          <Text style={styles.buttonText}>{t('common.continue', { defaultValue: 'Continue' })}</Text>
+          <Text style={styles.buttonText}>{t('common.continue')}</Text>
         </TouchableOpacity>
       </View>
 

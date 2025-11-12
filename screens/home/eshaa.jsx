@@ -1,5 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
-import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,15 +18,14 @@ const Eshaas = () => {
    const { user } = useAuth();
    const { eshaa, loading, error, fetchEshaas } = useMedicalRecords();
 
-   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+   // This effect runs every time the screen comes into focus
+   useFocusEffect(
+    useCallback(() => {
       if (user?.data?.token?.value) {
         fetchEshaas();
       }
-    });
-
-    return unsubscribe;
-  }, [navigation, user?.data?.token?.value]);
+    }, [user?.data?.token?.value, fetchEshaas])
+  );
 
   const onRefresh = useCallback(() => {
     fetchEshaas({ force: true });
@@ -64,7 +63,7 @@ const Eshaas = () => {
 
   return (
     <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
-      <CustomHeader text={t('home.xray_title', { defaultValue: 'الاشعة' })}/>
+      <CustomHeader text={t('home.xray_title')}/>
       <ListContainer
         loading={loading.eshaa}
         error={error.eshaa}
@@ -74,7 +73,7 @@ const Eshaas = () => {
         onRefresh={onRefresh}
         refreshing={loading.eshaa}
         contentContainerStyle={styles.listContent}
-        emptyListMessage={t('home.no_xrays_found', { defaultValue: 'No X-rays found.' })}
+        emptyListMessage={t('home.no_xrays_found')}
       />
       {eshaa.length > 0 && !loading.eshaa && (
         <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.ele}>

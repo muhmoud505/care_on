@@ -1,5 +1,6 @@
 import { API_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import i18next from 'i18next';
 import { jwtDecode } from 'jwt-decode';
 import { createContext, useContext, useEffect, useState } from 'react';
 
@@ -30,7 +31,7 @@ export const AuthProvider = ({ children }) => {
             setChildAccounts(JSON.parse(storedChildren));
           }
           // Always fetch children using the consistent user object structure.
-          fetchChildren(userObject);
+          fetchChildren(userObject.token.value);
         }
       } catch (error) {
         console.error("Failed to load user from storage", error);
@@ -71,7 +72,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       console.log('Token is expiring soon, attempting to refresh...');
-      const response = await fetch(`${API_URL}/api/v1/auth/refresh`, {
+      const response = await fetch(`${API_URL}api/v1/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,25 +102,23 @@ export const AuthProvider = ({ children }) => {
   };
 
   const fetchChildren = async (token) => {
-    const currentUser = await refreshToken();
-    const ut = currentUser?.token?.value;
-    
-    if (!ut) {
+    // The token is now passed directly. We can still use refreshToken to ensure it's not expired, but the primary check is if a token was passed.
+    if (!token) {
     
       
       console.log("No token provided, cannot fetch children.");
       return;
     }
     try {
-      console.log(ut+' from try catch');
+      console.log('Fetching children with provided token...');
       
       const response = await fetch(`${API_URL}/api/v1/auth/users`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': `Bearer ${ut}`,
-          'lang':'en'
+          'Authorization': `Bearer ${token}`,
+          'lang': i18next.language
         },
       });
       
@@ -170,7 +169,7 @@ export const AuthProvider = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'lang':'en'
+          'lang': i18next.language
         },
       });
       console.log('hello from login');
@@ -199,7 +198,7 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem('primary_user', JSON.stringify(data.data));
       setUser(data.data);
       // After successful login, fetch the children associated with this user
-      await fetchChildren(data.data);
+      await fetchChildren(data.data.token.value);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -221,7 +220,7 @@ export const AuthProvider = ({ children }) => {
     await AsyncStorage.setItem('primary_user', JSON.stringify(userObject));
     setUser(userObject);
     // After setting the new user, fetch their children (which should be an empty list)
-    await fetchChildren(sessionData);
+    await fetchChildren(userObject.token.value);
   };
 
   const logout = async () => {

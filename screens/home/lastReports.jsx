@@ -1,7 +1,7 @@
-import { useNavigation } from '@react-navigation/native';
-import { useCallback, useEffect } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
 import Eshaa from '../../components/eshaaComponent';
@@ -20,15 +20,14 @@ const LastReports = () => {
   const { user } = useAuth();
   const { allRecords, loading, error, fetchAllRecords } = useMedicalRecords();
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+  // This effect runs every time the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
       if (user?.data?.token?.value) {
         fetchAllRecords();
       }
-    });
-
-    return unsubscribe;
-  }, [navigation, user?.data?.token?.value]);
+    }, [user?.data?.token?.value, fetchAllRecords])
+  );
 
   const onRefresh = useCallback(() => {
     fetchAllRecords({ force: true });
@@ -51,7 +50,7 @@ const LastReports = () => {
 
   return (
     <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
-      <CustomHeader text={t('home.last_reports_title', { defaultValue: 'التقارير السابقة' })}/>
+      <CustomHeader text={t('home.last_reports_title')}/>
       <ListContainer
         loading={loading.all}
         error={error.all}
@@ -62,12 +61,11 @@ const LastReports = () => {
         refreshing={loading.all}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
-        emptyListMessage={t('home.no_reports_found', { defaultValue: 'No previous reports found.' })}
+        emptyListMessage={t('home.no_reports_found')}
       />
       {/* Add record button */}
       <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddRecordSelector')}>
         <Image source={Images.add} />
-        <Text>here is button</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

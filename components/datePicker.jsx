@@ -79,8 +79,8 @@ const DatePick = ({
             <TouchableOpacity 
               style={styles.closeButton}
               onPress={() => setShowModal(false)}
-            >
-              <Text style={styles.closeButtonText}>{t('common.close', { defaultValue: 'Close' })}</Text>
+            > 
+              <Text style={styles.closeButtonText}>{t('common.close')}</Text>
             </TouchableOpacity>
           </View>
         </View>

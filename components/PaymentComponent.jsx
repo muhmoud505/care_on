@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -9,13 +10,14 @@ const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 const PaymentComponent = () => {
   const navigation=useNavigation();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
       <View style={styles.v1}>
-        <Text style={{marginTop:hp(1)}}>10 EGP</Text>
+        <Text style={{marginTop:hp(1)}}>10 {t('payment.currency')}</Text>
         <View style={{flexDirection:'row',columnGap:8}}>
-            <Text style={styles.txt1}>ناجحة</Text>
+            <Text style={styles.txt1}>{t('common.success')}</Text>
             <TouchableOpacity 
               onPress={()=>navigation.navigate('payment_status')}
             >
@@ -26,8 +28,8 @@ const PaymentComponent = () => {
       <View style={styles.v2}>
         <Image source={require('../assets2/images/pay.png')}/>
         <View style={{rowGap:hp(1.2),top:-hp(1)}}>
-            <Text style={styles.txt2}>جيلان ا*** ج***</Text>
-            <Text style={[styles.txt2,{color:'black'}]}>0123456789</Text>
+            <Text style={styles.txt2}>{t('payment.masked_name')}</Text>
+            <Text style={[styles.txt2,{color:'black'}]}>{t('payment.masked_phone')}</Text>
         </View>
         <Text style={styles.txt3}>12 Jul 2025 05:47 PM</Text>
       </View>

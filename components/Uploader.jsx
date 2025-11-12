@@ -14,8 +14,8 @@ const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 const Uploader = ({ title, required, error, style,onFileSelect }) => {
   const [selectedImage, setSelectedImage] = useState(null);
-  const [imageName, setImageName] = useState('تحميل');
   const { t } = useTranslation();
+  const [imageName, setImageName] = useState(t('uploader.upload'));
 
   const pickImage = async () => {
     try {
@@ -58,10 +58,10 @@ const Uploader = ({ title, required, error, style,onFileSelect }) => {
 
     } catch (err) {
       console.error('Error in pickImage:', err);
-      Alert.alert(t('common.error', { defaultValue: 'خطأ' }), t('uploader.pick_failed', { defaultValue: 'فشل اختيار الصورة' }));
-      setImageName(t('uploader.upload', { defaultValue: 'تحميل' }));
+      Alert.alert(t('common.error'), t('uploader.pick_failed'));
+      setImageName(t('uploader.upload'));
       if (onFileSelect) onFileSelect(null);
-    }
+    } 
   };
 
   return (

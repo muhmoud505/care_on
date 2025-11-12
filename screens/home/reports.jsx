@@ -1,5 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
-import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,15 +18,14 @@ const Reports = () => {
   const { user } = useAuth();
   const { reports, loading, error, fetchReports } = useMedicalRecords();
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+  // This effect runs every time the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
       if (user?.data?.token?.value) {
         fetchReports();
       }
-    });
-
-    return unsubscribe;
-  }, [navigation, user?.data?.token?.value]);
+    }, [user?.data?.token?.value, fetchReports])
+  );
 
   const onRefresh = useCallback(() => {
     fetchReports({ force: true });
@@ -57,7 +56,7 @@ const Reports = () => {
 
   return (
     <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
-      <CustomHeader text={t('home.reports_title', { defaultValue: 'تقارير الدكاترة' })} />
+      <CustomHeader text={t('home.reports_title')} />
       <ListContainer
         loading={loading.reports}
         error={error.reports}
@@ -67,7 +66,7 @@ const Reports = () => {
         onRefresh={onRefresh}
         refreshing={loading.reports}
         contentContainerStyle={styles.listContent}
-        emptyListMessage={t('home.no_doctor_reports_found', { defaultValue: 'No doctor reports found.' })}
+        emptyListMessage={t('home.no_doctor_reports_found')}
       />
       {reports.length > 0 && !loading.reports && (
         <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.ele}>

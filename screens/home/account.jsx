@@ -1,5 +1,6 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dimensions,
   Image,
@@ -22,6 +23,7 @@ const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 const Account = () => {
   const navigation = useNavigation();
+  const { t } = useTranslation();
   // Get user, children, and the fetch function from the Auth context
   const { user, children, fetchChildren, logout } = useAuth();
 
@@ -59,7 +61,7 @@ const Account = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <CustomHeader text="الحسابات المرتبطة" onLogout={logout} showLogout />
+      <CustomHeader text={t('account.linked_accounts')} onLogout={logout} showLogout />
       <ScrollView contentContainerStyle={styles.content}>
         {/* Primary Profile Section */}
         {user && (
@@ -68,11 +70,11 @@ const Account = () => {
               <Image source={Images.profile} style={styles.avatarImage} />
             </View>
             <View style={styles.userInfo}>
-              <Text style={styles.userName}>{user.user?.name || 'Primary User'}</Text>
-              <Text style={styles.phoneNumber}>{user.user?.phone_number || 'No phone number'}</Text>
+              <Text style={styles.userName}>{user.user?.name || t('account.primary_user')}</Text>
+              <Text style={styles.phoneNumber}>{user.user?.phone_number || t('account.no_phone_number')}</Text>
             </View>
             <View style={styles.activeBadge}>
-              <Text style={styles.activeBadgeText}>الحساب الحالي</Text>
+              <Text style={styles.activeBadgeText}>{t('account.current_account')}</Text>
             </View>
           </View>
         )}
@@ -88,7 +90,7 @@ const Account = () => {
               <Text style={styles.phoneNumber}>{child.phone_number || ''}</Text>
             </View>
             <TouchableOpacity style={styles.loginButton} onPress={() => handleSwitchAccount(child)}>
-              <Text style={styles.loginButtonText}>تمثيل المستخدم</Text>
+              <Text style={styles.loginButtonText}>{t('account.impersonate_user')}</Text>
             </TouchableOpacity>
           </View>
         ))}
@@ -97,8 +99,8 @@ const Account = () => {
       {/* This view ensures the button stays at the bottom */}
       <View style={styles.bottomContainer}>
         {/* Add Account Button */}
-        <TouchableOpacity style={styles.addAccountButton} onPress={handleAddAccount}>
-          <Text style={styles.addAccountText}>إضافة حساب آخر</Text>
+        <TouchableOpacity style={styles.addAccountButton} onPress={handleAddAccount} activeOpacity={0.8}>
+          <Text style={styles.addAccountText}>{t('account.add_another_account')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
