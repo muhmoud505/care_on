@@ -15,25 +15,21 @@ const CustomHeader = ({ text }) => {
   return (
     <SafeAreaView 
       style={[
-        styles.container,
-        isRTL ? styles.rtlContainer : styles.ltrContainer
+        styles.container
       ]}
       edges={['top']} // Ensure proper safe area handling
     >
       <TouchableOpacity 
-        style={styles.touchable}
+        style={[styles.touchable, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
         onPress={() => navigation.goBack()}
       >
-        <Text style={[
-          styles.text,
-          isRTL ? styles.ltrText : styles.ltrText
-        ]}>
-          {text}
-        </Text>
         <Image 
           source={require('../assets2/images/Vector.png')}
-          style={styles.icon}
+          style={[styles.icon, isRTL && { transform: [{ scaleX: -1 }] }]}
         />
+        <Text style={styles.text}>
+          {text}
+        </Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -43,37 +39,18 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     height: hp(12),
-    flexDirection: 'row',
-  },
-  rtlContainer: {
-    alignItems: 'flex-start',
-   direction:'rtl',
-
-  },
-  ltrContainer: {
-    alignItems: 'flex-end',
-   direction:'ltr',
-
+    justifyContent: 'center',
   },
   touchable: {
     width: '100%',
-    height: hp(12),
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: wp(3),
     alignItems: 'center',
-    paddingRight: wp(6),
+    justifyContent: 'flex-start',
+    gap: wp(3),
+    paddingHorizontal: wp(6),
   },
   text: {
     fontWeight: 'bold',
     fontSize: Math.min(wp(4.5), 18),
-    marginTop: hp(0.5),
-  },
-  rtlText: {
-    textAlign: 'right',
-  },
-  ltrText: {
-    textAlign: 'left',
   },
   icon: {
     width: wp(2.5),

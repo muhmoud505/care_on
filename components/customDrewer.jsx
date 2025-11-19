@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Image,
@@ -8,71 +9,196 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import images from '../constants2/images';
 import { useAuth } from '../contexts/authContext';
 import LanguageSwitch from './switchlng';
 
 const CustomDrawerContent = (props) => {
+  const insets = useSafeAreaInsets();
   const { navigation } = props;
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
   const { width, height } = useWindowDimensions();
-
-  // Drawer width is 80% of the screen width, as defined in DrawerNavigator.js
-  const drawerWidth = width * 0.8; // This should match the width in DrawerNavigator.js
-  const drawerWP = (percentage) => (percentage / 100) * drawerWidth;
-  const screenHP = (percentage) => (percentage / 100) * height;
-
   const { user, logout } = useAuth();
-console.log(user);
 
-  // Menu items matching your screenshot
+  const age = useMemo(() => {
+    const nationalId = user?.user?.resource?.national_number;
+    if (!nationalId || nationalId.length !== 14) {
+      return null; // Cannot determine age
+    }
+    try {
+      const century = nationalId.substring(0, 1) === '2' ? '19' : '20';
+      const year = parseInt(century + nationalId.substring(1, 3), 10);
+      const month = parseInt(nationalId.substring(3, 5), 10) - 1; // Month is 0-indexed
+      const day = parseInt(nationalId.substring(5, 7), 10);
+
+      const birthDate = new Date(year, month, day);
+      const today = new Date();
+      let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        calculatedAge--;
+      }
+      return calculatedAge;
+    } catch (e) {
+      return null;
+    }
+  }, [user]);
+  const isChild = age !== null && age < 18;
+
+  // Get the parent navigator (AppStack)
+  const parentNavigation = navigation.getParent();
+
+  const handleNavigate = (screenName) => {
+    // Close the drawer
+    navigation.closeDrawer();
+    // Navigate using the parent Stack navigator
+    parentNavigation?.navigate(screenName);
+  };
+
+  // Menu items
   const menuItems = [
     {
       id: 1, 
       title: t('drawer.profile'),
       icon: images.user,
-      onPress: () => navigation.navigate('ProfileStack'),
+      onPress: () => handleNavigate('ProfileStack'),
     },
-    {
+    { 
       id: 2, 
       title: t('drawer.billing'),
       icon: images.wallet,
-      onPress: () => navigation.navigate('PaymentStack'),
+      onPress: () => handleNavigate('PaymentStack'),
     },
     {
       id: 3, 
       title: t('drawer.find_service'),
       icon: images.search,
-      onPress: () => navigation.navigate('ServiceStack'),
+     
     },
     {
       id: 4, 
       title: t('drawer.contact_us'),
       icon: images.call,
-      onPress: () => console.log('Navigate to Contact Us'), // Placeholder for a screen that doesn't exist yet
+    
     },
   ];
-  const styles = getStyles(drawerWP, screenHP, isRTL);
+
+  const styles = StyleSheet.create({
+    container: {
+      width:'100%',
+      height:'100%',
+      backgroundColor: '#fff',
+      paddingTop: insets.top,
+      paddingBottom: insets.bottom,
+    },
+    profileSection: {
+      paddingHorizontal: 20,
+      paddingVertical: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: '#291f1fff',
+    },
+    profileHeader: {
+      alignItems: 'center',
+      justifyContent: isChild ? 'center' : 'space-between',
+    },
+    profileInfo: {
+      alignItems: 'center',
+      gap: 10,
+      flex: 1,
+      // justifyContent is now on profileHeader
+
+    },
+    avatar: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+    },
+    profileName: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: '#000',
+      textAlign: isRTL ? 'right' : 'left',
+      flex: 1,
+    },
+    editButton: {
+      backgroundColor: '#014CC4',
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      borderRadius: 12,
+    },
+    editText: {
+      color: '#fff',
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    menuContainer: {
+      flex: 1,
+    },
+    menuItem: {
+      alignItems: 'center',
+      paddingHorizontal: 25,
+      paddingVertical: 18,
+      gap: 20,
+    },
+    menuIcon: {
+      width: 24,
+      height: 24,
+      tintColor: '#000',
+    },
+    menuText: {
+      fontSize: 16,
+      color: '#000',
+      fontWeight: '500',
+      textAlign: isRTL ? 'right' : 'left',
+      flex: 1,
+    },
+    footer: {
+      paddingHorizontal: 20,
+      paddingBottom: 10,
+      borderTopWidth: 1,
+      borderTopColor: '#EEE',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    logoutButton: {
+      gap: 15,
+    },
+    logoutIcon: {
+      width: 24,
+      height: 24,
+      tintColor: '#F44336',
+    },
+    logoutText: {
+      fontSize: 16,
+      color: '#F44336',
+      fontWeight: '500',
+      textAlign: isRTL ? 'right' : 'left',
+    },
+  });
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <View style={styles.container}>
       {/* Profile Section */}
       <View style={styles.profileSection}>
-        <View style={styles.profileHeader}>
-          <View style={styles.profileInfo}>
-            <TouchableOpacity onPress={() => navigation.navigate('ProfileStack')}>
+        <View style={[styles.profileHeader, { flexDirection: isRTL ? 'row-reverse' : 'row', columnGap: 15 }]}>
+          {/* User Info: Avatar and Name */}
+          <View style={[styles.profileInfo, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <TouchableOpacity onPress={() => handleNavigate('ProfileStack')}>
               <Image source={images.profile} style={styles.avatar} />
             </TouchableOpacity>
-            <Text style={styles.profileName} numberOfLines={1}>{user?.user?.name || 'User Name'}</Text>
+            <Text style={styles.profileName} numberOfLines={1}>
+              {user?.user?.name || t('drawer.user_name_placeholder')}
+            </Text>
           </View>
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => navigation.navigate('accounts')}
-          >
-            <Text style={styles.editText}>{t('drawer.linked_accounts', { defaultValue: 'الحسابات المرتبطة' })}</Text>
-          </TouchableOpacity>
+
+          {/* Linked Accounts Button (only for parents) */}
+          {!isChild && (
+            <TouchableOpacity style={styles.editButton} onPress={() => handleNavigate('accounts')}>
+              <Text style={styles.editText}>{t('drawer.linked_accounts', { defaultValue: 'الحسابات المرتبطة' })}</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -81,122 +207,28 @@ console.log(user);
         {menuItems.map((item) => (
           <TouchableOpacity
             key={item.id}
-            style={styles.menuItem}
+            style={[styles.menuItem, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
             onPress={item.onPress}
             activeOpacity={0.7}
           >
-            <Text style={styles.menuText}>{item.title}</Text>
             <Image source={item.icon} style={styles.menuIcon} />
+            <Text style={styles.menuText}>{item.title}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
       {/* Logout Button */}
-      <View style={styles.footer}>
-        <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+      <View style={[styles.footer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <TouchableOpacity onPress={logout} style={[styles.logoutButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <Image source={images.logout} style={styles.logoutIcon} />
           <Text style={styles.logoutText}> 
             {t('auth.logout', { defaultValue: 'تسجيل الخروج' })}
           </Text>
-          <Image source={images.logout} style={styles.logoutIcon} />
         </TouchableOpacity>
         <LanguageSwitch />
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
-
-const getStyles = (drawerWP, screenHP, isRTL) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  profileSection: {
-    paddingHorizontal: drawerWP(5),
-    paddingVertical: screenHP(1.5),
-    borderBottomWidth: 1,
-    borderBottomColor: '#291f1fff',
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    columnGap: drawerWP(7),
-    justifyContent: 'space-between',
-  },
-  profileInfo: {
-    flexDirection: isRTL ? 'row' : 'row-reverse',
-    alignItems: 'center',
-    gap: drawerWP(2),
-    flex: 1, // Allow this view to shrink and grow
-  },
-  avatar: {
-    width: drawerWP(15),
-    height: drawerWP(15),
-    borderRadius: drawerWP(7.5),
-  },
-  profileName: {
-    fontSize: drawerWP(5),
-    fontWeight: 'bold',
-    color: '#000',
-    textAlign: isRTL ? 'right' : 'left',
-    flex: 1, // Allow text to wrap and not push other elements
-  },
-  editButton: {
-    backgroundColor: '#014CC4',
-    paddingHorizontal: drawerWP(2),
-    paddingVertical: screenHP(0.8),
-    borderRadius: drawerWP(3),
-  },
-  editText: {
-    color: '#fff',
-    fontSize: drawerWP(4.5),
-    fontWeight: '600',
-  },
-  menuContainer: {
-    flex: 1, // This makes the ScrollView expand to fill available space
-  },
-  menuItem: {
-    flexDirection: isRTL ? 'row' : 'row-reverse',
-    alignItems: 'center',
-    paddingHorizontal: drawerWP(7),
-    paddingVertical: screenHP(1.8),
-    gap: drawerWP(5),
-  },
-  menuIcon: {
-    width: drawerWP(6),
-    height: drawerWP(6),
-    tintColor: '#000',
-  },
-  menuText: {
-    fontSize: drawerWP(4.8),
-    color: '#000',
-    fontWeight: '500',
-    textAlign: isRTL ? 'right' : 'left',
-    flex: 1,
-  },
-  footer: {
-    paddingHorizontal: drawerWP(5),
-    paddingBottom: screenHP(1),
-    borderTopWidth: 1,
-    borderTopColor: '#EEE',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  logoutButton: {
-    flexDirection: isRTL ? 'row' : 'row-reverse',
-    gap: drawerWP(5),
-  },
-  logoutIcon: {
-    width: drawerWP(6),
-    height: drawerWP(6),
-    tintColor: '#F44336',
-  },
-  logoutText: {
-    fontSize: drawerWP(4.8),
-    color: '#F44336',
-    fontWeight: '500',
-    textAlign: isRTL ? 'right' : 'left',
-  },
-})
 
 export default CustomDrawerContent;

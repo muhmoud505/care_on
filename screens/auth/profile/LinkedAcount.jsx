@@ -1,11 +1,15 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import CustomHeader from '../../../components/CustomHeader'
+import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomHeader from '../../../components/CustomHeader';
 
 const LinkedAcount = () => {
+  const { t } = useTranslation();
+  const navigation = useNavigation();
   return (
     <SafeAreaView style={{position:'relative'}}>
-        <CustomHeader text={'الحسابات المرتبطة بحساب الأم'}/>
+        <CustomHeader text={t('account.linked_accounts_mother', { defaultValue: 'الحسابات المرتبطة بحساب الأم' })}/>
       <View style={styles.container}>
         <Image
          source={require('../../../assets2/images/profile.png')}
@@ -13,22 +17,22 @@ const LinkedAcount = () => {
         />
         <View>
             <Text style={styles.txt1} numberOfLines={1}>
-          جيلان ايمن جلال محمود
+          {t('payment.masked_name')}
         </Text>
         <Text style={styles.txt2}>
           2030xxxxxxxxxx
         </Text> 
         </View>
          <TouchableOpacity style={styles.btn}>
-            <Text style={styles.btnText}>تمثيل المستخدم</Text>
+            <Text style={styles.btnText}>{t('account.impersonate_user')}</Text>
           </TouchableOpacity>
       </View>
       <TouchableOpacity
           style={styles.nextButton}
-         onPress={()=>router.push('/home')}
+         onPress={()=>navigation.navigate('accounts')}
                      
       >
-        <Text style={styles.nextButtonText}>اضافة حساب اخر</Text>
+        <Text style={styles.nextButtonText}>{t('account.add_another_account')}</Text>
          </TouchableOpacity>
     </SafeAreaView>
   )

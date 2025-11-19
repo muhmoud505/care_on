@@ -24,13 +24,18 @@ const Signup = () => {
   const navigation=useNavigation()
   const { isChild, birthdate, gender, age } = route.params || {};
   const [isProcessing, setIsProcessing] = useState(false); // State for image processing
-  const { form, errors, handleChange, checkFormValidity } = useForm({
+
+  // Conditionally define the initial form state
+  const initialFormState = {
     name: '',
-    national_number: isChild ? undefined : '',
     email: '',
     id: null,
-    type:'patient'
-  });
+    type: 'patient',
+  };
+  if (!isChild) {
+    initialFormState.national_number = '';
+  }
+  const { form, errors, handleChange, checkFormValidity } = useForm(initialFormState);
 
   const formIsValid = checkFormValidity();
 
@@ -80,12 +85,19 @@ const Signup = () => {
     <SafeAreaView style={[styles.safeArea,{direction:'rtl'}]}>
       <CustomHeader text={route.params?.title || t('auth.create_account')}/>
       <View style={[styles.headerTextContainer, { direction: i18n.dir() }]}>
-        <Text numberOfLines={2} style={styles.txt1}> 
-          {t('auth.create_account_prompt', {
-              account: t('auth.your_account'),
-              interpolation: { escapeValue: false },
-            }).replace(t('auth.your_account'), '')}
-          <Text style={{color: '#014CC4'}}>{t('auth.your_account')}</Text>
+        <Text numberOfLines={2} style={styles.txt1}>
+          {(() => {
+            const fullText = t('auth.create_account_prompt');
+            const highlightText = t('auth.your_account');
+            const parts = fullText.split(highlightText);
+            return (
+              <>
+                {parts[0]}
+                <Text style={{ color: '#014CC4' }}>{highlightText}</Text>
+                {parts[1]}
+              </>
+            );
+          })()}
         </Text>
       </View>
       
@@ -109,7 +121,7 @@ const Signup = () => {
           <>
             <FormField 
               required
-              title={t('auth.national_id')}
+              title={t('auth.id')}
               placeholder={t('auth.national_id_placeholder')}
               value={form.national_number}
               onChangeText={(text) => handleChange('national_number', text)}

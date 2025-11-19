@@ -103,8 +103,19 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
     <SafeAreaView style={[styles.safeArea, { direction: 'rtl' }]}>
       <CustomHeader text={route.params?.title || t('auth.create_account')}/>
       <View style={[styles.headerTextContainer, { direction: i18n.dir() }]}>
-        <Text numberOfLines={2} style={styles.txt1}> 
-          {t('auth.final_step_password').replace(t('auth.password'), '')}<Text style={{ color: '#014CC4' }}>{t('auth.password')}</Text>
+        <Text numberOfLines={2} style={styles.txt1}>
+          {(() => {
+            const fullText = t('auth.final_step_password');
+            const highlightText = t('auth.password');
+            const parts = fullText.split(highlightText);
+            return (
+              <>
+                {parts[0]}
+                <Text style={{ color: '#014CC4' }}>{highlightText}</Text>
+                {parts[1]}
+              </>
+            );
+          })()}
         </Text>
       </View>
 

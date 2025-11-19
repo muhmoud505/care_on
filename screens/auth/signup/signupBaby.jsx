@@ -1,6 +1,6 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -18,6 +18,7 @@ import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
 import Uploader from '../../../components/Uploader';
 import { useAuth } from '../../../contexts/authContext'; // Using Auth context to get parent user
+import useForm from '../../../hooks/useForm'; // Import the useForm hook
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -29,46 +30,38 @@ const Signup2 = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { birthdate, gender, age, isParentAddingChild } = route.params || {};
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
 
   // Get parent user from global state (e.g., Redux).
   const { user: parentUser } = useAuth();
 
   const [isProcessing, setIsProcessing] = useState(false);
-
-  const [formData, setFormData] = useState({
+  
+  // Use the custom hook for form state management
+  const { form, errors, handleChange, checkFormValidity } = useForm({
     name: '',
-    email: '', // This is for the child's unique email
+    email: '',
     national_number: '',
     birthCertificate: null,
   });
 
-  const handleFieldChange = useCallback((field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  }, []);
-
-  const isFormValid = useMemo(() => {
-    return (
-      formData.name &&
-      formData.email && // Ensure child's email is provided
-      formData.national_number &&
-      formData.birthCertificate
-    );
-  }, [formData]);
+  // The hook now provides the validity check
+  const isFormValid = checkFormValidity();
 
   const handleNext = async () => {
     if (!isFormValid) return;
 
     setIsProcessing(true);
     try {
-      const base64Image = await FileSystem.readAsStringAsync(formData.birthCertificate.uri, {
+      const base64Image = await FileSystem.readAsStringAsync(form.birthCertificate.uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
       const signupData = {
-        name: formData.name,
-        email: formData.email,
-        national_number: formData.national_number,
+        name: form.name,
+        email: form.email,
+        national_number: form.national_number,
         birthdate: birthdate,
         age: age,
         gender: gender,
@@ -92,14 +85,24 @@ const Signup2 = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       <ScrollView contentContainerStyle={styles.container}>
         <CustomHeader text={t('auth.create_account')} />
         
         <View style={styles.headerTextContainer}>
-          <Text style={styles.headerText}> 
-            {t('auth.create_child_account_prompt').replace(t('auth.your_child_account'), '')}
-            <Text style={styles.headerHighlight}>{t('auth.your_child_account')}</Text>
+          <Text style={[styles.headerText, { textAlign: isRTL ? 'left' : 'right' }]}>
+            {(() => {
+              const fullText = t('auth.create_child_account_prompt');
+              const highlightText = t('auth.your_child_account');
+              const parts = fullText.split(highlightText);
+              return (
+                <>
+                  {parts[0]}
+                  <Text style={styles.headerHighlight}>{highlightText}</Text>
+                  {parts[1]}
+                </>
+              );
+            })()}
           </Text>
         </View>
         
@@ -107,25 +110,27 @@ const Signup2 = () => {
           <FormField 
             title={t('auth.child_name')}
             placeholder={t('auth.child_name_placeholder')}
-            value={formData.name}
-            onChangeText={(text) => handleFieldChange('name', text)}
+            value={form.name}
+            onChangeText={(text) => handleChange('name', text)}
+            error={errors.name}
           />
           
           <FormField 
             required
             title={t('auth.child_email')}
             placeholder={t('auth.child_email_placeholder')}
-            value={formData.email}
-            onChangeText={(text) => handleFieldChange('email', text)}
+            value={form.email}
+            onChangeText={(text) => handleChange('email', text)}
             keyboardType="email-address"
+            error={errors.email}
           />
 
           <FormField 
             required
             title={t('auth.child_national_id')}
             placeholder={t('auth.child_national_id_placeholder')}
-            value={formData.national_number}
-            onChangeText={(text) => handleFieldChange('national_number', text)}
+            value={form.national_number}
+            onChangeText={(text) => handleChange('national_number', text)}
             keyboardType="numeric"
           />
         </View>
@@ -134,7 +139,8 @@ const Signup2 = () => {
           required
           title={t('auth.child_birth_certificate')}
           color='#80D28040'
-          onFileSelect={(file) => handleFieldChange('birthCertificate', file)}
+          onFileSelect={(file) => handleChange('birthCertificate', file)}
+          error={errors.birthCertificate}
         />
         
         <TouchableOpacity
@@ -171,7 +177,6 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: wp(5.5),
     fontWeight: 'bold',
-    textAlign: 'right',
   },
   headerHighlight: {
     color: '#80D280',

@@ -30,17 +30,12 @@ const Account = () => {
   // Use useFocusEffect to refetch children every time the screen is viewed
   useFocusEffect(
     React.useCallback(() => {
-      console.log('hiiii');
-      
-      if (user) {
-        console.log('hi2');
-
-        console.log(user?.data?.token?.value);
-        
-        
-        fetchChildren(user);
+      // The token is consistently located at user.token.value
+      const token = user?.token?.value;
+      if (token) {
+        fetchChildren(token);
       }
-    }, [user]) // Re-run if the user token changes
+    }, [user?.token?.value, fetchChildren]) // Re-run only if the token value changes
   );
 
   const handleSwitchAccount = (childAccount) => {
@@ -53,9 +48,12 @@ const Account = () => {
 
   const handleAddAccount = () => {
     // Navigate to the signup flow, passing a flag to indicate a parent is adding a child.
-    navigation.navigate('auth', {
-      screen: 's2',
-      params: { userType: 'child', isParentAddingChild: true },
+    // We must first navigate to the stack containing 'Auth', which is 'ProfileStack'.
+    navigation.navigate('ProfileStack', {
+      screen: 'Auth',
+      params: {
+        screen: 's2', params: { userType: 'child', isParentAddingChild: true }
+      }
     });
   };
 

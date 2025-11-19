@@ -36,7 +36,7 @@ const FormField = ({
   ...props
 }) => {
   // Removed internal state to rely on parent props
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
   const [show, setShow] = useState(false);
   const [showList,setShowList]=useState(false)
@@ -61,7 +61,7 @@ const FormField = ({
 
       <View style={[
         styles.inputContainer,
-        { flexDirection: isRTL ? 'row' : 'row-reverse' },
+        { flexDirection: isRTL ? 'row' : 'row-rerverse',direction:'rtl' },
         error && styles.errorInput // Added error styling
         ,type=='long'&&styles.textArea
       ]}>
@@ -148,35 +148,40 @@ const FormField = ({
           contentContainerStyle={styles.daysGrid} */}
 
       {showList && (type === 'drop' || type === 'picker') && (
-        <FlatList
-         nestedScrollEnabled={true}
-         scrollEnabled={true}
-          data={type === 'picker' ? pickerItems : data}
-          renderItem={({item})=>(
-            <TouchableOpacity
-              style={[styles.itemStyle, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
-              onPress={() => {
-                onChangeText(type === 'picker' ? item.value : item);
-                // The list will no longer close on selection.
-              }}
-            >
-              <Text style={[styles.listItemText, { textAlign: isRTL ? 'right' : 'left' }]}>{type === 'picker' ? item.label : item}</Text>
-              {
-                (type === 'picker' ? item.value === value : item === value)
-                  ? <Image source={Images.verify}/> : <Image source={Images.nonVerify}/>
-              }
+        <View style={styles.list}>
+          <View style={[styles.listHeader, { flexDirection: isRTL ? 'row' : 'row' }]}>
+            <TouchableOpacity style={{justifyContent:'center',alignItems:'center'}} onPress={() => setShowList(false)}>
+              <Text style={[styles.closeButtonText,{textAlign:'center'}]}>{t('common.close', { defaultValue: 'Close' })}</Text>
             </TouchableOpacity>
-          )
-            
-          }
-          showsVerticalScrollIndicator={false}
-          style={styles.list}
-          contentContainerStyle={styles.daysGrid}
-           keyExtractor={(item) => (type === 'picker' ? item.value : String(item))}
-         
-        />
+          </View>
+          <FlatList
+            nestedScrollEnabled={true}
+            scrollEnabled={true}
+            data={type === 'picker' ? pickerItems : data}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[styles.itemStyle, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+                onPress={() => {
+                  onChangeText(type === 'picker' ? item.value : item);
+                  // The list will no longer close on selection.
+                }}
+              >
+                <Text style={[styles.listItemText, { textAlign: isRTL ? 'right' : 'left' }]}>{type === 'picker' ? item.label : item}</Text>
+                {
+                  (type === 'picker' ? item.value === value : item === value)
+                    ? <Image source={Images.verify} /> : <Image source={Images.nonVerify} />
+                }
+              </TouchableOpacity>
+            )
 
-       
+            }
+            showsVerticalScrollIndicator={false}
+            style={styles.flatListStyle}
+            contentContainerStyle={styles.daysGrid}
+            keyExtractor={(item) => (type === 'picker' ? item.value : String(item))}
+
+          />
+        </View>
 
       )}
     </View>
@@ -243,7 +248,7 @@ const styles = StyleSheet.create({
   },
   list:{
     width: wp(80),
-    height: hp(25),
+    maxHeight: hp(30), // Use maxHeight to be more flexible
     alignSelf:'center',
     borderRadius: wp(4),
     borderColor:'#014CC4',
@@ -251,9 +256,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     padding: wp(2.5),
     position:'absolute',
-    top: hp(12), // Position below the input field
+    top: hp(10), // Position below the input field
     zIndex: 1000,
     elevation: 5, // for Android shadow
+  },
+  listHeader: {
+    paddingBottom: hp(1),
+    marginBottom: hp(1),
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    justifyContent: 'center',
+  },
+  closeButtonText: {
+    color: '#014CC4',
+    fontWeight: 'bold',
+  },
+  flatListStyle: {
+    // The FlatList itself doesn't need a height if its container has one
+  
   },
   daysGrid: {
     justifyContent: 'center',

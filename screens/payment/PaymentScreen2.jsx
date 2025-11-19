@@ -1,20 +1,22 @@
 import { useNavigation } from "@react-navigation/native"
 import { useTranslation } from 'react-i18next'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import CustomHeader from "../../components/CustomHeader"
 import Images from '../../constants2/images'
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 const PaymentStatus=()=>{
     const navigation=useNavigation()
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     return(
         <SafeAreaView style={{direction:'rtl'}}>
             <CustomHeader text={t('payment.details', { defaultValue: 'تفاصيل المعاملة' })}/>
             <View style={styles.mainContainer}>
                 <View style={styles.cont1}>
                       <Image source={Images.success}/>
-                <Text style={styles.txt1}>10 EGP</Text>
+                <Text style={styles.txt1}>10 {t('payment.currency', { defaultValue: 'EGP' })}</Text>
                 </View>
                 <View style={[styles.cont2,{
                     padding:20
@@ -27,10 +29,10 @@ const PaymentStatus=()=>{
                     >
                         <View style={styles.cont2}>
                             <Text style={styles.txt2}>{t('payment.to', { defaultValue: 'الي' })}</Text>
-                            <Text style={[styles.txt2,{color:'#000'}]}>0123456789</Text>
+                            <Text style={[styles.txt2,{color:'#000'}]}>{t('payment.masked_phone', { defaultValue: '0123456789' })}</Text>
                         </View>
                         <Text style={[styles.txt2,{color:'#000'}]}>
-                            جيلان ا*** ج*** م****
+                            {t('payment.masked_name', { defaultValue: 'جيلان ا*** ج***' })}
                         </Text>
                     </View>
                 </View>
@@ -51,16 +53,16 @@ const PaymentStatus=()=>{
                         <Text style={[styles.txt2,{color:'#000'}]}>12 Jul 2025 05:47 PM</Text>
                     </View>
                 </View>
-                <TouchableOpacity
-                    style={styles.btn}
-                    onPress={()=>{navigation.goBack()}}
-                    activeOpacity={0.5}
-                >
-                    <Text style={styles.txt3}>
-                        رجوع
-                    </Text>
-                </TouchableOpacity>
             </View>
+            <TouchableOpacity
+                style={styles.btn}
+                onPress={()=>{navigation.goBack()}}
+                activeOpacity={0.5}
+            >
+                <Text style={styles.txt3}>
+                    {t('common.back', { defaultValue: 'رجوع' })}
+                </Text>
+            </TouchableOpacity>
             
             </SafeAreaView>
     )
@@ -98,16 +100,14 @@ const styles=StyleSheet.create({
         color:'#808080'
     },
     btn:{
-        width:327,
+        width: SCREEN_WIDTH * 0.9,
         height:56,
         backgroundColor:'#014CC4',
         justifyContent:'center',
         alignItems:'center',
         borderRadius:16,
-        position:'absolute',
-        bottom:'-115%',
-        left:'5%'
-
+        alignSelf: 'center',
+        marginTop: 20, // Add some margin from the content above
     },
     txt3:{
         color:'#FFF',

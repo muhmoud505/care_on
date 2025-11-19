@@ -22,10 +22,10 @@ const Results = () => {
   // This effect runs every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      if (user?.data?.token?.value) {
+      if (user?.token?.value) {
         fetchResults();
       }
-    }, [user?.data?.token?.value, fetchResults])
+    }, [user?.token?.value, fetchResults])
   );
 
   const onRefresh = useCallback(() => {
@@ -88,7 +88,8 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingVertical: hp(1.2),
-    paddingHorizontal: wp(4),
+    paddingHorizontal: wp(4), // Keep horizontal padding
+    paddingBottom: hp(15), // Add padding to clear the tab bar and floating button
     gap: hp(1.2),
   },
   ele:{

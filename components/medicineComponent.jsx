@@ -4,47 +4,52 @@ import { hp, wp } from '../utils/responsive';
 import CollapsibleCard from './CollapsibleCard';
 
 const Medicine = ({
-    title, 
+  id,
+  title, 
   from, 
-  to,
-  dose,
-  icon}
-) => {
+  to, 
+  description, // This prop contains the dosage value
+  icon,
+  expanded,
+  onExpandedChange
+}) => {
       const { t, i18n } = useTranslation();
   return (
-    <View style={{ alignSelf: 'stretch', marginHorizontal: wp(4), marginBottom: hp(1.2) }}>
-      <CollapsibleCard title={title} icon={icon}>
-        <View style={styles.expandedContent}>
-          <View style={styles.detailRow}>
-            <View style={styles.detailItem}>
-              <Image source={require('../assets2/images/r3.png')} style={styles.detailIcon} />
-              <View style={{flexDirection:'row',columnGap:5}}>
-                <Text style={styles.txt2}>{t('medicine.from')}:</Text>
-                <Text style={styles.txt3}>{from}</Text>
-              </View>
-            </View>
-            
-            <View style={styles.detailItem}>
-              <Image source={require('../assets2/images/r3.png')} style={styles.detailIcon} />
-              <View style={{flexDirection:'row',columnGap:5}}>
-                <Text style={styles.txt2}>{t('medicine.to')}:</Text>
-                <Text style={styles.txt3}>{to}</Text>
-              </View>
+    <CollapsibleCard
+      title={title}
+      icon={icon}
+      isExpanded={expanded}
+      onToggle={(isExpanded) => onExpandedChange(id, isExpanded)}
+    >
+      <View style={styles.expandedContent}>
+        <View style={styles.detailRow}>
+          <View style={styles.detailItem}>
+            <Image source={require('../assets2/images/r3.png')} style={styles.detailIcon} />
+            <View style={{flexDirection:'row',columnGap:5}}>
+              <Text style={styles.txt2}>{t('medicine.from')}:</Text>
+              <Text style={styles.txt3}>{from}</Text>
             </View>
           </View>
-          
-          <View style={styles.detailRow}>
-            <View style={styles.detailItem}>
-              <Image source={require('../assets2/images/r5.png')} style={styles.detailIcon} />
-              <View style={{flexDirection:'row',columnGap:5}}>
-                <Text style={styles.txt2}>{t('medicine.dosage')}:</Text>
-                <Text style={styles.txt3}>{dose}</Text>
-              </View>
+          <View style={styles.detailItem}>
+            <Image source={require('../assets2/images/r3.png')} style={styles.detailIcon} />
+            <View style={{flexDirection:'row',columnGap:5}}>
+              <Text style={styles.txt2}>{t('medicine.to')}:</Text>
+              <Text style={styles.txt3}>{to}</Text>
             </View>
           </View>
         </View>
-      </CollapsibleCard>
-    </View>
+        
+        <View style={styles.detailRow}>
+          <View style={styles.detailItem}>
+            <Image source={require('../assets2/images/r5.png')} style={styles.detailIcon} />
+            <View style={{flexDirection:'row',columnGap:5}}>
+              <Text style={styles.txt2}>{t('medicine.dosage')}:</Text>
+              <Text style={styles.txt3}>{description}</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </CollapsibleCard>
   )
 }
 

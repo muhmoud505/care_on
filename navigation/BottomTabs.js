@@ -19,7 +19,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
       <Image
         source={focused ? activeIcon : inactiveIcon}
         resizeMode='cover'
-        style={[styles.icon, { tintColor: focused ? '#014CC4' : 'gray' }]}
+        style={styles.icon}
       />
     </View>
   );

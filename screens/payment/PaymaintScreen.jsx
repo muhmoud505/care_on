@@ -5,15 +5,16 @@ import CustomHeader from '../../components/CustomHeader'
 import PaymentComponent from '../../components/PaymentComponent'
 
 const PaymaintScreen = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+
   return (
-    <SafeAreaView style={{direction:'rtl'}}>
+    <SafeAreaView style={{ direction: isRTL ? 'rtl' : 'ltr', flex: 1 }}>
     <CustomHeader text={t('payment.records', { defaultValue: 'سجلات الدفع' })}/>
-    <Text style={styles.txt1}>{t('payment.recent_transactions', { defaultValue: 'معاملاتك الاخيرة' })}</Text>
-    < ScrollView  style={[{direction:'rtl'},styles.container]}>
+    <Text style={[styles.txt1, { textAlign: isRTL ? 'right' : 'left' }]}>{t('payment.recent_transactions', { defaultValue: 'معاملاتك الاخيرة' })}</Text>
+    <ScrollView contentContainerStyle={styles.container}>
       <PaymentComponent/>
-     
-    </ ScrollView>
+    </ScrollView>
     </SafeAreaView>
   )
 }
@@ -22,8 +23,8 @@ export default PaymaintScreen
 
 const styles = StyleSheet.create({
     container:{
-        width:'95%',
-        marginHorizontal:20,
+        paddingHorizontal: 20,
+        alignItems: 'center', // Center the PaymentComponent
     },
     txt1:{
         fontWeight:500,

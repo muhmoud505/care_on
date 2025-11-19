@@ -3,8 +3,7 @@
     "registered_successfully": "تم التسجيل بنجاح",
     "welcome_to": "مرحبا بك في"
   },
-  "Care": "كير",
-  "On": "أون",
+  
   "common": {
     "save": "حفظ",
     "continue": "متابعة",
@@ -16,9 +15,16 @@
     "from": "من", 
     "to": "إلى", 
     "back": "رجوع",
+    "close": "إغلاق",
     "name": "الاسم",
+    "day": "يوم",
+    "month": "شهر",
+    "year": "سنة",
     "name_placeholder": "ادخل اسمك",
-    "success": "نجاح"
+    "success": "نجاح",
+    "masked_national_id": "xxxxxxxxxxxxxx",
+    "error": "خطأ",
+    "no_items_found": "لم يتم العثور على عناصر"
   },
   "add_result": {
     "title": "إضافة نتيجة تحليل",
@@ -28,7 +34,11 @@
     "result_value_placeholder": "مثال: 120 ملغ/ديسيلتر",
     "notes": "ملاحظات",
     "notes_placeholder": "ملاحظات (اختياري)",
-    "upload_file": "رفع ملف النتيجة"
+    "upload_file": "رفع ملف النتيجة",
+    "lab_name": "اسم المعمل",
+    "lab_name_placeholder": "أدخل اسم المعمل",
+    "date": "تاريخ التحليل",
+    "date_placeholder": "اختر تاريخ التحليل"
   },
   "add_eshaa": {
     "title": "إضافة أشعة",
@@ -96,15 +106,20 @@
   },
   "errors": {
     "add_medicine_failed": "لا يمكن حفظ الدواء. يرجى المحاولة مرة أخرى.",
-    "add_record_failed": "لا يمكن حفظ السجل. يرجى المحاولة مرة أخرى."
+    "add_record_failed": "لا يمكن حفظ السجل. يرجى المحاولة مرة أخرى.",
+    "image_processing_failed": "فشل في معالجة الصورة. يرجى تجربة صورة أخرى.",
+    "error_fetching_data": "حدث خطأ أثناء جلب البيانات"
   },
   "account": {
     "linked_accounts": "الحسابات المرتبطة",
     "primary_user": "المستخدم الأساسي",
     "no_phone_number": "لا يوجد رقم هاتف",
     "current_account": "الحساب الحالي",
+    "linked_accounts_mother": "الحسابات المرتبطة بحساب الأم",
     "impersonate_user": "تمثيل المستخدم",
-    "add_another_account": "إضافة حساب آخر"
+    "add_another_account": "إضافة حساب آخر",
+    "switch_to_parent": "انتقال لحساب الأم",
+    "logout": "تسجيل الخروج"
   },
   "add_selector": {
     "title": "إضافة سجل جديد",
@@ -119,13 +134,26 @@
     "health_in_pocket_part1": "صحتك",
     "health_in_pocket_part2": "في",
     "health_in_pocket_part3": "جيبك",
-    "anytime_anywhere": "أي وقت - أي مكان"
+    "anytime_anywhere": "أي وقت - أي مكان",
+    "error_fetching_data": "حدث خطأ أثناء جلب البيانات"
   },
   "auth": {
    "reset_password":"إعادة تعيين كلمة المرور",
-
+   "enter_passwords": "برجاء ادخال كلمات السر",
+   "current_password": "كلمة المرور الحالية",
+   "enter_current_password": "ادخل كلمة المرور الحالية",
+   "new_password": "كلمة المرور الجديدة",
+   "enter_new_password": "ادخل كلمة المرور الجديدة",
+   "confirm_new_password": "تأكيد كلمة المرور الجديدة",
+   "reenter_new_password": "اعد ادخال كلمة المرور الجديدة",
+   "passwords_do_not_match": "كلمات المرور غير متطابقة",
+   "password_rules": "يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)",
+   "password_reset_success": "تم إعادة تعيين كلمة المرور بنجاح.",
+   "id":"الرقم القومي",
     "create_account_prompt": "لإنشاء حسابك يرجي ملئ البيانات التالية ..",
+    "create_account": "إنشاء حساب",
     "your_account": "حسابك",
+    "national_id": "البطاقة الشخصية",
     "national_id_placeholder": "ادخل الرقم القومي",
     "final_step_password": "الخطوة الأخيرة، كلمة المرور",
     "password": "كلمة المرور",
@@ -133,6 +161,7 @@
     "password_placeholder": "ادخل كلمة المرور",
     "confirm_password": "تأكيد كلمة المرور",
     "confirm_password_placeholder": "أعد إدخال كلمة المرور",
+    "enter_email": "ادخل البريد الالكتروني",
     "email_placeholder": "ادخل البريد الالكتروني",
     "enter_your_data": "ادخل بياناتك",
     "enter_child_data": "ادخل بيانات الطفل",
@@ -155,7 +184,9 @@
     "child_national_id_placeholder": "ادخل الرقم القومي للطفل",
     "child_birth_certificate": "شهادة ميلاد الطفل",
     "signin": "تسجيل دخول",
-    "signup": "تسجيل"
+    "create_account_button": "إنشاء حساب",
+    "signup": "تسجيل",
+    "logout":"تسجيل الخروج"
   },
   "home": {
     "hello": "مرحباً",
@@ -190,7 +221,14 @@
     "doctor_name": "اسم الدكتور",
     "report_date": "تاريخ الكشف"
   },
+ 
   "profile": {
+    "child_profile_title": "الحساب الشخصي للطفل",
+    "parent_profile_title": "الحساب الشخصي",
+    "age_today": "العمر لليوم",
+    "birth_certificate": "شهادة الميلاد",
+    "uploaded_file":"الملف المرفوع سابقا",
+    "reset_password": "إعادة تعيين كلمة السر",
     "dob": "تاريخ الميلاد",
     "dob_placeholder": "ادخل تاريخ الميلاد",
     "gender": "الجنس",
@@ -199,9 +237,16 @@
     "female": "أنثى"
   },
   "uploader": {
-    "upload": "تحميل"
+    "upload": "تحميل",
+    "pick_failed": "فشل اختيار الملف. يرجى المحاولة مرة أخرى."
   },
   "payment": {
+    "details": "تفاصيل المعاملة",
+    "records": "سجلات الدفع",
+    "recent_transactions": "معاملاتك الاخيرة",
+    "to": "إلى",
+    "reference_number": "الرقم المرجعي",
+    "date": "التاريخ",
     "currency": "ج.م",
     "masked_name": "جيلان ا*** ج***",
     "masked_phone": "0123456789"
@@ -211,6 +256,7 @@
     "profile": "الملف الشخصي",
     "billing": "الفواتير والمدفوعات",
     "find_service": "البحث عن أقرب خدمة",
-    "contact_us": "تواصل معنا"
+    "contact_us": "تواصل معنا",
+    "linked_accounts":"الحسابات المرتبطة"
   }
 }

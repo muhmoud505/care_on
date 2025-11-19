@@ -45,13 +45,13 @@ const DatePick = ({
   return (
     <View style={[styles.container, otherStyles]}>
       {/* Title with dynamic text alignment */}
-      <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
+      <Text style={[styles.title, { textAlign: isRTL ? 'left' : 'right' }]}>
         {title}
         {required && <Text style={styles.required}> *</Text>}
       </Text>
 
       <TouchableOpacity 
-        style={styles.inputContainer}
+        style={[styles.inputContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' ,direction:'ltr'}]}
         onPress={() => setShowModal(true)}
       >
         {/* Input text with dynamic text alignment */}
@@ -91,6 +91,10 @@ const DatePick = ({
 
 const styles = StyleSheet.create({
   container: {
+     marginVertical: hp(2),
+    marginTop: hp(0.6),
+    // gap: hp(1.5),
+    marginHorizontal: wp(2.5),
     width: wp(85),
     height: hp(10.5)
   },
@@ -103,9 +107,9 @@ const styles = StyleSheet.create({
     color: '#FF0000',
   },
   inputContainer: {
-    flexDirection: 'row', // Let the parent View handle direction
     alignItems: 'center', // Keep items vertically centered
     justifyContent: 'space-between',
+   
     width: '100%',
     height: hp(7),
     marginVertical: hp(2),

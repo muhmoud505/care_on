@@ -102,6 +102,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const fetchChildren = async (token) => {
+    console.log(token);
+    
     // The token is now passed directly. We can still use refreshToken to ensure it's not expired, but the primary check is if a token was passed.
     if (!token) {
     
@@ -123,7 +125,9 @@ export const AuthProvider = ({ children }) => {
       });
       
       
-
+    console.log(response);
+    
+      
       // Read the response body as text first to avoid JSON parsing errors on non-JSON responses.
       const responseText = await response.text();
       console.log('Response from /api/v1/auth/users:', responseText);
@@ -317,6 +321,45 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const authFetch = async (url, options = {}) => {
+    // 1. Ensure the token is fresh before making the request.
+    // refreshToken will handle checking expiry and refreshing if needed.
+    // If refresh fails, it will throw an error and log the user out.
+    const currentUser = await refreshToken();
+    const token = currentUser?.token?.value;
+
+    if (!token) {
+      throw new Error('Authentication token is not available.');
+    }
+
+    // 2. Prepare the headers. Check if the body is FormData.
+    const isFormData = options.body instanceof FormData;
+
+    const defaultHeaders = {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      'lang': i18next.language,
+    };
+
+    // Only set Content-Type if it's not FormData
+    if (!isFormData) {
+      defaultHeaders['Content-Type'] = 'application/json';
+    }
+
+    // Merge custom headers from options, allowing them to override defaults
+    const finalOptions = {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers,
+      },
+    };
+
+    // 3. Make the actual fetch call
+    // We use the full URL passed in, assuming it's correctly constructed with BASE_URL
+    return fetch(url, finalOptions);
+  };
+
   // The value provided to consuming components
   const value = {
     user,
@@ -331,6 +374,7 @@ export const AuthProvider = ({ children }) => {
     fetchChildren,
     forgotPassword,
     refreshToken, // Expose the refresh token function
+    authFetch, // Expose the new authenticated fetch wrapper
   };
 
   return (

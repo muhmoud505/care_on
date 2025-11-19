@@ -10,30 +10,38 @@ const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 const PaymentComponent = () => {
   const navigation=useNavigation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
 
   return (
-    <View style={styles.container}>
-      <View style={styles.v1}>
+    <TouchableOpacity
+    onPress={()=>navigation.navigate('payment_status')}
+    activeOpacity={0.6}
+    >
+
+  <View style={styles.container}>
+      <View style={[styles.v1, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Text style={{marginTop:hp(1)}}>10 {t('payment.currency')}</Text>
-        <View style={{flexDirection:'row',columnGap:8}}>
+        <View style={{flexDirection: isRTL ? 'row' : 'row-reverse', columnGap:8}}>
             <Text style={styles.txt1}>{t('common.success')}</Text>
             <TouchableOpacity 
               onPress={()=>navigation.navigate('payment_status')}
             >
-                <Text style={styles.navButtonText}>‹</Text>
+                <Text style={[styles.navButtonText, isRTL && { transform: [{ scaleX: -1 }] }]}>‹</Text>
             </TouchableOpacity>
         </View>
       </View>
-      <View style={styles.v2}>
+      <View style={[styles.v2, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Image source={require('../assets2/images/pay.png')}/>
-        <View style={{rowGap:hp(1.2),top:-hp(1)}}>
+        <View style={{rowGap:hp(1.2),top:-hp(1), alignItems: isRTL ? 'flex-end' : 'flex-start'}}>
             <Text style={styles.txt2}>{t('payment.masked_name')}</Text>
             <Text style={[styles.txt2,{color:'black'}]}>{t('payment.masked_phone')}</Text>
         </View>
-        <Text style={styles.txt3}>12 Jul 2025 05:47 PM</Text>
+        <Text style={[styles.txt3, { textAlign: isRTL ? 'left' : 'right' }]}>12 Jul 2025 05:47 PM</Text>
       </View>
     </View>
+    </TouchableOpacity>
+
   )
 }
 
@@ -50,13 +58,12 @@ const styles = StyleSheet.create({
     },
     v1:{
         paddingHorizontal: wp(2.5),
-        flexDirection:'row',
         justifyContent:'space-between'
     },
     v2:{
         paddingHorizontal: wp(2.5),
-        flexDirection:'row',
-        columnGap: wp(2.5)
+        columnGap: wp(2.5),
+        justifyContent: 'space-between'
     },
     txt1:{
         backgroundColor:'#80D28040',
@@ -76,8 +83,7 @@ const styles = StyleSheet.create({
         fontSize: Math.min(wp(2.5), 10),
         fontWeight:'300',
         color:'#808080',
-        alignSelf:'flex-end',
-        left: -wp(12)
+        flex: 1,
     },
     navButtonText: {
     fontSize: Math.min(wp(5), 20),

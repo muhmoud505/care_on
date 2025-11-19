@@ -1,4 +1,5 @@
 import { API_URL } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +24,7 @@ const Survey = () => {
   const [file, setFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth(); // 2. Get user object from context
-  const token = user?.data?.token;
+  const token = user?.token?.value;
 
   // Memoize the validity check to prevent recalculating on every render
   const isFormValid = useMemo(() => {
@@ -45,12 +46,12 @@ const Survey = () => {
     const fetchQuestions = async () => {
       if (!token) {
         setQuestionsError('Authentication token not found.');
-        setIsQuestionsLoading(false);
+        return setIsQuestionsLoading(false);
       }
       try {
         const response = await fetch(`${API_URL}/api/v1/questions`, {
           headers: {
-            'Authorization': `Bearer ${token.value}`,
+            'Authorization': `Bearer ${token}`,
             'Accept': 'application/json',
             'lang':'ar'
           },
@@ -58,13 +59,16 @@ const Survey = () => {
         const result = await response.json();
         if (response.ok) {
           // Map API response to the format your component expects
-          const formattedQuestions = result.data.map(q => ({
-            id: `q_${q.id}`, // Unique ID for local state management
-            api_id: q.id,    // ID to send back to the API
-            q: q.question_text,
-            ans: q.options || ['نعم', 'لا'], // Fallback options
-            required: q.is_required || false,
-          }));
+          const formattedQuestions = result.data.map(q => {
+            // The API returns an array of answer objects. We need to map them for the Check component.
+            const answerOptions = q.answers.map(a => a.content); // e.g., ['نعم', 'لا']
+            return {
+              id: q.id, // Use the API ID directly
+              q: q.content, // The question text is in 'content'
+              ans: answerOptions,
+              required: q.is_required || false, // Assuming is_required exists
+            };
+          });
           setQuestions(formattedQuestions);
         } else {
           throw new Error(result.message || 'Failed to fetch questions.');
@@ -92,8 +96,8 @@ const Survey = () => {
     // Append answers
     questions.forEach((question, index) => {
       if (answers[question.id]) {
-        // Use the numeric api_id for the backend
-        formData.append(`answers[${index}][question_id]`, question.api_id);
+        // Use the question's ID for the backend
+        formData.append(`answers[${index}][question_id]`, question.id);
         formData.append(`answers[${index}][text]`, answers[question.id]);
       }
     });
@@ -115,12 +119,12 @@ const Survey = () => {
     
     
     try {
-      console.log(token.value);
+      console.log(token);
       
       const response = await fetch(`${API_URL}/api/v1/answers`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token.value}`, // Use the actual token from the user object
+          'Authorization': `Bearer ${token}`, // Use the actual token from the user object
           'Accept': 'application/json', // Inform the server that we expect a JSON response
           // 'Content-Type' is set automatically by fetch for FormData
         },
@@ -130,6 +134,13 @@ const Survey = () => {
       const result = await response.json();
 
       if (response.ok) {
+        // On successful submission, set the flag in AsyncStorage to prevent the popup from showing again.
+        const userId = user?.user?.id;
+        if (userId) {
+          const surveyStatusKey = `hasCompletedSurvey_${userId}`;
+          await AsyncStorage.setItem(surveyStatusKey, 'true');
+        }
+
         Alert.alert(t('survey.success_title'), t('survey.success_message'));
         navigation.goBack();
       } else {

@@ -1,49 +1,52 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useTranslation } from 'react-i18next';
-import { Dimensions } from 'react-native';
+import { useWindowDimensions } from 'react-native';
 import CustomDrawerContent from '../components/customDrewer';
-import Account from '../screens/home/account';
 import BottomTabs from './BottomTabs';
-import PaymentStack from './PaymentStack';
-import ProfileStack from './ProfileStack';
-import ServiceStack from './ServiceStack';
-
-// Import your screens
-// import ProfileScreen from '../screens/ProfileScreen';
-// import InfoScreen from '../screens/InfoScreen';
-// import SearchBloodBankScreen from '../screens/SearchBloodBankScreen';
-// import ContactScreen from '../screens/ContactScreen';
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigator = () => {
-  const { width } = Dimensions.get('window');
+  const { width } = useWindowDimensions();
   const { i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
   return (
     <Drawer.Navigator
-      // Use your custom drawer content
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
         drawerPosition: isRTL ? 'right' : 'left',
         drawerType: 'front',
         drawerStyle: {
-          width: '80%', // Drawer width
+          width: width * 1,
+          margin:0,
+          padding:0 ,
+            borderWidth: 2, // Temporary - remove after debugging
+  borderColor: 'green',// Use 80% of the current window width
+   // Remove shadow/elevation
+          shadowColor: 'transparent',
+          shadowOpacity: 0,
+          shadowOffset: { width: 0, height: 0 },
+          shadowRadius: 0,
+          elevation: 0,
+          borderRightWidth: 0, // Remove border if RTL is false
+          borderLeftWidth: 0,
+        },
+        drawerContentContainerStyle: {
+          paddingTop: 0,      // Remove default top padding
+          paddingBottom: 0,   // Remove default bottom padding
+          paddingLeft: 0,     // Remove default left padding
+          paddingRight: 0,    // Remove default right padding
         },
         overlayColor: 'rgba(0, 0, 0, 0.5)', // Use a semi-transparent black color to dim the background
-        swipeEnabled: false, // Disable swipe gesture to open drawer
+        swipeEnabled: true, // Disable swipe gesture to open drawer
       }}
     >
       <Drawer.Screen 
         name="MainTabs" 
         component={BottomTabs}
-        options={{ drawerLabel: () => null }} // Hide from drawer menu
+        options={{ drawerLabel: () => null }} // Hide this from the drawer list itself
       />
-      <Drawer.Screen name="ProfileStack" component={ProfileStack} options={{ drawerLabel: 'الملف الشخصي' }} />
-      <Drawer.Screen name="PaymentStack" component={PaymentStack} options={{ drawerLabel: 'الفواتير والمدفوعات' }} />
-      <Drawer.Screen name="ServiceStack" component={ServiceStack} options={{ drawerLabel: 'البحث عن أقرب خدمة',headerShown:false }} />
-      <Drawer.Screen name="accounts" component={Account} options={{ drawerLabel: 'البحث عن أقرب خدمة',headerShown:false }} />
     </Drawer.Navigator>
   );
 };

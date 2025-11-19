@@ -31,7 +31,6 @@ const addMedicineScreen = () => {
 
   const handleSave = async () => {
     if (!formIsValid) return;
-    console.log('User national number being sent:', user.user.resource.national_number);
     setIsSubmitting(true);
 
     const descriptionObject = {
@@ -41,7 +40,6 @@ const addMedicineScreen = () => {
     };
 
     const payload = {
-      user_national_number: user.user.resource.national_number,
       type: 'prescription',
       title: form.medicineName,
       description: JSON.stringify(descriptionObject),

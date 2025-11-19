@@ -1,5 +1,5 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,34 +15,57 @@ import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
 
 const LastReports = () => {
+  const [expandedItems, setExpandedItems] = useState({});
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const { user } = useAuth();
-  const { allRecords, loading, error, fetchAllRecords } = useMedicalRecords();
+  const { allRecords, loading, error, fetchAllRecords, loadMoreAllRecords } = useMedicalRecords();
 
   // This effect runs every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      if (user?.data?.token?.value) {
+      if (user?.token?.value) {
         fetchAllRecords();
       }
-    }, [user?.data?.token?.value, fetchAllRecords])
+    }, [user?.token?.value, fetchAllRecords])
   );
 
   const onRefresh = useCallback(() => {
     fetchAllRecords({ force: true });
   }, [fetchAllRecords]);
 
+  const handleItemExpand = (id, isExpanded) => {
+    setExpandedItems(prev => ({ ...prev, [id]: isExpanded }));
+  };
+
+  const areAllExpanded = allRecords.length > 0 && allRecords.every(item => expandedItems[`${item.type}-${item.id}`]);
+
+  const toggleAll = () => {
+    const nextExpandedState = !areAllExpanded;
+    const newExpandedState = allRecords.reduce((acc, item) => {
+      acc[`${item.type}-${item.id}`] = nextExpandedState;
+      return acc;
+    }, {});
+    setExpandedItems(newExpandedState);
+  };
+
   const renderItem = ({ item }) => {
+    const uniqueId = `${item.type}-${item.id}`;
+    const itemProps = {
+      ...item,
+      expanded: expandedItems[uniqueId] || false,
+      onExpandedChange: (isExpanded) => handleItemExpand(uniqueId, isExpanded),
+    };
+
     switch(item.type) {
       case 'result':
-        return <Result {...item} />;
+        return <Result {...itemProps} />;
       case 'medicine':
-        return <Medicine {...item} />;
+        return <Medicine {...itemProps} />;
       case 'eshaa':
-        return <Eshaa {...item} />;
+        return <Eshaa {...itemProps} />;
       case 'report':
-        return <Report {...item} />;
+        return <Report {...itemProps} />;
       default:
         return null;
     }
@@ -56,13 +79,19 @@ const LastReports = () => {
         error={error.all}
         data={allRecords}
         renderItem={renderItem}
-        keyExtractor={(item) => `${item.type}-${item.id}`}
+        keyExtractor={(item) => `${item.type}-${item.id}`} // This is already robust
         onRefresh={onRefresh}
         refreshing={loading.all}
+        onEndReached={loadMoreAllRecords}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         emptyListMessage={t('home.no_reports_found')}
       />
+      {allRecords.length > 0 && !loading.all && (
+        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.expandButton}>
+          <Image source={areAllExpanded ? Images.shrink : Images.r6} />
+        </TouchableOpacity>
+      )}
       {/* Add record button */}
       <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddRecordSelector')}>
         <Image source={Images.add} />
@@ -79,15 +108,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8F8', // A light background color for consistency
   },
   listContent: {
-    padding: 16, // Add some padding around the list items
+    paddingHorizontal: 16,
+    paddingBottom: hp(20), // Add significant padding to clear the tab bar and floating buttons
   },
   separator: {
     height: 12,
   },
   addButton: {
     position: 'absolute',
-    bottom: hp(10), // Increased to position it above the bottom tab bar
+    bottom: hp(13), // Increased to position it above the bottom tab bar
     right: wp(5),
     zIndex: 1, // Ensure the button is rendered on top of other elements
+  },
+  expandButton: {
+    position: 'absolute',
+    bottom: hp(10),
+    left: wp(5),
+    zIndex: 1,
   },
 });

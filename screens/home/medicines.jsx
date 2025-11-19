@@ -1,5 +1,5 @@
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StatusBar, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,22 +12,23 @@ import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
 
 const Medicines = () => {
+  const [expandedItems, setExpandedItems] = useState({});
   const navigation=useNavigation()
   const route = useRoute();
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  console.log(user.data.token.value);
+  console.log(user?.token?.value);
   
-  const { medicines, loading, error, fetchMedicines, addMedicine } = useMedicalRecords();
+  const { medicines, loading, error, fetchMedicines, addMedicine, loadMoreMedicines } = useMedicalRecords();
   console.log(medicines);
 
   // This effect runs every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      if (user?.data?.token?.value) {
+      if (user?.token?.value) {
         fetchMedicines();
       }
-    }, [user?.data?.token?.value, fetchMedicines])
+    }, [user?.token?.value, fetchMedicines])
   );
 
   useEffect(() => {
@@ -45,13 +46,31 @@ const Medicines = () => {
     fetchMedicines();
   }, [fetchMedicines]);
 
+  const handleItemExpand = (id, isExpanded) => {
+    setExpandedItems(prev => ({ ...prev, [id]: isExpanded }));
+  };
+
+  const areAllExpanded = medicines.length > 0 && medicines.every(item => expandedItems[item.id]);
+
+  const toggleAll = () => {
+    const nextExpandedState = !areAllExpanded;
+    const newExpandedState = medicines.reduce((acc, item) => {
+      acc[item.id] = nextExpandedState;
+      return acc;
+    }, {});
+    setExpandedItems(newExpandedState);
+  };
+
   const renderItem = ({ item }) => (
     <Medicine
       title={item.title} // Assuming item.title is already the translated/displayable title
-      dose={item.dose} // Assuming item.dose is the direct string or already translated
+      description={item.description}
       from={item.from}
       to={item.to}
+      id={item.id}
       icon={item.icon}
+      expanded={expandedItems[item.id] || false}
+      onExpandedChange={(isExpanded) => handleItemExpand(item.id, isExpanded)}
       style={item.pending ? { opacity: 0.6 } : {}} // Visually indicate pending items
     />
   );
@@ -69,13 +88,15 @@ const Medicines = () => {
         keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
         onRefresh={onRefresh}
         refreshing={loading.medicines}
+        onEndReached={loadMoreMedicines}
         contentContainerStyle={styles.listContent}
       />
+      {medicines.length > 0 && !loading.medicines && (
+        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.expandButton}>
+          <Image source={areAllExpanded ? Images.shrink : Images.r6} />
+        </TouchableOpacity>
+      )}
       
-      {/* Add medication button */}
-      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('add')}>
-        <Image source={Images.add} />
-      </TouchableOpacity>
       
      
       <StatusBar barStyle={'dark-content'}  backgroundColor="transparent"  />
@@ -90,12 +111,20 @@ const styles = StyleSheet.create({
     paddingTop: hp(1.2),
   },
   listContent: {
-    paddingBottom: hp(10), // Ensure space for the add button
+    paddingHorizontal: wp(4),
+    paddingBottom: hp(15), // Increased padding to clear the tab bar and the add button
+    gap: hp(1.2),
   },
   addButton: {
     position: 'absolute',
-    bottom: hp(3),
+    bottom: hp(10),
     right: wp(5),
+  },
+  expandButton: {
+    position: 'absolute',
+    bottom: hp(10),
+    left: wp(10),
+    paddingBottom:hp(3)
   },
 });
 

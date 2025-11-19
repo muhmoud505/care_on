@@ -16,15 +16,15 @@ const Reports = () => {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const { user } = useAuth();
-  const { reports, loading, error, fetchReports } = useMedicalRecords();
+  const { reports, loading, error, fetchReports, loadMoreReports } = useMedicalRecords();
 
   // This effect runs every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      if (user?.data?.token?.value) {
+      if (user?.token?.value) {
         fetchReports();
       }
-    }, [user?.data?.token?.value, fetchReports])
+    }, [user?.token?.value, fetchReports])
   );
 
   const onRefresh = useCallback(() => {
@@ -65,6 +65,7 @@ const Reports = () => {
         keyExtractor={(item) => item.id.toString()}
         onRefresh={onRefresh}
         refreshing={loading.reports}
+        onEndReached={loadMoreReports}
         contentContainerStyle={styles.listContent}
         emptyListMessage={t('home.no_doctor_reports_found')}
       />
@@ -74,9 +75,7 @@ const Reports = () => {
         </TouchableOpacity>
       )}
       {/* Add report button */}
-      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('addReport')}>
-        <Image source={Images.add} />
-      </TouchableOpacity>
+    
     </SafeAreaView>
   );
 };
@@ -90,17 +89,18 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingVertical: hp(1.2),
-    paddingHorizontal: wp(4),
+    paddingHorizontal: wp(4), // Keep horizontal padding
+    paddingBottom: hp(15), // Add padding to clear the tab bar and floating buttons
     gap: hp(1.2),
   },
   ele: {
     position: 'absolute',
-    bottom: hp(10),
+    bottom: hp(13),
     left: wp(10),
   },
   addButton: {
     position: 'absolute',
-    bottom: hp(3),
+    bottom: hp(10),
     right: wp(5),
   },
 });

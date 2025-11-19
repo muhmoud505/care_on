@@ -42,12 +42,11 @@ const CollapsibleCard = ({
 
 const styles = StyleSheet.create({
   smcontainer: {
-    width: '90%',
+    width: '100%', // Take the full width provided by the Shadow container
     borderRadius: 12,
     backgroundColor: '#FFF',
     padding: 10,
     overflow: 'hidden',
-    marginHorizontal: 15,
   },
   mincontainer: {
     flexDirection: 'row',

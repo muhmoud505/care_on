@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../../components/CustomHeader';
+import DatePick from '../../../components/datePicker';
 import FormField from '../../../components/FormInput';
 import Uploader from '../../../components/Uploader';
 import { useAuth } from '../../../contexts/authContext';
@@ -20,7 +21,8 @@ const AddResultScreen = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { form, errors, handleChange, checkFormValidity } = useForm({
     testName: '',
-    resultValue: '',
+    labName: '',
+    date: null,
     notes: '',
     documents: null,
   });
@@ -29,22 +31,20 @@ const AddResultScreen = () => {
 
   const handleSave = async () => {
     if (!formIsValid) return;
-    console.log('User national number being sent:', user.user.resource.national_number);
-    
     setIsSubmitting(true);
 
     const descriptionObject = {
-      resultValue: form.resultValue,
+      labName: form.labName,
       notes: form.notes,
+      date: form.date,
     };
 
     const payload = {
-      user_national_number: user.user.resource.national_number,
       type: 'lab_test',
       title: form.testName,
       description: JSON.stringify(descriptionObject),
     };
-``
+
     if (form.documents) {
       payload.documents = [form.documents];
     }
@@ -73,11 +73,19 @@ const AddResultScreen = () => {
             required
           />
           <FormField
-            title={t('add_result.result_value')}
-            placeholder={t('add_result.result_value_placeholder')}
-            value={form.resultValue}
-            onChangeText={(text) => handleChange('resultValue', text)}
-            error={errors.resultValue}
+            title={t('add_result.lab_name')}
+            placeholder={t('add_result.lab_name_placeholder')}
+            value={form.labName}
+            onChangeText={(text) => handleChange('labName', text)}
+            error={errors.labName}
+            required
+          />
+          <DatePick
+            title={t('add_result.date')}
+            placeholder={t('add_result.date_placeholder')}
+            value={form.date}
+            onDateSelect={(date) => handleChange('date', date)}
+            error={errors.date}
             required
           />
           <FormField

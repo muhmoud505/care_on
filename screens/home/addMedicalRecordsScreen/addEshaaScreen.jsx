@@ -39,7 +39,6 @@ const AddEshaaScreen = () => {
 
   const handleSave = async () => {
     if (!formIsValid) return;
-    console.log('User national number being sent:', user.user.resource.national_number);
     setIsSubmitting(true);
 
     const descriptionObject = {
@@ -50,7 +49,6 @@ const AddEshaaScreen = () => {
     };
 
     const payload = {
-      user_national_number: user.user.resource.national_number,
       type: 'radiology',
       title: form.xrayName,
       description: JSON.stringify(descriptionObject),

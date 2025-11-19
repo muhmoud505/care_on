@@ -1,5 +1,4 @@
 import { API_URL } from '@env';
-import i18next from 'i18next';
 import { createContext, useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Images from '../constants2/images'; // Assuming this path is correct
@@ -13,46 +12,89 @@ export const useMedicalRecords = () => {
 
 const BASE_URL = API_URL; // Use the URL from the .env file
 
-const mapApiDataToComponentProps = (item, type) => {
+/**
+ * Safely parses a JSON string and returns an empty object on failure.
+ * @param {string} jsonString The JSON string to parse.
+ * @returns {object} The parsed object or an empty object.
+ */
+const safeJsonParse = (jsonString) => {
+  try {
+    return jsonString ? JSON.parse(jsonString) : {};
+  } catch (e) {
+    console.error('Failed to parse description JSON:', e);
+    return {};
+  }
+};
+
+const mapApiDataToComponentProps = (item, componentType) => {
+  // When fetching for a summary or 'all' records, we must determine the type from the item's data.
+  // Otherwise, we use the componentType passed from the specific fetcher (e.g., 'result' for fetchResults).
+  let type;
+  if (componentType === 'all') {
+    // Use item.type, but fallback to item.record_type to be more robust against API inconsistencies.
+    // Make the type detection more robust by checking common key variations.
+    const apiType = item.type || item.record_type || item.recordType;
+    const typeMapping = {
+      // English keys
+      'lab_test': 'result',
+      'radiology': 'eshaa',
+      'diagnosis': 'report',
+      'consultation': 'report',
+      'prescription': 'medicine',
+      // Arabic keys from API
+      'اختبار معملي': 'result',
+      'وصفة طبية': 'medicine',
+      'تشخيص': 'report',
+    };
+    type = typeMapping[apiType] || 'unknown';
+  } else {
+    type = componentType;
+  }
+
   let commonProps = {
     id: item.id,
-    type: type,
-    icon: item.imageUrl ? { uri: item.imageUrl } : Images.n11, // Using n11 as a generic fallback
+    type: type, // This is now correctly set to 'result', 'eshaa', etc.
+    icon: item.imageUrl ? { uri: item.imageUrl } : Images.r5, // Using r5 as a valid generic fallback
+    date: item.dates?.created_at?.full, // Use the creation date as a consistent date field
   };
+  
+  const parsedDesc = safeJsonParse(item.description);
 
   switch (type) {
-    case 'result': // lab_test (type 1)
+    case 'result': { // lab_test (type 1)
       return {
         ...commonProps,
-        title: item.name,
-        description: item.description,
-        date: item.testDate,
-        labName: item.labName,
+        title: item.title,
+        description: parsedDesc.notes || '', // Show notes as the main description
+        labName: parsedDesc.labName || item.provider?.name, // Use parsed labName, fallback to provider
       };
-    case 'eshaa': // radiology (type 2)
+    }
+    case 'eshaa': { // radiology (type 2)
       return {
         ...commonProps,
-        title: item.name,
-        description: item.description,
-        date: item.scanDate,
-        labName: item.clinicName,
+        title: item.title,
+        description: parsedDesc.notes || '',
+        labName: parsedDesc.labName || item.provider?.name,
       };
-    case 'report': // diagnosis (type 3) or consultation (type 5)
+    }
+    case 'report': { // diagnosis (type 3) or consultation (type 5)
       return {
         ...commonProps,
-        title: `${item.doctorName}, ${item.diagnosisDate || item.consultationDate}`,
-        description: item.details || item.summary,
-        date: item.diagnosisDate || item.consultationDate,
+        title: item.title,
+        description: parsedDesc.notes || '',
+        doctorName: parsedDesc.doctorName || item.provider?.name,
       };
-    case 'medicine': // prescription (type 4)
+    }
+    case 'medicine': { // prescription (type 4)
       return {
         ...commonProps,
         icon: item.imageUrl ? { uri: item.imageUrl } : Images.medicine,
-        title: item.medicineName,
-        dose: item.dosage,
-        from: item.startDate,
-        to: item.endDate,
+        title: item.title,
+        description: parsedDesc.dosage || '', // Use dosage as the main description
+        from: parsedDesc.startDate || item.dates?.start_date?.full,
+        to: parsedDesc.endDate || item.dates?.end_date?.full,
       };
+    }
     default:
       return commonProps;
   }
@@ -65,87 +107,113 @@ export const MedicalRecordsProvider = ({ children }) => {
   const [eshaa, setEshaa] = useState([]);
   const [reports, setReports] = useState([]);
 
+  // State to manage pagination for each record type
+  const [pagination, setPagination] = useState({
+    all: { page: 1, hasMore: true },
+    medicines: { page: 1, hasMore: true },
+    results: { page: 1, hasMore: true },
+    eshaa: { page: 1, hasMore: true },
+    reports: { page: 1, hasMore: true },
+  });
   const [loading, setLoading] = useState({ all: false, medicines: false, results: false, eshaa: false, reports: false });
   const [lastFetched, setLastFetched] = useState({ all: null, medicines: null, results: null, eshaa: null, reports: null });
   const [error, setError] = useState({ all: null, medicines: null, results: null, eshaa: null, reports: null });
 
   const { t } = useTranslation();
-  const { user, refreshToken } = useAuth(); // Get the authenticated user and refreshToken from AuthContext
+  const { user, authFetch } = useAuth(); // Get the authenticated user and the new authFetch wrapper
 
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   const createFetcher = ({ stateKey, stateSetter, types, sort = false }) => {
-    return useCallback(async (options = { force: false }) => {
-      const { force } = options;
+    return useCallback(async (options = { force: false, loadMore: false }) => {
+      const { force, loadMore } = options;
+      const currentPagination = pagination[stateKey];
+
+      // If we are loading more but there are no more pages, or if we are already loading, exit.
+      if ((loadMore && !currentPagination.hasMore) || loading[stateKey]) {
+        return;
+      }
+
       const now = Date.now();
-      // 1. Check cache. If not forcing a refresh and data is fresh, do nothing.
-      if (!force && lastFetched[stateKey] && (now - lastFetched[stateKey] < CACHE_DURATION)) {
-        console.log(`Using cached data for ${stateKey}`);
+      // Check cache. If not forcing a refresh, not loading more, and data is fresh, do nothing.
+      if (!force && !loadMore && lastFetched[stateKey] && (now - lastFetched[stateKey] < CACHE_DURATION)) {
         return;
       }
 
       setLoading(prev => ({ ...prev, [stateKey]: true }));
       setError(prev => ({ ...prev, [stateKey]: null }));
   
-      try {
-        // First, ensure the token is fresh.
-        const currentUser = await refreshToken();
-        const token = currentUser?.token?.value;
+      const pageToFetch = loadMore ? currentPagination.page + 1 : 1;
 
-        if (!token) {
-          throw new Error(t('common.unauthorized'));
-        }
+      try {
+        // The national_number is still needed for the URL.
+        const nationalNumber = user?.user?.resource?.national_number;
 
         const fetchPromises = types.map(async ({ apiType, componentType }) => {
-          const headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'lang': i18next.language
-          };
-          
-          const response = await fetch(`${BASE_URL}/api/v1/medical-records?type=${apiType}`, { headers });
-          
+          // If an apiType is provided, add it to the query to filter results.
+          // This is crucial for correct pagination on category-specific tabs.
+          const typeQuery = apiType ? `&type=${apiType}` : '';
+          const url = `${BASE_URL}/api/v1/medical-records?national_number=${nationalNumber}&page=${pageToFetch}${typeQuery}`;
+
+          // Use the new authFetch wrapper. No need to manage tokens or headers here!
+          const response = await authFetch(url);
+
+     
           
           if (!response.ok) throw new Error(`Failed to fetch type ${apiType}`);
           const json = await response.json();
-          console.log(`--- Data fetched for type: ${apiType} ---`, JSON.stringify(json, null, 2));
           
-          return Array.isArray(json.data)
-            ? json.data.map(item => mapApiDataToComponentProps(item, componentType))
-            : [];
+          
+          // Update pagination state based on the response meta-data
+          setPagination(prev => ({
+            ...prev,
+            [stateKey]: {
+              page: json.meta.current_page,
+              hasMore: !!json.links.next, // `hasMore` is true if a 'next' link exists
+            }
+          }));
+
+          console.log(`Raw API data for ${stateKey} (page ${pageToFetch}):`, json.data);
+          return Array.isArray(json.data) ? json.data.map(item => mapApiDataToComponentProps(item, stateKey === 'all' ? 'all' : componentType)) : [];
         });
   
         const results = await Promise.all(fetchPromises);
         let combinedData = results.flat();
+
+        // Log the fetched and processed data for debugging
+        console.log(`--- Fetched data for ${stateKey} ---`, combinedData);
   
         if (sort) {
           combinedData.sort((a, b) => new Date(b.date) - new Date(a.date));
         }
   
-        stateSetter(combinedData);
-        // 2. On successful fetch, update the timestamp.
-        setLastFetched(prev => ({ ...prev, [stateKey]: Date.now() }));
+        if (loadMore) {
+          // Append new data to existing data
+          stateSetter(prevData => [...prevData, ...combinedData]);
+        } else {
+          // Replace existing data on a refresh or initial load
+          stateSetter(combinedData);
+          // On successful fresh fetch, update the timestamp.
+          setLastFetched(prev => ({ ...prev, [stateKey]: Date.now() }));
+        }
       } catch (e) {
-        
-        
         console.error(`Failed to fetch ${stateKey}:`, e);
         setError(prev => ({ ...prev, [stateKey]: t('common.error_fetching_data', { stateKey: stateKey }) }));
       } finally {
         setLoading(prev => ({ ...prev, [stateKey]: false }));
       }
-    }, [user, t, refreshToken, stateSetter, stateKey, types, sort, lastFetched]);
+    }, [t, stateKey, types, sort, pagination, loading]);
   };
   
   const fetchAllRecords = createFetcher({
     stateKey: 'all',
     stateSetter: setAllRecords,
+    // When fetching 'all', we make a single request without a type filter.
+    // The mapping logic will handle assigning the correct componentType based on the API response.
     types: [
-      { apiType: 'lab_test', componentType: 'result' },
-      { apiType: 'radiology', componentType: 'eshaa' },
-      { apiType: 'diagnosis', componentType: 'report' },
-      { apiType: 'prescription', componentType: 'medicine' },
-      { apiType: 'consultation', componentType: 'report' },
+      // The componentType here is a fallback; the real mapping happens in mapApiDataToComponentProps
+      // based on the 'type' field from the API data for each item.
+      { apiType: null, componentType: 'all' } 
     ],
     sort: true,
   });
@@ -170,63 +238,44 @@ export const MedicalRecordsProvider = ({ children }) => {
   
   const fetchReports = createFetcher({
     stateKey: 'reports',
-    stateSetter: setReports,
+    stateSetter: setReports, // Directly set the reports state
     types: [
+      // Fetch both diagnosis and consultation records for the 'Reports' screen
       { apiType: 'diagnosis', componentType: 'report' },
       { apiType: 'consultation', componentType: 'report' },
     ],
-    sort: true,
+    sort: true, // Sort all reports by date
   });
 
+  // Functions to load the next page of data for each type
+  const loadMoreAllRecords = () => fetchAllRecords({ loadMore: true });
+  const loadMoreMedicines = () => fetchMedicines({ loadMore: true });
+  const loadMoreResults = () => fetchResults({ loadMore: true });
+  const loadMoreEshaas = () => fetchEshaas({ loadMore: true });
+  // Re-enable load more for reports
+  const loadMoreReports = () => fetchReports({ loadMore: true });
+
   const addMedicine = useCallback(async (newMedicineData) => {
-    // 1. Optimistic Update: Add a temporary version to the UI immediately
-    const tempId = `temp-${Date.now()}`;
-    const optimisticMedicine = {
-      ...newMedicineData,
-      id: tempId,
-      icon: Images.medicine,
-      pending: true, // Add a flag to indicate it's not saved yet
+    // This function now acts as a wrapper around the generic addRecord.
+    // It prepares the payload specifically for a medicine record.
+    const descriptionObject = {
+      dosage: newMedicineData.dosage,
+      startDate: newMedicineData.startDate,
+      endDate: newMedicineData.endDate,
     };
-    setMedicines(prev => [optimisticMedicine, ...prev]);
 
-    try {
-      // 2. Ensure token is fresh before making the API call
-      const currentUser = await refreshToken();
-      const token = currentUser?.token?.value;
+    const payload = {
+      type: 'prescription',
+      title: newMedicineData.medicineName,
+      description: JSON.stringify(descriptionObject),
+    };
 
-      if (!token) {
-        throw new Error(t('common.unauthorized'));
-      }
-
-      // NOTE: The endpoint and body format are an assumption. Adjust to your actual API.
-      const headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'lang': i18next.language
-      };
-
-      const response = await fetch(`${BASE_URL}/api/v1/medical-records`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ ...newMedicineData, type: 'prescription' }),
-      });
-
-      if (!response.ok) throw new Error('Failed to save medicine to the server.');
-
-      const savedMedicine = await response.json();
-      const finalMedicine = mapApiDataToComponentProps(savedMedicine.data, 'medicine');
-
-    } catch (e) {
-      console.error("Failed to add medicine:", e);
-      // 4. Failure: Rollback the optimistic update by removing the temporary item
-      setMedicines(prev => prev.filter(m => m.id !== tempId));
-      setError(prev => ({ ...prev, medicines: t('errors.add_medicine_failed') }));
-    } // No finally block needed as we handle UI state via rollback
-  }, [t, user, refreshToken]);
+    return await addRecord(payload);
+  }, [t]); // Removed addRecord from dependency array
 
   const addRecord = useCallback(async (newRecordData) => {
     const formData = new FormData();
+    
     Object.keys(newRecordData).forEach(key => {
       if (key === 'documents' && Array.isArray(newRecordData[key])) {
         newRecordData[key].forEach((doc, index) => {
@@ -240,33 +289,17 @@ export const MedicalRecordsProvider = ({ children }) => {
     });
 
     try {
-      // Ensure token is fresh before making the API call
-      const currentUser = await refreshToken();
-      const token = currentUser?.token?.value;
-      
+      const nationalNumber = user?.user?.resource?.national_number;
 
-      if (!token) {
-        const unauthorizedError = t('common.unauthorized');
-        throw new Error(unauthorizedError);
-      }
+      // Append the national number to the form data
+      formData.append('user_national_number', nationalNumber);
 
-      const headers = {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'lang': i18next.language
-        // 'Content-Type' is not set for FormData, fetch handles it.
-      };
-      console.log('before request');
-      console.log(user);
-      
-      console.log('--- Logging Request Payload ---', newRecordData);
-
-      const response = await fetch(`${BASE_URL}/api/v1/medical-records`, {
+      // Use authFetch for the POST request.
+      // The updated authFetch will automatically handle the Content-Type for FormData.
+      const response = await authFetch(`${BASE_URL}/api/v1/medical-records`, {
         method: 'POST',
-        headers,
         body: formData,
       });
-      console.log('after request');
 
       // Read the response body as text ONCE. This consumes the body stream.
       const responseText = await response.text();
@@ -284,8 +317,23 @@ export const MedicalRecordsProvider = ({ children }) => {
       
       if (!response.ok) {
         // Use the parsed message if available, otherwise use the raw text or a generic error.
-        const errorMessage = responseData?.message || (responseData?.errors && Object.values(responseData.errors).flat().join(', ')) || responseText || 'Failed to save record to the server.';
+        const errorMessage = responseData?.message || (responseData?.errors && Object.values(responseData.errors).flat().join(', ')) || responseText || t('errors.add_record_failed');
         throw new Error(errorMessage); // Throw the error here to stop execution
+      }
+
+      // After a successful save, update the 'allRecords' state
+      // to include the new record without needing a full refresh.
+      if (responseData?.data) {
+        const newRecord = mapApiDataToComponentProps(responseData.data, 'all');
+        // Instead of updating each state manually, we can just force a refresh
+        // of the relevant lists. This is simpler and ensures data consistency.
+        fetchAllRecords({ force: true });
+        
+        // Selectively refresh based on type
+        if (newRecord.type === 'medicine') fetchMedicines({ force: true });
+        if (newRecord.type === 'result') fetchResults({ force: true });
+        if (newRecord.type === 'report') fetchReports({ force: true });
+        if (newRecord.type === 'eshaa') fetchEshaas({ force: true });
       }
 
       return { success: true, data: responseData };
@@ -295,7 +343,7 @@ export const MedicalRecordsProvider = ({ children }) => {
       setError(prev => ({ ...prev, all: addRecordFailedError }));
       return { success: false, error: addRecordFailedError };
     }
-  }, [t, user, refreshToken]);
+  }, [t, user, authFetch]);
 
   const value = {
     allRecords,
@@ -312,6 +360,11 @@ export const MedicalRecordsProvider = ({ children }) => {
     fetchReports,
     addMedicine,
     addRecord,
+    loadMoreAllRecords,
+    loadMoreMedicines,
+    loadMoreResults,
+    loadMoreEshaas,
+    loadMoreReports,
   };
 
   return (

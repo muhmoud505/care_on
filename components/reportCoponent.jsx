@@ -5,7 +5,8 @@ import CollapsibleCard from './CollapsibleCard';
 const Report = ({ 
   title,  
   date, 
-  description, 
+  description,
+  doctorName, // Add doctorName to props
   expanded,
   onExpandedChange,
   icon
@@ -23,7 +24,7 @@ const Report = ({
         <View style={styles.miccontianer}>
           <Image source={require('../assets2/images/r2.png')} />
           <Text style={styles.txt2}>{t('report.doctor_name')}:</Text>
-          <Text style={styles.txt3}>{title}</Text>
+          <Text style={styles.txt3}>{doctorName}</Text>
         </View>
         <View style={styles.miccontianer}>
           <Image source={require('../assets2/images/r4.png')} />

@@ -30,6 +30,10 @@
     "from": "From",
     "to": "To",
     "back": "Back",
+    "close": "Close",
+    "day": "Day",
+    "month": "Month",
+    "year": "Year",
     "date": "Date",
     "description": "Description",
     "error": "Error",
@@ -40,7 +44,9 @@
     "lets_go": "Let's go!",
     "later": "Later!",
     "unauthorized": "Authentication token not found.",
-    "error_fetching_data": "Failed to load {{stateKey}}."
+    "error_fetching_data": "Failed to load {{stateKey}}.",
+    "masked_national_id": "xxxxxxxxxxxxxx",
+    "no_items_found": "No items found"
   },
  "add_selector": {
     "title": "Add New Record",
@@ -142,7 +148,8 @@
     "password_rules": "Must include: at least 8 characters, English letters, symbols (@, #, $ ...)",
     "enter_email_to_reset": "Please enter your email to reset your password",
     "under_18_error": "Users must be 18 or older to create a personal account.",
-    "over_18_error": "For users 18 and over, please create a personal account."
+    "over_18_error": "For users 18 and over, please create a personal account.",
+    "logout":"Logout"
   },
   "errors": {
     "add_medicine_failed": "Could not save medicine. Please try again.",
@@ -153,8 +160,11 @@
     "primary_user": "Primary User",
     "no_phone_number": "No phone number",
     "current_account": "Current Account",
+    "linked_accounts_mother": "Linked Accounts to Mother's Account",
     "impersonate_user": "Impersonate User",
-    "add_another_account": "Add Another Account"
+    "add_another_account": "Add Another Account",
+    "switch_to_parent": "Switch to Parent Account",
+    "logout": "Logout"
   },
   "survey": {
     "title": "Survey",
@@ -212,21 +222,15 @@
     }
   },
 
-  "payment": {
-    "details": "Transaction details",
-    "records": "Payment records",
-    "recent_transactions": "Your recent transactions",
-    "to": "To",
-    "reference_number": "Reference number",
-    "date": "Date"
-  },
-
   "profile": {
-    "age_to_date": "Age to date",
-    "day": "day",
-    "month": "month",
-    "year": "year",
-    "birth_certificate": "Birth certificate"
+    "child_profile_title": "Child Profile",
+    "parent_profile_title": "Personal Profile",
+    "age_today": "Age Today",
+    "dob": "Date of Birth",
+    "gender": "Gender",
+    "reset_password": "Reset Password",
+    "birth_certificate": "Birth certificate",
+    "uploaded_file":"uploaded file"
   },
 
   "marketing": {
@@ -253,6 +257,12 @@
     "upload": "Upload"
   },
   "payment": {
+    "details": "Transaction details",
+    "records": "Payment records",
+    "recent_transactions": "Your recent transactions",
+    "to": "To",
+    "reference_number": "Reference number",
+    "date": "Date",
     "currency": "EGP",
     "masked_name": "Jilan A*** G***",
     "masked_phone": "0123456789"
@@ -262,6 +272,7 @@
     "profile": "Profile",
     "billing": "Billing & Payments",
     "find_service": "Find Nearest Service",
-    "contact_us": "Contact Us"
+    "contact_us": "Contact Us",
+    "linked_accounts":"Linked Accounts"
   }
 }
