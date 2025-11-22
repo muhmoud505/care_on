@@ -29,12 +29,10 @@ const Signup = () => {
   const initialFormState = {
     name: '',
     email: '',
+    national_number: '', // Always include national_number
     id: null,
     type: 'patient',
   };
-  if (!isChild) {
-    initialFormState.national_number = '';
-  }
   const { form, errors, handleChange, checkFormValidity } = useForm(initialFormState);
 
   const formIsValid = checkFormValidity();
@@ -121,7 +119,7 @@ const Signup = () => {
           <>
             <FormField 
               required
-              title={t('auth.id')}
+              title={t('auth.national_id')}
               placeholder={t('auth.national_id_placeholder')}
               value={form.national_number}
               onChangeText={(text) => handleChange('national_number', text)}

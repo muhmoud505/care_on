@@ -125,8 +125,8 @@ export const MedicalRecordsProvider = ({ children }) => {
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   const createFetcher = ({ stateKey, stateSetter, types, sort = false }) => {
-    return useCallback(async (options = { force: false, loadMore: false }) => {
-      const { force, loadMore } = options;
+    return useCallback(async (options = { force: false, loadMore: false, per_page: 10 }) => {
+      const { force, loadMore, per_page } = options;
       const currentPagination = pagination[stateKey];
 
       // If we are loading more but there are no more pages, or if we are already loading, exit.
@@ -153,7 +153,7 @@ export const MedicalRecordsProvider = ({ children }) => {
           // If an apiType is provided, add it to the query to filter results.
           // This is crucial for correct pagination on category-specific tabs.
           const typeQuery = apiType ? `&type=${apiType}` : '';
-          const url = `${BASE_URL}/api/v1/medical-records?national_number=${nationalNumber}&page=${pageToFetch}${typeQuery}`;
+          const url = `${BASE_URL}/api/v1/medical-records?national_number=${nationalNumber}&page=${pageToFetch}${typeQuery}&per_page=${per_page}`;
 
           // Use the new authFetch wrapper. No need to manage tokens or headers here!
           const response = await authFetch(url);
@@ -202,7 +202,7 @@ export const MedicalRecordsProvider = ({ children }) => {
       } finally {
         setLoading(prev => ({ ...prev, [stateKey]: false }));
       }
-    }, [t, stateKey, types, sort, pagination, loading]);
+    }, [t, stateKey, types, sort, pagination, loading, user, authFetch]);
   };
   
   const fetchAllRecords = createFetcher({

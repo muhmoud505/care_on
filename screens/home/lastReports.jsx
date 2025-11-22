@@ -1,5 +1,5 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,30 +19,63 @@ const LastReports = () => {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const { user } = useAuth();
-  const { allRecords, loading, error, fetchAllRecords, loadMoreAllRecords } = useMedicalRecords();
+  const {
+    medicines,
+    results,
+    eshaa,
+    reports,
+    loading,
+    error,
+    fetchMedicines,
+    fetchResults,
+    fetchEshaas,
+    fetchReports,
+  } = useMedicalRecords();
+
+  // Combine the latest record from each category into a single array.
+  // useMemo ensures this array is only recalculated when the source data changes.
+  const lastRecords = useMemo(() => {
+    const combined = [
+      medicines[0], // Get the first (and only) item from the medicines array
+      results[0],
+      eshaa[0],
+      reports[0],
+    ].filter(Boolean); // .filter(Boolean) removes any undefined entries if a category has no records
+
+    // Sort the final list by date to show the most recent record first.
+    return combined.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [medicines, results, eshaa, reports]);
 
   // This effect runs every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       if (user?.token?.value) {
-        fetchAllRecords();
+        // Fetch the single latest record for each category.
+        fetchMedicines({ per_page: 1 });
+        fetchResults({ per_page: 1 });
+        fetchEshaas({ per_page: 1 });
+        fetchReports({ per_page: 1 });
       }
-    }, [user?.token?.value, fetchAllRecords])
+    }, [user?.token?.value, fetchMedicines, fetchResults, fetchEshaas, fetchReports])
   );
 
   const onRefresh = useCallback(() => {
-    fetchAllRecords({ force: true });
-  }, [fetchAllRecords]);
+    // When refreshing, force a refetch of the latest record for each category.
+    fetchMedicines({ force: true, per_page: 1 });
+    fetchResults({ force: true, per_page: 1 });
+    fetchEshaas({ force: true, per_page: 1 });
+    fetchReports({ force: true, per_page: 1 });
+  }, [fetchMedicines, fetchResults, fetchEshaas, fetchReports]);
 
   const handleItemExpand = (id, isExpanded) => {
     setExpandedItems(prev => ({ ...prev, [id]: isExpanded }));
   };
 
-  const areAllExpanded = allRecords.length > 0 && allRecords.every(item => expandedItems[`${item.type}-${item.id}`]);
+  const areAllExpanded = lastRecords.length > 0 && lastRecords.every(item => expandedItems[`${item.type}-${item.id}`]);
 
   const toggleAll = () => {
     const nextExpandedState = !areAllExpanded;
-    const newExpandedState = allRecords.reduce((acc, item) => {
+    const newExpandedState = lastRecords.reduce((acc, item) => {
       acc[`${item.type}-${item.id}`] = nextExpandedState;
       return acc;
     }, {});
@@ -75,19 +108,20 @@ const LastReports = () => {
     <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
       <CustomHeader text={t('home.last_reports_title')}/>
       <ListContainer
-        loading={loading.all}
-        error={error.all}
-        data={allRecords}
+        // Combine loading and error states from all categories
+        loading={loading.medicines || loading.results || loading.eshaa || loading.reports}
+        error={error.medicines || error.results || error.eshaa || error.reports}
+        data={lastRecords}
         renderItem={renderItem}
         keyExtractor={(item) => `${item.type}-${item.id}`} // This is already robust
         onRefresh={onRefresh}
-        refreshing={loading.all}
-        onEndReached={loadMoreAllRecords}
+        refreshing={loading.medicines || loading.results || loading.eshaa || loading.reports}
+        // onEndReached is not needed here since we are not paginating
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         emptyListMessage={t('home.no_reports_found')}
       />
-      {allRecords.length > 0 && !loading.all && (
+      {lastRecords.length > 0 && !(loading.medicines || loading.results || loading.eshaa || loading.reports) && (
         <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.expandButton}>
           <Image source={areAllExpanded ? Images.shrink : Images.r6} />
         </TouchableOpacity>

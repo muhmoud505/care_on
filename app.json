@@ -1,12 +1,11 @@
 {
   "expo": {
     "name": "HC",
-    "entryPoint": "expo-router/entry",
     "slug": "HC",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets2/images/logo.png",
-    "scheme": "HC",
+    "scheme": "hc",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
