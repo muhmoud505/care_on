@@ -13,6 +13,9 @@ export const AuthProvider = ({ children }) => {
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   
   useEffect(() => {
+    // Log the API_URL on startup for easy debugging.
+    console.log(`[AuthContext] API_URL is set to: ${API_URL}`);
+
     const loadUserFromStorage = async () => {
       try {
         const storedUser = await AsyncStorage.getItem('primary_user');
