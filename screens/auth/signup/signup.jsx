@@ -1,11 +1,12 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system'; // Import Expo FileSystem
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
   SafeAreaView,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -22,28 +23,19 @@ const Signup = () => {
   const { t, i18n } = useTranslation();
   const route = useRoute();
   const navigation=useNavigation()
-  const { isChild, birthdate, gender, age } = route.params || {};
+  const { birthdate, gender, age } = route.params || {};
   const [isProcessing, setIsProcessing] = useState(false); // State for image processing
 
   // Conditionally define the initial form state
   const initialFormState = {
     name: '',
     email: '',
-    national_number: '', // Always include national_number
-    id: null,
-    type: 'patient',
+    national_number: '',
+    nationalIdFile: null, // Use a more descriptive name
   };
   const { form, errors, handleChange, checkFormValidity } = useForm(initialFormState);
 
   const formIsValid = checkFormValidity();
-
-  useEffect(() => {
-    console.log('Current form data:', {
-      ...form,
-      isValid: formIsValid,
-      errors,
-    });
-  }, [form, errors]);
 
   const handleSignup = async () => {
     if (!formIsValid) return;
@@ -51,7 +43,7 @@ const Signup = () => {
     setIsProcessing(true);
     try {
       // 1. Read the image file and convert it to a Base64 string.
-      const base64Image = await FileSystem.readAsStringAsync(form.id.uri, {
+      const base64Image = await FileSystem.readAsStringAsync(form.nationalIdFile.uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
@@ -64,7 +56,7 @@ const Signup = () => {
         birthdate: birthdate,
         age: age,
         gender: gender,
-        isChild: !!isChild,
+        isChild: false, // This flow is always for adults
         // Your API expects the 'id' field to contain the image data.
         id: base64Image,
         type:'patient'
@@ -80,77 +72,74 @@ const Signup = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea,{direction:'rtl'}]}>
-      <CustomHeader text={route.params?.title || t('auth.create_account')}/>
-      <View style={[styles.headerTextContainer, { direction: i18n.dir() }]}>
-        <Text numberOfLines={2} style={styles.txt1}>
-          {(() => {
-            const fullText = t('auth.create_account_prompt');
-            const highlightText = t('auth.your_account');
-            const parts = fullText.split(highlightText);
-            return (
-              <>
-                {parts[0]}
-                <Text style={{ color: '#014CC4' }}>{highlightText}</Text>
-                {parts[1]}
-              </>
-            );
-          })()}
-        </Text>
-      </View>
-      
-      <View style={styles.formContainer}>
-        <FormField 
-          title={t('common.name')}
-          placeholder={t('common.name_placeholder')}
-          value={form.name}
-          onChangeText={(text) => handleChange('name', text)}
-          error={errors.name}
-        />  
-        <FormField 
-          required
-          title={t('auth.email')}
-          placeholder={t('auth.enter_email')}
-          value={form.email}
-          onChangeText={(text) => handleChange('email', text)}
-          error={errors.email}
-        />
-        {!isChild && (
-          <>
-            <FormField 
-              required
-              title={t('auth.national_id')}
-              placeholder={t('auth.national_id_placeholder')}
-              value={form.national_number}
-              onChangeText={(text) => handleChange('national_number', text)}
-              keyboardType="numeric"
-              error={errors.national_number}
-            />
-          </>
-        )}
-      </View>
-      
-      <Uploader
-        required 
-        title={isChild ? t('profile.birth_certificate') : t('auth.national_id')}
-        color='#80D28040'
-        onFileSelect={(file) => handleChange('id', file)}
-        error={errors.id}
-      />
-      
-      <TouchableOpacity
-        onPress={handleSignup}
-        activeOpacity={0.7}
-        disabled={!formIsValid || isProcessing}
-        style={[styles.submitButton, (!formIsValid || isProcessing) && styles.disabledButton]}
+    <SafeAreaView style={[styles.safeArea, { direction: i18n.dir() }]}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <CustomHeader text={route.params?.title || t('auth.create_account')}/>
+        <View style={styles.headerTextContainer}>
+          <Text numberOfLines={2} style={styles.txt1}>
+            {(() => {
+              const fullText = t('auth.create_account_prompt');
+              const highlightText = t('auth.your_account');
+              const parts = fullText.split(highlightText);
+              return (
+                <>
+                  {parts[0]}
+                  <Text style={{ color: '#014CC4' }}>{highlightText}</Text>
+                  {parts[1]}
+                </>
+              );
+            })()}
+          </Text>
+        </View>
         
-      >
-        {isProcessing ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.submitButtonText}>{t('common.next')}</Text>
-        )}
-      </TouchableOpacity>
+        <View style={styles.formContainer}>
+          <FormField 
+            title={t('common.name')}
+            placeholder={t('common.name_placeholder')}
+            value={form.name}
+            onChangeText={(text) => handleChange('name', text)}
+            error={errors.name}
+          />  
+          <FormField 
+            required
+            title={t('auth.email')}
+            placeholder={t('auth.enter_email')}
+            value={form.email}
+            onChangeText={(text) => handleChange('email', text)}
+            error={errors.email}
+          />
+          <FormField 
+            required
+            title={t('auth.national_id')}
+            placeholder={t('auth.national_id_placeholder')}
+            value={form.national_number}
+            onChangeText={(text) => handleChange('national_number', text)}
+            keyboardType="numeric"
+            error={errors.national_number}
+          />
+        </View>
+        
+        <Uploader
+          required 
+          title={t('auth.national_id')}
+          color='#80D28040'
+          onFileSelect={(file) => handleChange('nationalIdFile', file)}
+          error={errors.nationalIdFile}
+        />
+        
+        <TouchableOpacity
+          onPress={handleSignup}
+          activeOpacity={0.7}
+          disabled={!formIsValid || isProcessing}
+          style={[styles.submitButton, (!formIsValid || isProcessing) && styles.disabledButton]}
+        >
+          {isProcessing ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitButtonText}>{t('common.next')}</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -160,28 +149,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: StatusBar.currentHeight,
-    
-    
+  },
+  scrollContainer: {
+    paddingBottom: hp(5),
   },
   headerTextContainer: {
-    // Styles for the header text block
-    marginHorizontal: wp(2.5)
-
+    marginHorizontal: wp(5),
+    marginVertical: hp(2),
   },
   txt1: {
     fontSize: Math.min(wp(5.5), 22),
     fontWeight: 'bold',
-    textAlign: 'left',
+    textAlign: 'auto', // Let the direction style handle alignment
   },
   formContainer: {
-    // Container for FormField components
+    paddingHorizontal: wp(2.5),
+    gap: hp(1.5),
+    marginBottom: hp(2),
   },
   submitButton: {
     backgroundColor: '#014CC4',
     width: wp(90),
     height: hp(7),
-    marginHorizontal: wp(5),
-    marginVertical: hp(5),
+    alignSelf: 'center',
+    marginTop: hp(4),
     borderRadius: wp(4),
     justifyContent: 'center',
     alignItems: 'center',

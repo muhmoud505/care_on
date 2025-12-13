@@ -39,6 +39,8 @@
     "error": "Error",
     "ok": "OK",
     "cancel": "Cancel",
+    "name": "Name",
+    "name_placeholder": "Enter your name",
     "yes": "Yes",
     "no": "No",
     "lets_go": "Let's go!",
@@ -113,6 +115,7 @@
     "signup": "Sign up",
     "login": "Log in",
     "national_id": "National ID",
+    "national_id_placeholder": "Enter your national ID",
     "enter_national_id": "Enter your national ID",
     "password": "Password",
     "enter_password": "Enter your password",
@@ -126,7 +129,9 @@
     "enter_code": "Please enter the code",
     "resend_code": "Resend code",
     "enter_passwords": "Please enter the passwords",
+    "create_account": "Create Account",
     "create_your_account_prompt": "To create your account, please fill in the following data..",
+    "your_account": "your account",
     "create_child_account_prompt": "To create your child's account, please fill in the following data..",
     "linked_accounts": "Linked accounts",
     "choose_account_type": "Choose account type",
@@ -153,7 +158,8 @@
   },
   "errors": {
     "add_medicine_failed": "Could not save medicine. Please try again.",
-    "add_record_failed": "Could not save record. Please try again."
+    "add_record_failed": "Could not save record. Please try again.",
+    "image_processing_failed": "Failed to process image. Please try another one."
   },
   "account": {
     "linked_accounts": "Linked Accounts",
@@ -234,7 +240,8 @@
   },
 
   "marketing": {
-    "health_in_pocket": "Your health in your pocket",
+    "health_in_pocket_part1": "Your health",
+    "health_in_pocket_part2": "in your pocket",
     "anytime_anywhere": "Anytime - Anywhere",
     "login": "Log in",
     "register": "Register"

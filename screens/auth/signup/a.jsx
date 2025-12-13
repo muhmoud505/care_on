@@ -15,7 +15,7 @@ const S1 = () => {
       <Image style={styles.img} source={require('../../../assets2/images/img1.png')}/>
      <View style={styles.v1} >
       <Text style={styles.txt1} >
-        {t('marketing.health_in_pocket_part1')} <Text style={styles.txt2}>{t('marketing.health_in_pocket_part2')}</Text> {t('marketing.health_in_pocket_part3')}
+        {t('marketing.health_in_pocket_part1')} <Text style={styles.txt2}>{t('marketing.health_in_pocket_part2')}</Text>
       </Text>
       <Text style={styles.txt3}>{t('marketing.anytime_anywhere')}</Text>
     </View>

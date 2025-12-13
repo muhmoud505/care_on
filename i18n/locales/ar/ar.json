@@ -132,8 +132,7 @@
   },
   "marketing": {
     "health_in_pocket_part1": "صحتك",
-    "health_in_pocket_part2": "في",
-    "health_in_pocket_part3": "جيبك",
+    "health_in_pocket_part2": "في جيبك",
     "anytime_anywhere": "أي وقت - أي مكان",
     "error_fetching_data": "حدث خطأ أثناء جلب البيانات"
   },
