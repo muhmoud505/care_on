@@ -16,8 +16,8 @@ const SplashScreen = () => {
     <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
       <Image source={Images.logo}/>
       <Text style={styles.text}>
-        <Text style={{color: '#014CC4'}}>{t('Care')}</Text>
-        <Text style={{color: '#80D280'}}>{t('On')}</Text>
+        <Text style={{color: '#014CC4'}}>Rayaa </Text>
+        <Text style={{color: '#80D280'}}>360</Text>
       </Text>
       {/* <Test/> */}
     </SafeAreaView>

@@ -118,17 +118,15 @@ const styles = StyleSheet.create({
         textAlign:'right'
     },
     formContainer:{
-      paddingHorizontal: wp(3),
+      paddingHorizontal: wp(5),
       paddingTop: hp(2),
     },
      nextButton: {
     backgroundColor: '#014CC4',
     height: hp(7),
     borderRadius: wp(4),
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: wp(90),
-    alignSelf: 'center',
+    justifyContent: 'center', // These properties are now handled by the container
+    alignItems: 'center', // and the button's own padding/margin
     marginTop: hp(5)
   },
   disabledButton: {

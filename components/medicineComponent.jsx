@@ -19,7 +19,7 @@ const Medicine = ({
       title={title}
       icon={icon}
       isExpanded={expanded}
-      onToggle={(isExpanded) => onExpandedChange(id, isExpanded)}
+      onToggle={onExpandedChange}
     >
       <View style={styles.expandedContent}>
         <View style={styles.detailRow}>

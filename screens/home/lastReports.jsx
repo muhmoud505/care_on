@@ -36,11 +36,11 @@ const LastReports = () => {
   // useMemo ensures this array is only recalculated when the source data changes.
   const lastRecords = useMemo(() => {
     const combined = [
-      medicines[0], // Get the first (and only) item from the medicines array
-      results[0],
-      eshaa[0],
-      reports[0],
-    ].filter(Boolean); // .filter(Boolean) removes any undefined entries if a category has no records
+      medicines[0] && { ...medicines[0], type: 'medicine' },
+      results[0] && { ...results[0], type: 'result' },
+      eshaa[0] && { ...eshaa[0], type: 'eshaa' },
+      reports[0] && { ...reports[0], type: 'report' },
+    ].filter(Boolean); // Removes any undefined entries if a category has no records
 
     // Sort the final list by date to show the most recent record first.
     return combined.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -49,13 +49,11 @@ const LastReports = () => {
   // This effect runs every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      if (user?.token?.value) {
-        // Fetch the single latest record for each category.
-        fetchMedicines({ per_page: 1 });
-        fetchResults({ per_page: 1 });
-        fetchEshaas({ per_page: 1 });
-        fetchReports({ per_page: 1 });
-      }
+      // Fetch the latest record (per_page: 1) for each category.
+      fetchMedicines({ per_page: 1 });
+      fetchResults({ per_page: 1 });
+      fetchEshaas({ per_page: 1 });
+      fetchReports({ per_page: 1 });
     }, [user?.token?.value, fetchMedicines, fetchResults, fetchEshaas, fetchReports])
   );
 
@@ -71,7 +69,10 @@ const LastReports = () => {
     setExpandedItems(prev => ({ ...prev, [id]: isExpanded }));
   };
 
-  const areAllExpanded = lastRecords.length > 0 && lastRecords.every(item => expandedItems[`${item.type}-${item.id}`]);
+  // Check if there are any records AND if every one of them is marked as expanded.
+  // The `lastRecords.length > 0` check is crucial because `[].every(...)` returns true by default.
+  const areAllExpanded =
+    lastRecords.length > 0 && lastRecords.every(item => !!expandedItems[`${item.type}-${item.id}`]);
 
   const toggleAll = () => {
     const nextExpandedState = !areAllExpanded;
@@ -104,12 +105,29 @@ const LastReports = () => {
     }
   };
 
+  // Determine if the toggle button should be visible
+  const isToggleButtonVisible = areAllExpanded
+
+  // Debugging logs to understand the state
+  console.log('DEBUG: lastRecords.length =', lastRecords.length);
+  console.log('DEBUG: loading.medicines =', loading.medicines);
+  console.log('DEBUG: loading.results =', loading.results);
+  console.log('DEBUG: loading.eshaa =', loading.eshaa);
+  console.log('DEBUG: loading.reports =', loading.reports);
+  console.log('DEBUG: isToggleButtonVisible =', isToggleButtonVisible);
+
+  // Define the specific style for the add button based on toggle button visibility
+  const finalAddButtonStyle = isToggleButtonVisible
+    ? styles.addButtonHigh // When toggle is visible, add button is higher
+    : styles.addButtonLow;  // When toggle is NOT visible, add button is lower (takes toggle's place)
   return (
     <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
       <CustomHeader text={t('home.last_reports_title')}/>
       <ListContainer
         // Combine loading and error states from all categories
-        loading={loading.medicines || loading.results || loading.eshaa || loading.reports}
+        // Only show the full-screen loader if there are no records yet.
+        // Otherwise, the pull-to-refresh indicator will be used.
+        loading={lastRecords.length === 0 && (loading.medicines || loading.results || loading.eshaa || loading.reports)}
         error={error.medicines || error.results || error.eshaa || error.reports}
         data={lastRecords}
         renderItem={renderItem}
@@ -121,13 +139,16 @@ const LastReports = () => {
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         emptyListMessage={t('home.no_reports_found')}
       />
-      {lastRecords.length > 0 && !(loading.medicines || loading.results || loading.eshaa || loading.reports) && (
-        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.expandButton}>
+      {isToggleButtonVisible && (
+        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
           <Image source={areAllExpanded ? Images.shrink : Images.r6} />
         </TouchableOpacity>
       )}
       {/* Add record button */}
-      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddRecordSelector')}>
+      <TouchableOpacity
+        style={finalAddButtonStyle} // Apply the determined style
+        onPress={() => navigation.navigate('AddRecordSelector')}
+      >
         <Image source={Images.add} />
       </TouchableOpacity>
     </SafeAreaView>
@@ -139,7 +160,7 @@ export default LastReports;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8', // A light background color for consistency
+    backgroundColor: '#F5F9FF', // A light background color for consistency
   },
   listContent: {
     paddingHorizontal: 16,
@@ -148,16 +169,22 @@ const styles = StyleSheet.create({
   separator: {
     height: 12,
   },
-  addButton: {
+  addButtonHigh: { // Position when toggle button IS visible
     position: 'absolute',
-    bottom: hp(13), // Increased to position it above the bottom tab bar
+    bottom: hp(24),
     right: wp(5),
     zIndex: 1, // Ensure the button is rendered on top of other elements
   },
-  expandButton: {
+  addButtonLow: { // Position when toggle button IS NOT visible (takes its place)
     position: 'absolute',
-    bottom: hp(10),
-    left: wp(5),
+    bottom: hp(16), // Lower position (when toggle is hidden)
+    right: wp(5),
+    zIndex: 1,
+  },
+  toggleButton: {
+    position: 'absolute',
+    bottom: hp(16), // Raised to be clearly above the tab bar
+    right: wp(8), // Aligned with the add button
     zIndex: 1,
   },
 });

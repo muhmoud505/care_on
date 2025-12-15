@@ -61,6 +61,12 @@ const Medicines = () => {
     setExpandedItems(newExpandedState);
   };
 
+  // Determine if the toggle button should be visible
+  const isToggleButtonVisible = areAllExpanded
+
+  const finalAddButtonStyle = isToggleButtonVisible
+    ? styles.addButtonHigh
+    : styles.addButtonLow;
   const renderItem = ({ item }) => (
     <Medicine
       title={item.title} // Assuming item.title is already the translated/displayable title
@@ -91,13 +97,18 @@ const Medicines = () => {
         onEndReached={loadMoreMedicines}
         contentContainerStyle={styles.listContent}
       />
-      {medicines.length > 0 && !loading.medicines && (
-        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.expandButton}>
+      {isToggleButtonVisible && (
+        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
           <Image source={areAllExpanded ? Images.shrink : Images.r6} />
         </TouchableOpacity>
       )}
       
-      
+      <TouchableOpacity
+        style={finalAddButtonStyle}
+        onPress={() => navigation.navigate('addMedicine')}
+      >
+        <Image source={Images.add} />
+      </TouchableOpacity>
      
       <StatusBar barStyle={'dark-content'}  backgroundColor="transparent"  />
     </SafeAreaView>
@@ -107,24 +118,31 @@ const Medicines = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#F5F9FF',
     paddingTop: hp(1.2),
   },
   listContent: {
     paddingHorizontal: wp(4),
-    paddingBottom: hp(15), // Increased padding to clear the tab bar and the add button
+    paddingBottom: hp(20), // Increased padding to clear the tab bar and floating buttons
     gap: hp(1.2),
   },
-  addButton: {
+  addButtonHigh: { // Position when toggle button IS visible
     position: 'absolute',
-    bottom: hp(10),
+    bottom: hp(24),
     right: wp(5),
+    zIndex: 1,
   },
-  expandButton: {
+  addButtonLow: { // Position when toggle button IS NOT visible (takes its place)
     position: 'absolute',
-    bottom: hp(10),
-    left: wp(10),
-    paddingBottom:hp(3)
+    bottom: hp(16),
+    right: wp(5),
+    zIndex: 1,
+  },
+   toggleButton: {
+    position: 'absolute',
+    bottom: hp(16), // Raised to be clearly above the tab bar
+    right: wp(8), // Aligned with the add button
+    zIndex: 1,
   },
 });
 

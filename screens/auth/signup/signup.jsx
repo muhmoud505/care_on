@@ -35,7 +35,9 @@ const Signup = () => {
   };
   const { form, errors, handleChange, checkFormValidity } = useForm(initialFormState);
 
-  const formIsValid = checkFormValidity();
+  // Check that every value in the form object is truthy (i.e., not an empty string or null).
+  // This ensures all fields must be filled before the form is considered valid.
+  const formIsValid = Object.values(form).every(value => !!value);
 
   const handleSignup = async () => {
     if (!formIsValid) return;
@@ -94,6 +96,7 @@ const Signup = () => {
         
         <View style={styles.formContainer}>
           <FormField 
+            required
             title={t('common.name')}
             placeholder={t('common.name_placeholder')}
             value={form.name}
@@ -117,20 +120,19 @@ const Signup = () => {
             keyboardType="numeric"
             error={errors.national_number}
           />
+          <Uploader
+            required 
+            title={t('auth.national_id')}
+            color='#80D28040'
+            onFileSelect={(file) => handleChange('nationalIdFile', file)}
+            error={errors.nationalIdFile}
+          />
         </View>
-        
-        <Uploader
-          required 
-          title={t('auth.national_id')}
-          color='#80D28040'
-          onFileSelect={(file) => handleChange('nationalIdFile', file)}
-          error={errors.nationalIdFile}
-        />
         
         <TouchableOpacity
           onPress={handleSignup}
           activeOpacity={0.7}
-          disabled={!formIsValid || isProcessing}
+          disabled={!formIsValid }
           style={[styles.submitButton, (!formIsValid || isProcessing) && styles.disabledButton]}
         >
           {isProcessing ? (
@@ -151,19 +153,22 @@ const styles = StyleSheet.create({
     paddingTop: StatusBar.currentHeight,
   },
   scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingBottom: hp(5),
   },
   headerTextContainer: {
-    marginHorizontal: wp(5),
+    width: wp(90),
     marginVertical: hp(2),
   },
   txt1: {
     fontSize: Math.min(wp(5.5), 22),
     fontWeight: 'bold',
-    textAlign: 'auto', // Let the direction style handle alignment
+    textAlign: 'center', 
   },
   formContainer: {
-    paddingHorizontal: wp(2.5),
+    width: wp(90),
     gap: hp(1.5),
     marginBottom: hp(2),
   },
@@ -171,7 +176,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#014CC4',
     width: wp(90),
     height: hp(7),
-    alignSelf: 'center',
     marginTop: hp(4),
     borderRadius: wp(4),
     justifyContent: 'center',

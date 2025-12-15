@@ -46,8 +46,9 @@ const Signup2 = () => {
     birthCertificate: null,
   });
 
-  // The hook now provides the validity check
-  const isFormValid = checkFormValidity();
+  // Check that every value in the form object is truthy (i.e., not an empty string or null).
+  // This ensures all fields must be filled before the form is considered valid.
+  const isFormValid = Object.values(form).every(value => !!value);
 
   const handleNext = async () => {
     if (!isFormValid) return;
@@ -108,6 +109,7 @@ const Signup2 = () => {
         
         <View style={styles.formContainer}>
           <FormField 
+            required
             title={t('auth.child_name')}
             placeholder={t('auth.child_name_placeholder')}
             value={form.name}
@@ -167,6 +169,9 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingBottom: hp(5),
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTextContainer: {
     marginTop: hp(2),
@@ -175,11 +180,13 @@ const styles = StyleSheet.create({
     width: wp(90),
   },
   headerText: {
-    fontSize: wp(5.5),
+    fontSize: Math.min(wp(5.5), 22),
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   headerHighlight: {
-    color: '#80D280',
+    // Using the blue from the other screen for consistency
+    color: '#014CC4',
   },
   formContainer: {
     gap: hp(2),
@@ -191,7 +198,6 @@ const styles = StyleSheet.create({
     borderRadius: wp(3),
     justifyContent: 'center',
     alignItems: 'center',
-    alignSelf: 'center',
     marginTop: hp(4),
   },
   disabledButton: {

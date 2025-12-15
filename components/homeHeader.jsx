@@ -7,17 +7,10 @@ import { useAuth } from '../contexts/authContext';
 export const HomeHeader=({ showUserInfo = true })=>{
   const {user}=useAuth()
   
-  
-  const nationalid=user?.user?.resource?.national_number;
-  
-  
   const navigation=useNavigation()
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
-
-  const maskedNationalId = nationalid && nationalid.length > 0
-    ? `${nationalid.charAt(0)+nationalid.charAt(1)+nationalid.charAt(2)+nationalid.charAt(3)  }${'x'.repeat(nationalid.length - 4)}`
-    : '';
+  const userName = user?.user?.name;
   
   return(
     <View style={[styles.headerContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
@@ -31,7 +24,7 @@ export const HomeHeader=({ showUserInfo = true })=>{
         <View style={[styles.greetingContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <Text style={styles.txt1} numberOfLines={1}>
             {t('home.hello')}{' '}
-            <Text style={styles.txt2}>{maskedNationalId}</Text>
+            <Text style={styles.txt2}>{userName || ''}</Text>
             <Text style={{ color: '#888888' }}>!</Text>
           </Text>
           <Image source={Images.wave} style={[styles.waveIcon, { [isRTL ? 'marginRight' : 'marginLeft']: 5 }]} />

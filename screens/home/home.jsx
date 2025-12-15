@@ -3,7 +3,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HomeHeader } from '../../components/homeHeader';
 import SurveyPopup from '../../components/SurveyPopup';
@@ -72,6 +72,8 @@ const Home = () => {
 
           // If the survey has been completed, stop here. This was the missing check.
           if (hasCompletedSurvey === 'true') {
+            // If the survey is complete, ensure the "skipped" banner is not shown.
+            setSurveySkippedThisSession(false);
             return;
           }
 
@@ -111,6 +113,19 @@ const Home = () => {
     <SafeAreaView style={[styles.mainContainer, { direction: i18n.dir() }]}>
       
       <HomeHeader/>
+
+      {surveySkippedThisSession && (
+        <View style={styles.surveyReminderWrapper}>
+         
+          <TouchableOpacity
+            style={styles.surveyReminderContainer}
+            onPress={() => navigation.navigate('survey')}
+          >
+             <Image source={Images.alert}/>
+            <Text style={styles.surveyReminderText}>{t('home.complete_survey_prompt', { defaultValue: 'يرجي ملئ الاستبيان لاكمال بيانات الملف الشخصي' })}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       
       {menuItems.map((item) => (
         <TouchableOpacity
@@ -139,22 +154,54 @@ export default Home
 const styles = StyleSheet.create({
   mainContainer:{
     flex:1,
-    display:'flex',
-    backgroundColor:'#fff',
-    
-    
+    backgroundColor:'#F5F9FF',
   },
   secContainer:{
-    display:'flex',
     flexDirection:'row',
-    marginVertical: hp(2),
-    marginHorizontal: wp(10),
+    backgroundColor: '#fff',
+    marginVertical: hp(1.5),
+    marginHorizontal: wp(5),
     gap: wp(5),
-    alignItems: 'center'
+    alignItems: 'center',
+    padding: wp(4),
+    borderRadius: wp(3),
+    // Adding a subtle shadow for depth
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   txt1:{
-    fontWeight:400,
+    // Using a slightly bolder font weight for better readability
+    fontWeight:'500',
     fontSize: Math.min(wp(5), 20),
     lineHeight: hp(4),
+  },
+  surveyReminderWrapper: {
+    paddingHorizontal: wp(5),
+    paddingTop: hp(1),
+  },
+  surveyReminderContainer: {
+    backgroundColor: '#F8444F',
+    width: wp(87.2), // Responsive width equivalent to 327px on a standard screen
+    height: hp(4.5), // Responsive height equivalent to 36px on a standard screen
+    opacity: 0.6,// A light yellow background
+    paddingHorizontal: wp(4), // Use horizontal padding instead of all-around padding
+    borderRadius: wp(3),
+ // An amber border
+    flexDirection: 'row', // Align icon and text
+    alignItems: 'center', // Vertically center content
+    justifyContent: 'center',
+    gap: wp(2), // Add space between the icon and the text
+  },
+  surveyReminderText: {
+    color: '#000000', // A dark text color for readability
+    fontWeight: '700',
+    fontSize: 10,
+    textAlign: 'center',
   },
 })

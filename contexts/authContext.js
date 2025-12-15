@@ -128,8 +128,7 @@ export const AuthProvider = ({ children }) => {
       });
       
       
-    console.log(response);
-    
+  
       
       // Read the response body as text first to avoid JSON parsing errors on non-JSON responses.
       const responseText = await response.text();
@@ -138,6 +137,8 @@ export const AuthProvider = ({ children }) => {
       
       try {
         data = JSON.parse(responseText);
+        console.log(data);
+        
       } catch (e) {
         // The response was not valid JSON. We'll check response.ok and use the raw text in the error if needed.
         // If the response is not ok, the responseText itself is likely the error message.

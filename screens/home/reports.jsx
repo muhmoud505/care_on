@@ -46,6 +46,12 @@ const Reports = () => {
     setExpandedItems(newExpandedState);
   };
 
+  // Determine if the toggle button should be visible
+  const isToggleButtonVisible = areAllExpanded
+
+  const finalAddButtonStyle = isToggleButtonVisible
+    ? styles.addButtonHigh
+    : styles.addButtonLow;
   const renderItem = ({ item }) => (
     <Report
       {...item}
@@ -69,13 +75,18 @@ const Reports = () => {
         contentContainerStyle={styles.listContent}
         emptyListMessage={t('home.no_doctor_reports_found')}
       />
-      {reports.length > 0 && !loading.reports && (
-        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.ele}>
+      {isToggleButtonVisible && (
+        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
           <Image source={areAllExpanded ? Images.shrink : Images.r6} />
         </TouchableOpacity>
       )}
       {/* Add report button */}
-    
+      <TouchableOpacity
+        style={finalAddButtonStyle}
+        onPress={() => navigation.navigate('addReport')}
+      >
+        <Image source={Images.add} />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -85,18 +96,31 @@ export default Reports;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#F5F9FF',
   },
   listContent: {
     paddingVertical: hp(1.2),
     paddingHorizontal: wp(4), // Keep horizontal padding
-    paddingBottom: hp(15), // Add padding to clear the tab bar and floating buttons
+    paddingBottom: hp(20), // Add padding to clear the tab bar and floating buttons
     gap: hp(1.2),
   },
-  ele: {
+  addButtonHigh: { // Position when toggle button IS visible
     position: 'absolute',
-    bottom: hp(13),
-    left: wp(10),
+    bottom: hp(24),
+    right: wp(5),
+    zIndex: 1,
+  },
+  addButtonLow: { // Position when toggle button IS NOT visible (takes its place)
+    position: 'absolute',
+    bottom: hp(16),
+    right: wp(5),
+    zIndex: 1,
+  },
+   toggleButton: {
+    position: 'absolute',
+    bottom: hp(16), // Raised to be clearly above the tab bar
+    right: wp(8), // Aligned with the add button
+    zIndex: 1,
   },
   addButton: {
     position: 'absolute',

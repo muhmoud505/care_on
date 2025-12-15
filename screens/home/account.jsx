@@ -31,11 +31,12 @@ const Account = () => {
   useFocusEffect(
     React.useCallback(() => {
       // The token is consistently located at user.token.value
-      const token = user?.token?.value;
-      if (token) {
-        fetchChildren(token);
+      if (user?.token?.value) {
+        // We don't need to pass the token here if fetchChildren can access it from the context's state.
+        // The function from useCallback's closure will be the latest one.
+        fetchChildren(user?.token?.value);
       }
-    }, [user?.token?.value, fetchChildren]) // Re-run only if the token value changes
+    }, [user?.token?.value]) // Re-run only if the token value changes. fetchChildren is stable.
   );
 
   const handleSwitchAccount = (childAccount) => {

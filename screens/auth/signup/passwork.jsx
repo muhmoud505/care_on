@@ -165,28 +165,30 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: StatusBar.currentHeight,
+    paddingTop: StatusBar.currentHeight
   },
   headerTextContainer: {
     // Styles for the header text block
-    marginHorizontal: wp(2.5)
+    paddingHorizontal: wp(5),
+    paddingTop: hp(2)
 
   },
   txt1: {
     fontSize: Math.min(wp(5.5), 22),
     fontWeight: 'bold',
-    textAlign: 'left',
+    textAlign: 'center',
   },
   formContainer: {
     // Container for FormField components
     marginTop: hp(4),
+    paddingHorizontal: wp(5),
   },
   submitButton: {
     backgroundColor: '#014CC4',
-    width: wp(90),
     height: hp(7),
     marginHorizontal: wp(5),
-    marginVertical: hp(5),
+    marginTop: 'auto', // Push to the bottom
+    marginBottom: hp(4),
     borderRadius: wp(4),
     justifyContent: 'center',
     alignItems: 'center',

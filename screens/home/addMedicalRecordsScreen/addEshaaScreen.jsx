@@ -144,12 +144,13 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     paddingTop: hp(3),
-    paddingBottom: hp(4),
+    paddingBottom: hp(4), // Add padding to the bottom
+    paddingHorizontal: wp(5), // Add horizontal padding to center the content
   },
   saveButton: {
     backgroundColor: '#007AFF', // Example color, change to your theme color
     borderRadius: 8,
-    marginHorizontal: wp(7.5),
+    // marginHorizontal is no longer needed as padding is on the container
     paddingVertical: hp(2),
     alignItems: 'center',
     marginTop: hp(4),
