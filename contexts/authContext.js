@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
             setChildAccounts(JSON.parse(storedChildren));
           }
           // Always fetch children using the consistent user object structure.
-          fetchChildren(userObject.token.value);
+          fetchChildren(userObject.token.value, userObject.user.id);
         }
       } catch (error) {
         console.error("Failed to load user from storage", error);
@@ -104,20 +104,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const fetchChildren = async (token) => {
+  const fetchChildren = async (token, userId) => {
     console.log(token);
+    console.log(userId);
+    
     
     // The token is now passed directly. We can still use refreshToken to ensure it's not expired, but the primary check is if a token was passed.
-    if (!token) {
+    if (!token || !userId) {
     
       
-      console.log("No token provided, cannot fetch children.");
+      console.log("No token or userId provided, cannot fetch children.");
       return;
     }
     try {
       console.log('Fetching children with provided token...');
       
-      const response = await fetch(`${API_URL}/api/v1/auth/users`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/users?user_id=${userId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -156,12 +158,6 @@ export const AuthProvider = ({ children }) => {
       // If data parsing failed but the response was 'ok', data might be undefined.
       const fetchedChildren = data?.data || [];
 
-      // We need to store children with their tokens. The GET /users endpoint might not return tokens.
-      // For now, we'll just store the user info. The logic in PasswordScreen handles new children with tokens.
-      // A more robust solution might need to merge this list with the one in AsyncStorage that has tokens.
-      setChildAccounts(fetchedChildren);
-      
-      await AsyncStorage.setItem('child_accounts', JSON.stringify(fetchedChildren));
     } catch (error) {
       console.error("Failed to fetch children:", error);
       // Don't throw, as this might not be a critical failure
@@ -206,7 +202,7 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem('primary_user', JSON.stringify(data.data));
       setUser(data.data);
       // After successful login, fetch the children associated with this user
-      await fetchChildren(data.data.token.value);
+      await fetchChildren(data.data.token.value, data.data.user.id);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -228,7 +224,7 @@ export const AuthProvider = ({ children }) => {
     await AsyncStorage.setItem('primary_user', JSON.stringify(userObject));
     setUser(userObject);
     // After setting the new user, fetch their children (which should be an empty list)
-    await fetchChildren(userObject.token.value);
+    await fetchChildren(userObject.token.value, userObject.user.id);
   };
 
   const logout = async () => {
