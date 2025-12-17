@@ -65,7 +65,6 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
     // Add the password fields to the object.
     signupData.password = form.password;
     signupData.password_confirmation = form.password_confirmation;
-    signupData.isChild = route.params?.signupData?.isChild;
 
     try {
       // Perform the signup API call

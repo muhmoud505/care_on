@@ -30,13 +30,12 @@ const Account = () => {
   // Use useFocusEffect to refetch children every time the screen is viewed
   useFocusEffect(
     React.useCallback(() => {
-      // The token is consistently located at user.token.value
-      if (user?.token?.value) {
-        // We don't need to pass the token here if fetchChildren can access it from the context's state.
-        // The function from useCallback's closure will be the latest one.
-        fetchChildren(user?.token?.value);
+      // Ensure both the token and user ID are available before fetching.
+      if (user?.token?.value && user?.user?.id) {
+        // Pass both the token and the parent's user ID to fetch the associated children.
+        fetchChildren(user.token.value, user.user.id);
       }
-    }, [user?.token?.value]) // Re-run only if the token value changes. fetchChildren is stable.
+    }, [user?.token?.value, user?.user?.id]) // Re-run if user or fetchChildren changes.
   );
 
   const handleSwitchAccount = (childAccount) => {

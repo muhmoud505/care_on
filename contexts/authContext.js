@@ -119,7 +119,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Fetching children with provided token...');
       
-      const response = await fetch(`${API_URL}/api/v1/auth/users?user_id=${userId}`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/users`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -156,8 +156,13 @@ export const AuthProvider = ({ children }) => {
       }
       
       // If data parsing failed but the response was 'ok', data might be undefined.
-      const fetchedChildren = data?.data || [];
+      const fetchedChildren = data?.data || []; // This is the list of children from the API
 
+      // --- FIX: Update state and storage with the fetched children ---
+      setChildAccounts(fetchedChildren);
+      await AsyncStorage.setItem('child_accounts', JSON.stringify(fetchedChildren));
+      // --- END FIX ---
+      
     } catch (error) {
       console.error("Failed to fetch children:", error);
       // Don't throw, as this might not be a critical failure
@@ -241,12 +246,36 @@ export const AuthProvider = ({ children }) => {
   const signup = async (userData) => {
     // userData is now a plain JavaScript object
     setIsAuthLoading(true);
+    console.log(userData);
+    
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/users`, {
+      // Separate the 'id' (birth certificate image) from the rest of the user data.
+      const { id: birthCertificateImage, parent_id, ...otherUserData } = userData;
+      
+      // Create a FormData object to handle the image upload along with other data.
+      const formData = new FormData();
+
+      // Append all other key-value pairs to the formData object.
+      // This ensures all fields, including the optional 'parent_id', are included.
+      for (const key in otherUserData) {
+        if (otherUserData[key] !== undefined && otherUserData[key] !== null) {
+          formData.append(key, otherUserData[key]);
+        }
+      }
+
+      // Construct the URL with 'id' and 'parent_id' (if it exists) as query parameters.
+      let url = `${API_URL}/api/v1/auth/users`;
+      if (parent_id) {
+        url += `?user_id=${parent_id}`;
+      }
+
+      console.log("Constructed Signup URL:", url); // For debugging
+
+      const response = await fetch(url, {
         method: 'POST',
-        body: JSON.stringify(userData), // Convert the object to a JSON string
+        body: formData, // Send the FormData object.
         headers: {
-          'Content-Type': 'application/json',
+          // 'Content-Type': 'multipart/form-data' is set automatically by fetch for FormData.
           "accept": "application/json"
         },
       });

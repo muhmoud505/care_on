@@ -36,6 +36,8 @@ const Signup2 = () => {
   // Get parent user from global state (e.g., Redux).
   const { user: parentUser } = useAuth();
 
+  
+
   const [isProcessing, setIsProcessing] = useState(false);
   
   // Use the custom hook for form state management
@@ -73,7 +75,7 @@ const Signup2 = () => {
         // The backend will use this to link the accounts.
         // Also, pass the flag along to the next screen.
         isParentAddingChild: isParentAddingChild,
-        ...(isParentAddingChild && parentUser && { parent_id: parentUser.id }),
+        ...(isParentAddingChild && parentUser?.user?.id && { parent_id: parentUser?.user?.id }),
       };
 
       navigation.navigate('password', { signupData });
