@@ -271,13 +271,20 @@ export const AuthProvider = ({ children }) => {
 
       console.log("Constructed Signup URL:", url); // For debugging
 
+      const headers = {
+        // 'Content-Type': 'multipart/form-data' is set automatically by fetch for FormData.
+        "accept": "application/json"
+      };
+
+      // If creating a child account, add the parent's auth token to the header.
+      if (parent_id && user?.token?.value) {
+        headers['Authorization'] = `Bearer ${user.token.value}`;
+      }
+
       const response = await fetch(url, {
         method: 'POST',
         body: formData, // Send the FormData object.
-        headers: {
-          // 'Content-Type': 'multipart/form-data' is set automatically by fetch for FormData.
-          "accept": "application/json"
-        },
+        headers: headers,
       });
 
       // Read the response body as text ONCE.
