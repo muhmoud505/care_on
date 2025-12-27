@@ -25,25 +25,20 @@ const Account = () => {
   const navigation = useNavigation();
   const { t } = useTranslation();
   // Get user, children, and the fetch function from the Auth context
-  const { user, children, fetchChildren, logout } = useAuth();
+  const { user, primaryUser, isImpersonating, children, fetchChildren, logout, switchAccount } = useAuth();
 
   // Use useFocusEffect to refetch children every time the screen is viewed
   useFocusEffect(
     React.useCallback(() => {
-      // Ensure both the token and user ID are available before fetching.
-      if (user?.token?.value && user?.user?.id) {
-        // Pass both the token and the parent's user ID to fetch the associated children.
-        fetchChildren(user.token.value, user.user.id);
+      // We should always fetch children based on the primary parent account.
+      if (primaryUser?.token?.value && primaryUser?.user?.id) {
+        fetchChildren(primaryUser.token.value, primaryUser.user.id);
       }
-    }, [user?.token?.value, user?.user?.id]) // Re-run if user or fetchChildren changes.
+    }, [primaryUser?.token?.value, primaryUser?.user?.id]) // Re-run if user or fetchChildren changes.
   );
 
-  const handleSwitchAccount = (childAccount) => {
-    // TODO: Implement the full account switching logic in authContext
-    // For now, we can log the action.
-    console.log('Switching to account:', childAccount.name);
-    // Example of what it might look like:
-    // switchAccount({ type: 'child', id: childAccount.id });
+  const handleSwitchAccount = (account) => {
+    switchAccount(account);
   };
 
   const handleAddAccount = () => {
@@ -61,24 +56,31 @@ const Account = () => {
     <SafeAreaView style={styles.container}>
       <CustomHeader text={t('account.linked_accounts')} onLogout={logout} showLogout />
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Primary Profile Section */}
-        {user && (
+        {/* Parent/Primary Account Section */}
+        {primaryUser && (
           <View style={styles.profileCard}>
             <View style={styles.avatar}>
               <Image source={Images.profile} style={styles.avatarImage} />
             </View>
             <View style={styles.userInfo}>
-              <Text style={styles.userName}>{user.user?.name || t('account.primary_user')}</Text>
-              <Text style={styles.phoneNumber}>{user.user?.phone_number || t('account.no_phone_number')}</Text>
+              <Text style={styles.userName}>{primaryUser.user?.name || t('account.primary_user')}</Text>
+              <Text style={styles.phoneNumber}>{primaryUser.user?.phone_number || t('account.no_phone_number')}</Text>
             </View>
-            <View style={styles.activeBadge}>
-              <Text style={styles.activeBadgeText}>{t('account.current_account')}</Text>
-            </View>
+            {isImpersonating ? (
+              <TouchableOpacity style={styles.loginButton} onPress={() => handleSwitchAccount(null)}>
+                <Text style={styles.loginButtonText}>{t('account.switch_to_parent')}</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.activeBadge}>
+                <Text style={styles.activeBadgeText}>{t('account.current_account')}</Text>
+              </View>
+            )}
           </View>
         )}
 
         {/* Child Accounts Section */}
-        {children && children.map((child) => (
+        {/* We filter out the currently impersonated child from the list */}
+        {children && children.filter(child => child.id !== user?.user?.id).map((child) => (
           <View key={child.id} style={styles.profileCard}>
             <View style={styles.avatar}>
               <Image source={Images.profile} style={styles.avatarImage} />
@@ -95,12 +97,15 @@ const Account = () => {
       </ScrollView>
       
       {/* This view ensures the button stays at the bottom */}
-      <View style={styles.bottomContainer}>
-        {/* Add Account Button */}
-        <TouchableOpacity style={styles.addAccountButton} onPress={handleAddAccount} activeOpacity={0.8}>
-          <Text style={styles.addAccountText}>{t('account.add_another_account')}</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Only show "Add Account" if not impersonating */}
+      {!isImpersonating && (
+        <View style={styles.bottomContainer}>
+          {/* Add Account Button */}
+          <TouchableOpacity style={styles.addAccountButton} onPress={handleAddAccount} activeOpacity={0.8}>
+            <Text style={styles.addAccountText}>{t('account.add_another_account')}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 };

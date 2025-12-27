@@ -7,7 +7,8 @@ import { createContext, useContext, useEffect, useState } from 'react';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // The *active* user (can be primary or child)
+  const [primaryUser, setPrimaryUser] = useState(null); // The *logged in* parent user
   const [childAccounts, setChildAccounts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
@@ -25,8 +26,8 @@ export const AuthProvider = ({ children }) => {
           // We set the user state to the nested object to maintain a consistent structure.
           const userObject = parsedUser.data || parsedUser;
           
-          setUser(userObject);
-          ;
+          setPrimaryUser(userObject); // This is the real user
+          setUser(userObject); // Initially, active user is the primary user
           
           // Also load any stored children
           const storedChildren = await AsyncStorage.getItem('child_accounts');
@@ -205,6 +206,7 @@ export const AuthProvider = ({ children }) => {
 
       // Store only the 'data' object as the primary user to maintain a consistent object structure.
       await AsyncStorage.setItem('primary_user', JSON.stringify(data.data));
+      setPrimaryUser(data.data);
       setUser(data.data);
       // After successful login, fetch the children associated with this user
       await fetchChildren(data.data.token.value, data.data.user.id);
@@ -227,6 +229,7 @@ export const AuthProvider = ({ children }) => {
     }
     // Store as the primary user
     await AsyncStorage.setItem('primary_user', JSON.stringify(userObject));
+    setPrimaryUser(userObject);
     setUser(userObject);
     // After setting the new user, fetch their children (which should be an empty list)
     await fetchChildren(userObject.token.value, userObject.user.id);
@@ -237,6 +240,7 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.removeItem('primary_user');
       await AsyncStorage.removeItem('child_accounts');
       setUser(null);
+      setPrimaryUser(null);
       setChildAccounts([]);
     } catch (error) {
       console.error("Logout failed:", error);
@@ -396,11 +400,46 @@ export const AuthProvider = ({ children }) => {
     return fetch(url, finalOptions);
   };
 
+  const switchAccount = (accountToSwitchTo) => {
+    // If no account is provided, switch back to the primary user.
+    if (!accountToSwitchTo) {
+      if (primaryUser) {
+        setUser(primaryUser);
+        console.log("Switched back to primary user:", primaryUser.user.name);
+      }
+      return;
+    }
+
+    // Switching to a child account.
+    // CRITICAL ASSUMPTION: The child object (`accountToSwitchTo`) must have a `token` property.
+    const childToken = accountToSwitchTo.token?.value || accountToSwitchTo.token;
+    if (!childToken) {
+      console.error("Cannot switch to child account: token is missing.", accountToSwitchTo);
+      return;
+    }
+
+    // The structure of the 'user' state object is { user: {...}, token: {...} }.
+    // We construct this object for the child.
+    const childSession = {
+      user: accountToSwitchTo,
+      token: {
+        value: childToken,
+      },
+    };
+
+    // Set the active user state to the new child session.
+    setUser(childSession);
+    console.log("Switched to child account:", childSession.user.name);
+  };
+
   // The value provided to consuming components
   const value = {
     user,
+    primaryUser,
     children: childAccounts,
-    isAuthenticated: !!user, // Derived state
+    // Helper boolean to easily check if we are impersonating a child account
+    isImpersonating: primaryUser && user && primaryUser.user.id !== user.user.id,
+    isAuthenticated: !!primaryUser, // Authentication status depends on the primary user
     isLoading,
     isAuthLoading,
     login,
@@ -411,6 +450,7 @@ export const AuthProvider = ({ children }) => {
     forgotPassword,
     refreshToken, // Expose the refresh token function
     authFetch, // Expose the new authenticated fetch wrapper
+    switchAccount,
   };
 
   return (

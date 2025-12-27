@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
+  Modal,
   SafeAreaView,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -28,6 +30,8 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
   });
   const [isPasswordSecure, setIsPasswordSecure] = useState(true);
   const [isConfirmPasswordSecure, setIsConfirmPasswordSecure] = useState(true);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
     const { signupData } = route.params || {};
 
      console.log(signupData.birthdate)
@@ -52,6 +56,11 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
 
         return;
     };
+
+    if (!agreedToTerms) {
+      Alert.alert(t('common.error'), t('auth.must_agree_terms', { defaultValue: 'يجب الموافقة علي الشروط والاحكام' }));
+      return;
+    }
 
     // Safely get signupData from route.params inside the handler
     const { signupData } = route.params || {};
@@ -142,13 +151,25 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
           onToggleSecureEntry={() => setIsConfirmPasswordSecure(!isConfirmPasswordSecure)}
 
         />
+        
       </View>
-
+      <View style={styles.termsContainer}>
+          <TouchableOpacity
+            style={styles.checkbox}
+            onPress={() => setAgreedToTerms(!agreedToTerms)}
+            activeOpacity={0.7}
+          >
+            {agreedToTerms && <View style={styles.checkboxInner} />}
+          </TouchableOpacity>
+          <Text style={styles.termsText} onPress={() => setShowTermsModal(true)}>
+            {t('auth.agree_terms', { defaultValue: 'الموافقة علي الشروط والاحكام' })}
+          </Text>
+        </View>
       <TouchableOpacity
         onPress={handleSignup}
         activeOpacity={0.7}
-        disabled={!formIsValid || isAuthLoading}
-        style={[styles.submitButton, (!formIsValid || isAuthLoading) && styles.disabledButton]}
+        disabled={!formIsValid || isAuthLoading || !agreedToTerms}
+        style={[styles.submitButton, (!formIsValid || isAuthLoading || !agreedToTerms) && styles.disabledButton]}
       >
         {isAuthLoading ? (
           <ActivityIndicator color="#fff" />
@@ -156,6 +177,34 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
           <Text style={styles.submitButtonText}>{t('auth.create_account_button')}</Text>
         )}
       </TouchableOpacity>
+
+      <Modal
+        animationType="slide" 
+        transparent={true}
+        visible={showTermsModal}
+        onRequestClose={() => setShowTermsModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity 
+              style={styles.closeIconContainer} 
+              onPress={() => setShowTermsModal(false)}
+            >
+              <Text style={styles.closeIcon}>✕</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.modalTitle}>{t('auth.terms_title', { defaultValue: 'الشروط والأحكام' })}</Text>
+            <ScrollView style={styles.modalScroll}>
+              <Text style={styles.modalText}>
+                {t('auth.terms_full_text', { defaultValue: 'يرجى قراءة الشروط والأحكام بعناية...' })}
+              </Text>
+            </ScrollView>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => { setAgreedToTerms(true); setShowTermsModal(false); }}>
+              <Text style={styles.modalCloseButtonText}>{t('auth.agree', { defaultValue: 'الموافقة' })}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -182,11 +231,37 @@ const styles = StyleSheet.create({
     marginTop: hp(4),
     paddingHorizontal: wp(5),
   },
+  termsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 'auto',
+    marginBottom: hp(2),
+    paddingHorizontal: wp(5),
+    gap: wp(2),
+  },
+  checkbox: {
+    width: wp(5),
+    height: wp(5),
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxInner: {
+    width: wp(3),
+    height: wp(3),
+    backgroundColor: '#014CC4',
+    borderRadius: 2,
+  },
+  termsText: {
+    fontSize: Math.min(wp(4), 16),
+    color: '#000',
+  },
   submitButton: {
     backgroundColor: '#014CC4',
     height: hp(7),
     marginHorizontal: wp(5),
-    marginTop: 'auto', // Push to the bottom
     marginBottom: hp(4),
     borderRadius: wp(4),
     justifyContent: 'center',
@@ -199,7 +274,61 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: Math.min(wp(6), 24)
-  }
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    height: hp(60),
+    width: '100%',
+  },
+  closeIconContainer: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
+    zIndex: 1,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeIcon: {
+    fontSize: 16,
+    color: '#333',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalScroll: {
+    marginBottom: 15,
+  },
+  modalText: {
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  modalCloseButton: {
+    backgroundColor: '#014CC4',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalCloseButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });
 
 export default PasswordScreen;
