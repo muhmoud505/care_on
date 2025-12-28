@@ -161,8 +161,11 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
           >
             {agreedToTerms && <View style={styles.checkboxInner} />}
           </TouchableOpacity>
-          <Text style={styles.termsText} onPress={() => setShowTermsModal(true)}>
-            {t('auth.agree_terms', { defaultValue: 'الموافقة علي الشروط والاحكام' })}
+          <Text style={styles.termsText}>
+            {t('auth.agree_prefix', { defaultValue: 'الموافقة علي ' })}
+            <Text style={styles.termsLink} onPress={() => setShowTermsModal(true)}>
+              {t('auth.terms_only', { defaultValue: 'الشروط والاحكام' })}
+            </Text>
           </Text>
         </View>
       <TouchableOpacity
@@ -257,6 +260,10 @@ const styles = StyleSheet.create({
   termsText: {
     fontSize: Math.min(wp(4), 16),
     color: '#000',
+  },
+  termsLink: {
+    color: '#014CC4',
+    textDecorationLine: 'underline',
   },
   submitButton: {
     backgroundColor: '#014CC4',
