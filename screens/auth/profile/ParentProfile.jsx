@@ -1,4 +1,5 @@
-import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { Alert, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useNavigation } from '@react-navigation/native';
@@ -13,7 +14,50 @@ const ParentProfile = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth();
+
+  const handleImagePick = async (type) => {
+    setModalVisible(false);
+    try {
+      let result;
+      if (type === 'camera') {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(t('common.error'), t('permissions.camera_required', { defaultValue: 'Camera permission is required' }));
+          return;
+        }
+        result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.5,
+        });
+      } else {
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.5,
+        });
+      }
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        const formData = new FormData();
+        formData.append('avatar', {
+          uri: asset.uri,
+          name: asset.fileName || `avatar_${Date.now()}.jpg`,
+          type: asset.mimeType || 'image/jpeg',
+        });
+
+        await updateUserProfile(user.user.id, formData);
+        Alert.alert(t('common.success'), t('profile.photo_updated', { defaultValue: 'Profile photo updated successfully' }));
+      }
+    } catch (error) {
+      Alert.alert(t('common.error'), error.message);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <CustomHeader text={t('profile.parent_profile_title', { defaultValue: 'الحساب الشخصي' })}/>
@@ -28,7 +72,7 @@ const ParentProfile = () => {
 
           
            <Image
-            source={Images.profile}
+            source={user?.user?.avatar ? { uri: user.user.avatar } : Images.profile}
             style={styles.profileImg}
             />
           <TouchableOpacity style={styles.ele1} onPress={() => setModalVisible(true)}>
@@ -102,10 +146,10 @@ const ParentProfile = () => {
             <TouchableOpacity style={localStyles.option} onPress={() => setModalVisible(false)}>
               <Text style={[localStyles.optionText, { color: 'red' }]}>{t('profile.delete_photo', { defaultValue: 'حذف الصورة' })}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={localStyles.option} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity style={localStyles.option} onPress={() => handleImagePick('camera')}>
               <Text style={localStyles.optionText}>{t('profile.camera_photo', { defaultValue: 'التقط صورة عن طريق الكاميرا' })}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={localStyles.option} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity style={localStyles.option} onPress={() => handleImagePick('gallery')}>
               <Text style={localStyles.optionText}>{t('profile.gallery_photo', { defaultValue: 'اختر صورة من المعرض' })}</Text>
             </TouchableOpacity>
           </TouchableOpacity>

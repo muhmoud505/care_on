@@ -400,6 +400,67 @@ export const AuthProvider = ({ children }) => {
     return fetch(url, finalOptions);
   };
 
+  const updateUserProfile = async (userId, formData) => {
+    setIsAuthLoading(true);
+    try {
+      // Append _method=PUT to simulate PUT request with FormData
+      formData.append('_method', 'PUT');
+
+      const response = await authFetch(`${API_URL}/api/v1/auth/users/${userId}`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        // Ignore JSON parse error
+      }
+
+      if (!response.ok) {
+        const errorMessage = data?.message || responseText || 'Failed to update profile';
+        throw new Error(errorMessage);
+      }
+
+      // Assuming the API returns the updated user object in data.data
+      const updatedUserData = data?.data;
+
+      if (updatedUserData) {
+        // Update the current user state
+        setUser(prev => ({
+          ...prev,
+          user: { ...prev.user, ...updatedUserData }
+        }));
+
+        // Update primaryUser if the updated user is the primary user
+        if (primaryUser?.user?.id === userId) {
+          const newPrimaryUser = {
+            ...primaryUser,
+            user: { ...primaryUser.user, ...updatedUserData }
+          };
+          setPrimaryUser(newPrimaryUser);
+          await AsyncStorage.setItem('primary_user', JSON.stringify(newPrimaryUser));
+        } else {
+          // If it's a child account, update the childAccounts list
+          const updatedChildren = childAccounts.map(child => 
+            child.id === userId ? { ...child, ...updatedUserData } : child
+          );
+          setChildAccounts(updatedChildren);
+          await AsyncStorage.setItem('child_accounts', JSON.stringify(updatedChildren));
+        }
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Update profile failed:", error);
+      throw error;
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
   const switchAccount = (accountToSwitchTo) => {
     // If no account is provided, switch back to the primary user.
     if (!accountToSwitchTo) {
@@ -450,6 +511,7 @@ export const AuthProvider = ({ children }) => {
     forgotPassword,
     refreshToken, // Expose the refresh token function
     authFetch, // Expose the new authenticated fetch wrapper
+    updateUserProfile,
     switchAccount,
   };
 

@@ -51,11 +51,16 @@ const mapApiDataToComponentProps = (item, componentType) => {
     type = componentType;
   }
 
+  if (item.documents && item.documents.length > 0) {
+    console.log(`[Context] Mapping item ${item.id} - Documents found:`, JSON.stringify(item.documents));
+  }
+
   let commonProps = {
     id: item.id,
     type: type, // This is now correctly set to 'result', 'eshaa', etc.
     icon: item.imageUrl ? { uri: item.imageUrl } : Images.r5, // Using r5 as a valid generic fallback
     date: item.dates?.created_at?.full, // Use the creation date as a consistent date field
+    documents: item.documents,
   };
   
   const parsedDesc = safeJsonParse(item.description);
@@ -148,6 +153,8 @@ export const MedicalRecordsProvider = ({ children }) => {
       try {
         // The national_number is still needed for the URL.
         const nationalNumber = user?.user?.resource?.national_number;
+        console.log(nationalNumber);
+        
 
         const fetchPromises = types.map(async ({ apiType, componentType }) => {
           // If an apiType is provided, add it to the query to filter results.
@@ -157,6 +164,8 @@ export const MedicalRecordsProvider = ({ children }) => {
 
           // Use the new authFetch wrapper. No need to manage tokens or headers here!
           const response = await authFetch(url);
+        
+          
 
      
           
@@ -179,9 +188,11 @@ export const MedicalRecordsProvider = ({ children }) => {
   
         const results = await Promise.all(fetchPromises);
         let combinedData = results.flat();
+            // console.log("my json "+ combinedData);
+        
 
         // Log the fetched and processed data for debugging
-        console.log(`--- Fetched data for ${stateKey} ---`, combinedData);
+        // console.log(`--- Fetched data for ${stateKey} ---`, combinedData);
   
         if (sort) {
           combinedData.sort((a, b) => new Date(b.date) - new Date(a.date));

@@ -19,6 +19,7 @@ const Results = () => {
  const { user } = useAuth();
  const { results, loading, error, fetchResults } = useMedicalRecords();
 
+
   // This effect runs every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
@@ -30,6 +31,7 @@ const Results = () => {
 
   const onRefresh = useCallback(() => {
     fetchResults({ force: true });
+    
   }, [fetchResults]);
   
   const handleItemExpand = (id, isExpanded) => {
@@ -53,14 +55,20 @@ const Results = () => {
   const finalAddButtonStyle = isToggleButtonVisible
     ? styles.addButtonHigh
     : styles.addButtonLow;
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }) => {
+    // Extract file URL from the documents array (taking the first one) or fallback to other keys
+    const fileUrl = item.documents?.[0]?.url || item.documents?.[0]?.file || item.fileUrl || item.file || item.url;
+    console.log(`[Results] Item ${item.id} documents:`, JSON.stringify(item.documents));
+    
+    return (
     <Result
       {...item}
+      fileUrl={fileUrl}
       expanded={expandedItems[item.id] || false}
       onExpandedChange={(isExpanded) => handleItemExpand(item.id, isExpanded)}
     />
   );
-
+  };
 
   return (
     <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>

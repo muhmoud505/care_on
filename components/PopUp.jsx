@@ -39,9 +39,9 @@ import { hp, wp } from '../utils/responsive';
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
-          title: t('permissions.location_title'),
-          message: t('permissions.location_message'),
-          buttonNeutral: t('common.ask_me_later'),
+          title: t('permissions.location_title', { defaultValue: "Location Permission" }),
+          message: t('permissions.location_message', { defaultValue: "App needs access to your location" }),
+          buttonNeutral: t('common.ask_me_later', { defaultValue: "Ask Me Later" }),
           buttonNegative: t('common.cancel', { defaultValue: "Cancel" }),
           buttonPositive: t('common.ok', { defaultValue: "OK" }),
         },

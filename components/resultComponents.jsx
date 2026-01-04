@@ -1,5 +1,7 @@
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import { useTranslation } from 'react-i18next';
-import { Image, ImageBackground, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import CollapsibleCard from './CollapsibleCard';
 
 const Result = ({ 
@@ -10,8 +12,41 @@ const Result = ({
   expanded, 
   onExpandedChange,
   icon,
+  fileUrl
 }) => {
   const { t } = useTranslation();
+
+  const handleDownload = async () => {
+    if (!fileUrl) return;
+
+    try {
+      const fileName = fileUrl.split('/').pop().split('?')[0] || 'download';
+      const fileUri = FileSystem.documentDirectory + fileName;
+      
+      const { uri } = await FileSystem.downloadAsync(fileUrl, fileUri);
+      
+      if (Platform.OS === 'android') {
+        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (permissions.granted) {
+          const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+          await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, fileName, 'application/octet-stream')
+            .then(async (createdUri) => {
+              await FileSystem.writeAsStringAsync(createdUri, base64, { encoding: FileSystem.EncodingType.Base64 });
+              Alert.alert(t('common.success'), t('common.file_saved', { defaultValue: 'File saved successfully' }));
+            })
+            .catch(e => console.error(e));
+        } else {
+          await Sharing.shareAsync(uri);
+        }
+      } else {
+        await Sharing.shareAsync(uri);
+      }
+    } catch (err) {
+      console.error("Download error:", err);
+      Alert.alert(t('common.error'), t('common.download_failed', { defaultValue: 'Download failed' }));
+    }
+  };
+
   return (
     <CollapsibleCard
       title={title}
@@ -42,17 +77,21 @@ const Result = ({
                      </Text>
                    </View>
                    
-                   <ImageBackground 
-                     source={require('../assets2/images/backg.png')}
-                     style={styles.background}
-                     imageStyle={{width:319, height:61}}
-                     resizeMode='cover'
-                   >
-                     <View style={styles.overlay}>
-                       <Image source={require('../assets2/images/download.png')} />
-                       <Text style={styles.txt4}>{t('common.download')}</Text>
-                     </View>
-                   </ImageBackground>
+                   {fileUrl && (
+                     <TouchableOpacity onPress={handleDownload} activeOpacity={0.8}>
+                       <ImageBackground 
+                         source={require('../assets2/images/backg.png')}
+                         style={styles.background}
+                         imageStyle={{width:319, height:61}}
+                         resizeMode='cover'
+                       >
+                         <View style={styles.overlay}>
+                           <Image source={require('../assets2/images/download.png')} />
+                           <Text style={styles.txt4}>{t('common.download')}</Text>
+                         </View>
+                       </ImageBackground>
+                     </TouchableOpacity>
+                   )}
     </CollapsibleCard>
   )
 }

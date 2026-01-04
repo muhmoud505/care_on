@@ -55,18 +55,23 @@ const Eshaas = () => {
   const finalAddButtonStyle = isToggleButtonVisible
     ? styles.addButtonHigh
     : styles.addButtonLow;
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }) => {
+    // Extract file URL from the documents array (taking the first one) or fallback to other keys
+    const fileUrl = item.documents?.[0]?.url || item.documents?.[0]?.file || item.fileUrl || item.file || item.url;
+    console.log(`[Eshaa] Item ${item.id} documents:`, JSON.stringify(item.documents));
+    return (
     <Eshaa
       title={item.title}
       description={item.description}
       date={item.date}
       labName={item.labName}
       icon={item.icon}
+      fileUrl={fileUrl}
       expanded={expandedItems[item.id] || false}
       onExpandedChange={(isExpanded) => handleItemExpand(item.id, isExpanded)}
     />
   );
-
+  };
   return (
     <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
       <CustomHeader text={t('home.xray_title')}/>

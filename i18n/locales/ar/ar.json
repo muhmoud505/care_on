@@ -24,7 +24,12 @@
     "success": "نجاح",
     "masked_national_id": "xxxxxxxxxxxxxx",
     "error": "خطأ",
-    "no_items_found": "لم يتم العثور على عناصر"
+    "no_items_found": "لم يتم العثور على عناصر",
+    "ask_me_later": "ذكرني لاحقاً",
+    "allow": "سماح",
+    "dont_allow": "عدم السماح",
+    "cancel": "إلغاء",
+    "ok": "موافق"
   },
   "add_result": {
     "title": "إضافة نتيجة تحليل",
@@ -234,6 +239,17 @@
     "gender_placeholder": "اختر الجنس",
     "male": "ذكر",
     "female": "أنثى"
+  },
+  "permissions": {
+    "storage_title": "إذن التخزين",
+    "storage_message": "التطبيق يحتاج إلى الوصول إلى التخزين لتحميل الملفات",
+    "location_title": "إذن الموقع",
+    "location_message": "التطبيق يحتاج إلى الوصول إلى موقعك",
+    "location_denied_title": "تم رفض إذن الموقع",
+    "location_denied_message": "مطلوب إذن الموقع لاستخدام هذه الميزة.",
+    "open_settings": "فتح الإعدادات",
+    "location_access_title": "الوصول إلى الموقع",
+    "location_access_description": "نحتاج إلى الوصول إلى موقعك للعثور على الخدمات القريبة."
   },
   "uploader": {
     "upload": "تحميل",

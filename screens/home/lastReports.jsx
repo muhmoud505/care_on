@@ -84,9 +84,14 @@ const LastReports = () => {
   };
 
   const renderItem = ({ item }) => {
+    console.log("item of rednder" + JSON.stringify(item));
+    
+    // Extract file URL from the documents array (taking the first one) or fallback to other keys
+    const fileUrl = item.documents?.[0]?.url || item.documents?.[0]?.file || item.fileUrl || item.file || item.url;
     const uniqueId = `${item.type}-${item.id}`;
     const itemProps = {
       ...item,
+      fileUrl: fileUrl,
       expanded: expandedItems[uniqueId] || false,
       onExpandedChange: (isExpanded) => handleItemExpand(uniqueId, isExpanded),
     };
@@ -108,13 +113,6 @@ const LastReports = () => {
   // Determine if the toggle button should be visible
   const isToggleButtonVisible = areAllExpanded
 
-  // Debugging logs to understand the state
-  console.log('DEBUG: lastRecords.length =', lastRecords.length);
-  console.log('DEBUG: loading.medicines =', loading.medicines);
-  console.log('DEBUG: loading.results =', loading.results);
-  console.log('DEBUG: loading.eshaa =', loading.eshaa);
-  console.log('DEBUG: loading.reports =', loading.reports);
-  console.log('DEBUG: isToggleButtonVisible =', isToggleButtonVisible);
 
   // Define the specific style for the add button based on toggle button visibility
   const finalAddButtonStyle = isToggleButtonVisible
