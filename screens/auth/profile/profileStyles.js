@@ -54,7 +54,8 @@ export const profileStyles = StyleSheet.create({
   profileImg: {
     width: wp(32),
     height: wp(32),
-    resizeMode: 'contain',
+    borderRadius: wp(16),
+    overflow: 'hidden',
   },
   ele1: {
     backgroundColor: '#FFFFFF',

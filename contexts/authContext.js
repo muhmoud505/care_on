@@ -12,6 +12,33 @@ export const AuthProvider = ({ children }) => {
   const [childAccounts, setChildAccounts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
+
+  // Helper: convert relative avatar paths to absolute URLs using API_URL
+  const makeAbsolute = (avatarPath) => {
+    if (!avatarPath) return avatarPath;
+    if (/^https?:\/\//.test(avatarPath)) return avatarPath;
+    const base = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+    return avatarPath.startsWith('/') ? `${base}${avatarPath}` : `${base}/${avatarPath}`;
+  };
+
+  // Normalize a primary user object of shape { user: {...}, token: {...} }
+  const normalizePrimaryUser = (obj) => {
+    if (!obj) return obj;
+    const copy = { ...obj };
+    if (copy.user && copy.user.avatar) {
+      copy.user = { ...copy.user, avatar: makeAbsolute(copy.user.avatar) };
+    }
+    return copy;
+  };
+
+  // Normalize a child user object that may have avatar at root
+  const normalizeChild = (child) => {
+    if (!child) return child;
+    if (child.avatar) {
+      return { ...child, avatar: makeAbsolute(child.avatar) };
+    }
+    return child;
+  }; 
   
   useEffect(() => {
     // Log the API_URL on startup for easy debugging.
@@ -25,17 +52,26 @@ export const AuthProvider = ({ children }) => {
           // The user object might be nested under a 'data' key.
           // We set the user state to the nested object to maintain a consistent structure.
           const userObject = parsedUser.data || parsedUser;
+          const normalizedUser = normalizePrimaryUser(userObject);
           
-          setPrimaryUser(userObject); // This is the real user
-          setUser(userObject); // Initially, active user is the primary user
+          setPrimaryUser(normalizedUser); // This is the real user
+          setUser(normalizedUser); // Initially, active user is the primary user
+          console.log('[AuthContext] Loaded primary avatar:', normalizedUser.user?.avatar);
           
           // Also load any stored children
           const storedChildren = await AsyncStorage.getItem('child_accounts');
           if (storedChildren) {
-            setChildAccounts(JSON.parse(storedChildren));
+            try {
+              const parsedChildren = JSON.parse(storedChildren);
+              const normalizedChildrenFromStorage = parsedChildren.map(normalizeChild);
+              setChildAccounts(normalizedChildrenFromStorage);
+              console.log('[AuthContext] Loaded stored children avatars:', normalizedChildrenFromStorage.map(c => c.avatar));
+            } catch (e) {
+              setChildAccounts([]);
+            }
           }
           // Always fetch children using the consistent user object structure.
-          fetchChildren(userObject.token.value, userObject.user.id);
+          fetchChildren(normalizedUser.token.value, normalizedUser.user.id);
         }
       } catch (error) {
         console.error("Failed to load user from storage", error);
@@ -159,10 +195,11 @@ export const AuthProvider = ({ children }) => {
       // If data parsing failed but the response was 'ok', data might be undefined.
       const fetchedChildren = data?.data || []; // This is the list of children from the API
 
-      // --- FIX: Update state and storage with the fetched children ---
-      setChildAccounts(fetchedChildren);
-      await AsyncStorage.setItem('child_accounts', JSON.stringify(fetchedChildren));
-      // --- END FIX ---
+      // Normalize avatars and update state and storage with the fetched children
+      const normalizedChildren = fetchedChildren.map(normalizeChild);
+      setChildAccounts(normalizedChildren);
+      console.log('[AuthContext] Fetched children avatars:', normalizedChildren.map(c => c.avatar));
+      await AsyncStorage.setItem('child_accounts', JSON.stringify(normalizedChildren));
       
     } catch (error) {
       console.error("Failed to fetch children:", error);
@@ -205,11 +242,13 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Store only the 'data' object as the primary user to maintain a consistent object structure.
-      await AsyncStorage.setItem('primary_user', JSON.stringify(data.data));
-      setPrimaryUser(data.data);
-      setUser(data.data);
+      const normalized = normalizePrimaryUser(data.data);
+      await AsyncStorage.setItem('primary_user', JSON.stringify(normalized));
+      setPrimaryUser(normalized);
+      setUser(normalized);
+      console.log('[AuthContext] User logged in avatar:', normalized.user?.avatar);
       // After successful login, fetch the children associated with this user
-      await fetchChildren(data.data.token.value, data.data.user.id);
+      await fetchChildren(normalized.token.value, normalized.user.id);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -228,11 +267,13 @@ export const AuthProvider = ({ children }) => {
       throw new Error("Invalid session data provided to setSession.");
     }
     // Store as the primary user
-    await AsyncStorage.setItem('primary_user', JSON.stringify(userObject));
-    setPrimaryUser(userObject);
-    setUser(userObject);
+    const normalized = normalizePrimaryUser(userObject);
+    await AsyncStorage.setItem('primary_user', JSON.stringify(normalized));
+    setPrimaryUser(normalized);
+    setUser(normalized);
+    console.log('[AuthContext] Session set primary avatar:', normalized.user?.avatar);
     // After setting the new user, fetch their children (which should be an empty list)
-    await fetchChildren(userObject.token.value, userObject.user.id);
+    await fetchChildren(normalized.token.value, normalized.user.id);
   };
 
   const logout = async () => {
@@ -412,6 +453,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       const responseText = await response.text();
+      console.log('[AuthContext] updateUserProfile responseText:', responseText);
       let data;
       try {
         data = JSON.parse(responseText);
@@ -424,10 +466,39 @@ export const AuthProvider = ({ children }) => {
         throw new Error(errorMessage);
       }
 
-      // Assuming the API returns the updated user object in data.data
-      const updatedUserData = data?.data;
+      // Try to extract updated user data from a few common shapes
+      let updatedUserData = data?.data || data;
+      if (updatedUserData?.user) {
+        // Some APIs nest the user under `data.user`
+        updatedUserData = updatedUserData.user;
+      }
+
+      // If the response didn't include the updated user, refetch it explicitly
+      if (!updatedUserData || Object.keys(updatedUserData).length === 0) {
+        try {
+          const fetchResp = await authFetch(`${API_URL}/api/v1/auth/users/${userId}`, { method: 'GET' });
+          const fetchText = await fetchResp.text();
+          console.log('[AuthContext] Refetch after update response:', fetchText);
+          let fetchData;
+          try {
+            fetchData = JSON.parse(fetchText);
+          } catch (e) {}
+          const fetchedUser = fetchData?.data || fetchData?.user || fetchData;
+          if (fetchedUser) {
+            updatedUserData = fetchedUser;
+          }
+        } catch (e) {
+          console.warn('[AuthContext] Failed to refetch user after update:', e.message);
+        }
+      }
 
       if (updatedUserData) {
+        // If the avatar is a relative path, make it absolute
+        if (updatedUserData.avatar) {
+          updatedUserData = { ...updatedUserData, avatar: makeAbsolute(updatedUserData.avatar) };
+        }
+        console.log('[AuthContext] Updated user avatar (server):', updatedUserData.avatar);
+
         // Update the current user state
         setUser(prev => ({
           ...prev,
@@ -493,6 +564,27 @@ export const AuthProvider = ({ children }) => {
     console.log("Switched to child account:", childSession.user.name);
   };
 
+  // Allow components to set a temporary avatar while upload is in progress
+  const setTempAvatar = async (userId, uri) => {
+    setUser(prev => {
+      if (!prev || !prev.user) return prev;
+      if (prev.user.id === userId) {
+        return { ...prev, user: { ...prev.user, avatar: uri } };
+      }
+      return prev;
+    });
+
+    if (primaryUser?.user?.id === userId) {
+      const newPrimary = { ...primaryUser, user: { ...primaryUser.user, avatar: uri } };
+      setPrimaryUser(newPrimary);
+      try { await AsyncStorage.setItem('primary_user', JSON.stringify(newPrimary)); } catch (e) { console.warn('Failed to persist primary_user after temp avatar', e.message); }
+    }
+
+    const updatedChildren = childAccounts.map(c => (c.id === userId ? { ...c, avatar: uri } : c));
+    setChildAccounts(updatedChildren);
+    try { await AsyncStorage.setItem('child_accounts', JSON.stringify(updatedChildren)); } catch (e) { console.warn('Failed to persist child_accounts after temp avatar', e.message); }
+  };
+
   // The value provided to consuming components
   const value = {
     user,
@@ -513,6 +605,7 @@ export const AuthProvider = ({ children }) => {
     authFetch, // Expose the new authenticated fetch wrapper
     updateUserProfile,
     switchAccount,
+    setTempAvatar,
   };
 
   return (

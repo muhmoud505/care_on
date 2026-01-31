@@ -12,9 +12,11 @@ import { hp, profileStyles as styles, wp } from './profileStyles';
 
 const ParentProfile = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [previewAvatar, setPreviewAvatar] = useState(null);
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const { user, updateUserProfile } = useAuth();
+  const { user, updateUserProfile, setTempAvatar } = useAuth();
+  console.log('User data to get avatar:', user);
 
   const handleImagePick = async (type) => {
     setModalVisible(false);
@@ -50,6 +52,15 @@ const ParentProfile = () => {
           type: asset.mimeType || 'image/jpeg',
         });
 
+        // Optimistic preview: show the selected image immediately
+        setPreviewAvatar(asset.uri);
+        try {
+          // Also set a temporary avatar in the global auth state so other UI updates (drawer) reflect immediately
+          setTempAvatar(user.user.id, asset.uri);
+        } catch (e) {
+          console.warn('setTempAvatar failed', e.message);
+        }
+
         await updateUserProfile(user.user.id, formData);
         Alert.alert(t('common.success'), t('profile.photo_updated', { defaultValue: 'Profile photo updated successfully' }));
       }
@@ -72,8 +83,9 @@ const ParentProfile = () => {
 
           
            <Image
-            source={user?.user?.avatar ? { uri: user.user.avatar } : Images.profile}
+            source={previewAvatar ? { uri: previewAvatar } : (user?.user?.avatar ? { uri: user.user.avatar } : Images.profile)}
             style={styles.profileImg}
+            resizeMode="cover"
             />
           <TouchableOpacity style={styles.ele1} onPress={() => setModalVisible(true)}>
           <Image

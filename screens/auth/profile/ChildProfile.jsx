@@ -22,10 +22,11 @@ const AgeDisplay = ({ value, label }) => (
 
 const ChildProfile = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [previewAvatar, setPreviewAvatar] = useState(null);
   
   const navigation = useNavigation();
   const { t } = useTranslation();
-  const { user, updateUserProfile } = useAuth();
+  const { user, updateUserProfile, setTempAvatar } = useAuth();
   // Safely access user data
   const fullName = user?.user?.name || 'User Name';
   const nationalId = user?.user?.resource?.national_number || '';
@@ -103,6 +104,14 @@ console.log(user);
           type: asset.mimeType || 'image/jpeg',
         });
 
+        // Optimistic preview
+        setPreviewAvatar(asset.uri);
+        try {
+          await setTempAvatar(user.user.id, asset.uri);
+        } catch (e) {
+          console.warn('setTempAvatar failed', e.message);
+        }
+
         await updateUserProfile(user.user.id, formData);
         Alert.alert(t('common.success'), t('profile.photo_updated', { defaultValue: 'Profile photo updated successfully' }));
       }
@@ -123,8 +132,9 @@ console.log(user);
             <View style={styles.cont1}>
               <View style={styles.info}>
                <Image
-                source={user?.user?.avatar ? { uri: user.user.avatar } : Images.profile}
+                source={previewAvatar ? { uri: previewAvatar } : (user?.user?.avatar ? { uri: user.user.avatar } : Images.profile)}
                 style={styles.profileImg}
+                resizeMode="cover"
                 />
                 <TouchableOpacity style={styles.ele1} onPress={() => setModalVisible(true)}>
                   <Image source={Images.edit} />

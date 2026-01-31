@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    useWindowDimensions,
+    View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import images from '../constants2/images';
@@ -186,7 +186,11 @@ const CustomDrawerContent = (props) => {
           {/* User Info: Avatar and Name */}
           <View style={[styles.profileInfo, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <TouchableOpacity onPress={() => handleNavigate('ProfileStack')}>
-              <Image source={images.profile} style={styles.avatar} />
+              <Image
+                source={user?.user?.avatar ? { uri: user.user.avatar } : images.profile}
+                style={styles.avatar}
+                resizeMode="cover"
+              />
             </TouchableOpacity>
             <Text style={styles.profileName} numberOfLines={1}>
               {user?.user?.name || t('drawer.user_name_placeholder')}

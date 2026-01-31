@@ -41,7 +41,11 @@ export const HomeHeader=({ showUserInfo = true })=>{
         <TouchableOpacity
           onPress={() => navigation.navigate('ProfileStack')}
         >
-          <Image style={styles.profileImage} source={Images.profile} />
+          <Image
+            style={styles.profileImage}
+            source={user?.user?.avatar ? { uri: user.user.avatar } : Images.profile}
+            resizeMode="cover"
+          />
         </TouchableOpacity>
       </View>
     </View>
@@ -95,5 +99,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+    overflow: 'hidden',
   },
 });

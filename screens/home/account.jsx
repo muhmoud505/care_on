@@ -60,7 +60,11 @@ const Account = () => {
         {primaryUser && (
           <View style={styles.profileCard}>
             <View style={styles.avatar}>
-              <Image source={Images.profile} style={styles.avatarImage} />
+              <Image
+                source={primaryUser?.user?.avatar ? { uri: primaryUser.user.avatar } : Images.profile}
+                style={styles.avatarImage}
+                resizeMode="cover"
+              />
             </View>
             <View style={styles.userInfo}>
               <Text style={styles.userName}>{primaryUser.user?.name || t('account.primary_user')}</Text>
@@ -83,7 +87,11 @@ const Account = () => {
         {children && children.filter(child => child.id !== user?.user?.id).map((child) => (
           <View key={child.id} style={styles.profileCard}>
             <View style={styles.avatar}>
-              <Image source={Images.profile} style={styles.avatarImage} />
+              <Image
+                source={child?.avatar ? { uri: child.avatar } : Images.profile}
+                style={styles.avatarImage}
+                resizeMode="cover"
+              />
             </View>
             <View style={styles.userInfo}>
               <Text style={styles.userName}>{child.name}</Text>
