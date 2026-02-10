@@ -1,9 +1,10 @@
-import Clipboard from '@react-native-clipboard/clipboard';
+import { API_URL } from '@env';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, Image, Modal, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, Image, Modal, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Images from '../../constants2/images';
+import { useAuth } from '../../contexts/authContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -100,9 +101,17 @@ const CreateCodeScreen = () => {
   };
 
   const handleCopyCode = () => {
-    Clipboard.setString(generatedCode);
-    // Optionally, show a toast message that the code has been copied
-    alert(t('create_code.code_copied', { defaultValue: 'تم نسخ الكود!' }));
+    // Simple alert showing the code for now
+    Alert.alert(
+      t('create_code.code_display', { defaultValue: 'Code' }),
+      t('create_code.code_value', { defaultValue: `Your code is: ${generatedCode}` }),
+      [
+        {
+          text: t('common.ok', { defaultValue: 'OK' }),
+          onPress: () => console.log('Code displayed'),
+        },
+      ]
+    );
   };
 
   return (
