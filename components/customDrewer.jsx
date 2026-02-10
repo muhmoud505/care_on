@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import images from '../constants2/images';
@@ -74,14 +74,26 @@ const CustomDrawerContent = (props) => {
     {
       id: 3, 
       title: t('drawer.find_service'),
-      icon: images.search,
-     
+      icon: images.gps,
+      onPress: () => handleNavigate('FindService'),
     },
     {
       id: 4, 
+      title: t('drawer.doctors_used_codes'),
+      icon: images.user,
+      onPress: () => handleNavigate('DoctorsUsedCodes'),
+    },
+    {
+      id: 5, 
+      title: t('drawer.your_created_codes'),
+      icon: images.verify,
+      onPress: () => handleNavigate('YourCreatedCodes'),
+    },
+    {
+      id: 6, 
       title: t('drawer.contact_us'),
       icon: images.call,
-    
+      onPress: () => handleNavigate('ContactUs'),
     },
   ];
 

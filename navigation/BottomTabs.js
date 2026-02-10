@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Dimensions, Image, StyleSheet, View } from 'react-native';
 import Images from '../constants2/images';
+import CreateCodeScreen from '../screens/createCode/CreateCodeScreen';
 import HomeStack from './HomeStack';
 import ProfileStack from './ProfileStack';
 
@@ -12,8 +13,22 @@ const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 const Tab=createBottomTabNavigator()
 const TabIcon = ({ icon, color, name, focused }) => {
-  const activeIcon = name === 'Home' ? Images.homeActive : Images.profileActive;
-  const inactiveIcon = name === 'Home' ? Images.homeInactive : Images.profileInactive;
+  let activeIcon, inactiveIcon;
+  
+  if (name === 'Home') {
+    activeIcon = Images.homeActive;
+    inactiveIcon = Images.homeInactive;
+  } else if (name === 'Profile') {
+    activeIcon = Images.profileActive;
+    inactiveIcon = Images.profileInactive;
+  } else if (name === 'CreateCode') {
+    activeIcon = Images.verify; // Using verify icon as placeholder for create code icon
+    inactiveIcon = Images.verify; // Using same icon for now
+  } else {
+    activeIcon = Images.homeActive;
+    inactiveIcon = Images.homeInactive;
+  }
+  
   return (
     <View >
       <Image
@@ -51,6 +66,17 @@ export default function BottomTabs() {
       >
         
       </Tab.Screen>
+      <Tab.Screen name="createCode" component={CreateCodeScreen}
+        options={{
+         tabBarIcon: ({ color, focused }) => (
+              <TabIcon
+                color={color}
+                name="CreateCode"
+                focused={focused}
+              />
+            ),
+        }}
+      />
       <Tab.Screen name="profileTab" component={ProfileStack} 
          options={{
          tabBarIcon: ({ color, focused }) => (

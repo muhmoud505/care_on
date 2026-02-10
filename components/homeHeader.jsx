@@ -34,7 +34,7 @@ export const HomeHeader=({ showUserInfo = true })=>{
       {/* Right side: Action icons */}
       <View style={[styles.actionsContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <TouchableOpacity
-          onPress={() => console.log('Navigate to Notifications')}
+          onPress={() => navigation.navigate('Notifications')}
         >
           <Image source={Images.notification} style={styles.actionIcon} />
         </TouchableOpacity>
