@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Dimensions, Image, Modal, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import CustomHeader from '../../components/CustomHeader';
 import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
 
@@ -119,19 +120,7 @@ const CreateCodeScreen = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('create_code.request_code', { defaultValue: 'طلب كود' })}</Text>
-        <TouchableOpacity 
-          style={styles.headerRight}
-          onPress={() => navigation.navigate('YourCreatedCodes')}
-        >
-          <Text style={styles.headerRightText}>{t('create_code.create_code', { defaultValue: 'انشاء كود' })}</Text>
-          <Image 
-            source={Images.arrowRight} 
-            style={[styles.arrowIcon, { transform: [{ rotate: i18n.dir() === 'rtl' ? '180deg' : '0deg' }] }]}
-          />
-        </TouchableOpacity>
-      </View>
+     <CustomHeader text={'انشاء كود'}/>
 
       {/* Main Content */}
       <View style={styles.mainContent}>
@@ -139,9 +128,9 @@ const CreateCodeScreen = () => {
         <View style={styles.codeBox}>
           {/* Circular Icon */}
           <View style={styles.iconContainer}>
-            <View style={styles.iconCircle}>
-              <Image source={Images.verify} style={styles.codeIcon} />
-            </View>
+            
+              <Image source={Images.createCodeG} style={styles.codeIcon} />
+            
           </View>
           
           {/* Description Text */}
@@ -210,35 +199,7 @@ const CreateCodeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: wp(5),
-    paddingVertical: hp(2),
-    paddingTop: hp(4),
-  },
-  headerTitle: {
-    fontSize: wp(5.5),
-    fontWeight: '600',
-    color: '#000000',
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: wp(1.5),
-  },
-  headerRightText: {
-    fontSize: wp(4.2),
-    fontWeight: '500',
-    color: '#007AFF',
-  },
-  arrowIcon: {
-    width: wp(3.5),
-    height: wp(3.5),
-    tintColor: '#007AFF',
+    backgroundColor: '#F5F9FF',
   },
   mainContent: {
     flex: 1,
@@ -247,49 +208,51 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(5),
   },
   codeBox: {
-    width: wp(85),
-    borderWidth: 3,
-    borderColor: '#007AFF',
+    width: wp(85),  // Keep this or replace with: (327 / SCREEN_WIDTH) * 100
+    height: hp(38), 
     borderRadius: wp(3),
-    paddingVertical: hp(12),
+      paddingVertical: hp(6),  
     paddingHorizontal: wp(8),
     alignItems: 'center',
     backgroundColor: '#ffffff',
+        justifyContent: 'space-between', 
   },
   iconContainer: {
-    marginBottom: hp(8),
+      marginBottom: hp(2), 
   },
   iconCircle: {
     width: wp(25),
     height: wp(25),
     borderRadius: wp(12.5),
     borderWidth: 4,
-    borderColor: '#4CAF50',
+   
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#ffffff',
   },
   codeIcon: {
-    width: wp(12),
-    height: wp(12),
-    tintColor: '#4CAF50',
+    width: wp(20),
+    height: wp(20),
+ 
   },
   descriptionText: {
     fontSize: wp(4.8),
     fontWeight: '500',
     color: '#000000',
     textAlign: 'center',
-    marginBottom: hp(10),
+   marginBottom: hp(4),
     lineHeight: hp(3.5),
   },
   createButton: {
     backgroundColor: '#007AFF',
-    paddingHorizontal: wp(10),
-    paddingVertical: hp(3),
+     width: wp(34),  // 132px responsive
+    height: hp(4.5),  // 36px responsive
+
+
     borderRadius: wp(4),
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: wp(45),
+
   },
   createButtonDisabled: {
     backgroundColor: '#B0BEC5',

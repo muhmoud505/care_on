@@ -80,13 +80,13 @@ const CustomDrawerContent = (props) => {
     {
       id: 4, 
       title: t('drawer.doctors_used_codes'),
-      icon: images.user,
+      icon: images.scan,
       onPress: () => handleNavigate('DoctorsUsedCodes'),
     },
     {
       id: 5, 
       title: t('drawer.your_created_codes'),
-      icon: images.verify,
+      icon: images.createCode,
       onPress: () => handleNavigate('YourCreatedCodes'),
     },
     {

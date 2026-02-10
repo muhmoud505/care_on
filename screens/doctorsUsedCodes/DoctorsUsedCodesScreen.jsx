@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, Dimensions, Image, FlatList, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Dimensions, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import CustomHeader from '../../components/CustomHeader';
 import Images from '../../constants2/images';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -13,8 +14,8 @@ const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 const DoctorsUsedCodesScreen = () => {
   const navigation = useNavigation();
   const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl'; // Check if RTL
 
-  // Sample data matching the image
   const [doctorRequests] = useState([
     {
       id: 1,
@@ -48,60 +49,59 @@ const DoctorsUsedCodesScreen = () => {
 
   const renderRequestItem = ({ item }) => (
     <View style={styles.requestItem}>
-      {/* Status Tag */}
+      {/* Top Row - Status Tag (Left/Right based on language) and Doctor Info */}
       <View style={[
-        styles.statusTag,
-        item.status === 'accepted' ? styles.acceptedStatus : styles.rejectedStatus
+        styles.topRow,
+        { flexDirection: isRTL ? 'row-reverse' : 'row' }
       ]}>
-        <Text style={[
-          styles.statusText,
-          item.status === 'accepted' ? styles.acceptedStatusText : styles.rejectedStatusText
+        {/* Status Tag */}
+        <View style={[
+          styles.statusTag,
+          item.status === 'accepted' ? styles.acceptedStatus : styles.rejectedStatus
         ]}>
-          {item.status === 'accepted' 
-            ? t('doctors_used_codes.accepted', { defaultValue: 'تم القبول' })
-            : t('doctors_used_codes.rejected', { defaultValue: 'تم الرفض' })
-          }
-        </Text>
+          <Text style={[
+            styles.statusText,
+            item.status === 'accepted' ? styles.acceptedStatusText : styles.rejectedStatusText
+          ]}>
+            {item.status === 'accepted' 
+              ? t('doctors_used_codes.accepted', { defaultValue: 'تم القبول' })
+              : t('doctors_used_codes.rejected', { defaultValue: 'تم الرفض' })
+            }
+          </Text>
+        </View>
+
+        {/* Doctor Name */}
+        <View style={styles.doctorInfoContainer}>
+          <Text style={styles.infoText}>{item.doctorName}</Text>
+          <Image source={Images.user} style={styles.infoIcon} />
+        </View>
       </View>
 
-      {/* Doctor Name */}
-      <View style={styles.infoRow}>
-        <Image source={Images.user} style={styles.infoIcon} />
-        <Text style={styles.infoText}>
-          {t('doctors_used_codes.doctor_name', { defaultValue: 'اسم الدكتور:' })} {item.doctorName}
-        </Text>
+      {/* Second Row - Date */}
+      <View style={[
+        styles.dateRow,
+        { flexDirection: isRTL ? 'row' : 'row-reverse' }
+      ]}>
+        <View />
+        <View style={styles.dateContainer}>
+          <Text style={styles.infoText}>{item.requestDate}</Text>
+          <Image source={Images.alarm} style={styles.infoIcon} />
+        </View>
+         <Text style={[styles.timestamp, { textAlign: isRTL ? 'left' : 'right' }]}>
+        {item.timestamp}
+      </Text>
       </View>
 
-      {/* Request Date */}
-      <View style={styles.infoRow}>
-        <Image source={Images.alarm} style={styles.infoIcon} />
-        <Text style={styles.infoText}>
-          {t('doctors_used_codes.request_date', { defaultValue: 'تاريخ الطلب:' })} {item.requestDate}
-        </Text>
-      </View>
-
-      {/* Timestamp */}
-      <Text style={styles.timestamp}>{item.timestamp}</Text>
+      {/* Bottom Timestamp */}
+     
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image 
-            source={Images.arrowLeft} 
-            style={[styles.backIcon, { transform: [{ rotate: i18n.dir() === 'rtl' ? '180deg' : '0deg' }] }]}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          {t('doctors_used_codes.title', { defaultValue: 'اطباء استخدموا اكوادك' })}
-        </Text>
-        <View style={styles.placeholder} />
-      </View>
+      <CustomHeader text={'اطباء استخدموا اكوادك'}/>
 
       {/* List of Requests */}
       <FlatList
@@ -121,31 +121,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F9FA',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: wp(4),
-    paddingVertical: hp(2),
-    paddingTop: hp(4),
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
-  },
-  backIcon: {
-    width: wp(6),
-    height: wp(6),
-    tintColor: '#000000',
-  },
-  headerTitle: {
-    fontSize: wp(5),
-    fontWeight: '600',
-    color: '#000000',
-    textAlign: 'center',
-  },
-  placeholder: {
-    width: wp(6),
-  },
   list: {
     flex: 1,
   },
@@ -157,7 +132,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: wp(3),
     padding: wp(4),
-    marginBottom: hp(2),
+    marginBottom: hp(1),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -167,12 +142,15 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  topRow: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: hp(1),
+  },
   statusTag: {
-    alignSelf: 'flex-start',
     paddingHorizontal: wp(3),
     paddingVertical: hp(0.8),
     borderRadius: wp(4),
-    marginBottom: hp(2),
   },
   acceptedStatus: {
     backgroundColor: '#D4EDDA',
@@ -190,12 +168,26 @@ const styles = StyleSheet.create({
   rejectedStatusText: {
     color: '#721C24',
   },
-  infoRow: {
-    flexDirection: 'row',
+  doctorInfoContainer: {
+    flexDirection: 'row-reverse',
     alignItems: 'center',
-    marginBottom: hp(1.5),
     gap: wp(2),
+    paddingVertical: hp(0.5),  // Add consistent vertical padding
   },
+ dateRow: {
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: hp(0.5),  // Add margin between date row and timestamp
+  gap: wp(2),  // Add gap for consistency
+},
+dateContainer: {
+  flexDirection: 'row-reverse',
+  alignItems: 'center',
+  gap: wp(2),
+  paddingVertical: hp(0.5),
+  flex: 1,  // Take available space like doctorInfoContainer
+  justifyContent: 'flex-end',  // Align to the right
+},
   infoIcon: {
     width: wp(4),
     height: wp(4),
@@ -209,8 +201,7 @@ const styles = StyleSheet.create({
   timestamp: {
     fontSize: wp(3.2),
     color: '#6C757D',
-    textAlign: 'right',
-    marginTop: hp(1),
+    marginTop: hp(0.5),
     fontStyle: 'italic',
   },
 });

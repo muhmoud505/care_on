@@ -1,7 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { Dimensions, I18nManager, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Images from '../constants2/images';
 import { useAuth } from '../contexts/authContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -36,13 +35,13 @@ const CustomHeader = ({ text }) => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('ProfileStack')}>
+        {/* <TouchableOpacity onPress={() => navigation.navigate('ProfileStack')}>
           <Image
             source={user?.user?.avatar ? { uri: user.user.avatar } : Images.profile}
             style={styles.avatar}
             resizeMode="cover"
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </SafeAreaView>
   );

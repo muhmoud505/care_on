@@ -22,8 +22,8 @@ const TabIcon = ({ icon, color, name, focused }) => {
     activeIcon = Images.profileActive;
     inactiveIcon = Images.profileInactive;
   } else if (name === 'CreateCode') {
-    activeIcon = Images.verify; // Using verify icon as placeholder for create code icon
-    inactiveIcon = Images.verify; // Using same icon for now
+    activeIcon = Images.createCodeA; // Using verify icon as placeholder for create code icon
+    inactiveIcon = Images.createCodeB; // Using same icon for now
   } else {
     activeIcon = Images.homeActive;
     inactiveIcon = Images.homeInactive;
@@ -54,6 +54,7 @@ export default function BottomTabs() {
       <Tab.Screen name="home" component={HomeStack}
        
         options={{
+          
          tabBarIcon: ({ color, focused }) => (
               <TabIcon
                 color={color}

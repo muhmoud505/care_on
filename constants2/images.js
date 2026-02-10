@@ -6,7 +6,7 @@ const Images = {
   logo: require('../assets2/images/logo.png'),
   confirmed: require('../assets2/images/confirmed.png'),
   alert:require('../assets2/images/alert.png'),
-
+  scan:require('../assets2/images/scan.png'),
   background: require('../assets2/images/backg.png'),
   wave: require('../assets2/images/wave.png'),
   results:require('../assets2/images/results.png'),
@@ -15,8 +15,10 @@ const Images = {
   eshaa:require('../assets2/images/eshaa.png'),
   last_reports:require('../assets2/images/last_reports.png'),
   shrink:require('../assets2/images/r6.png'),
-  
-  // Icons
+  createCode:require('../assets2/images/createCode.png'),
+  createCodeA:require('../assets2/images/createCodeA.png'),
+  createCodeB:require('../assets2/images/createCodeB.png'),
+  createCodeG:require('../assets2/images/createCodeG.png'),
   add: require('../assets2/images/add.png'),
   verify:require('../assets2/images/verify.png'),
   nonVerify:require('../assets2/images/non-verify.png'),
