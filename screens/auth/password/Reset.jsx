@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
 import { useAuth } from '../../../contexts/authContext';

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
 import FormField from '../../components/FormInput';
 import Images from '../../constants2/images';
@@ -18,6 +19,7 @@ const SignIn = () => {
     password: '',
   });
   const [isPasswordSecure, setIsPasswordSecure] = useState(true);
+  const { t } = useTranslation()
 
   const formIsValid = checkFormValidity();
 
@@ -40,8 +42,6 @@ const SignIn = () => {
       } 
     }
   };
-
-  const { t } = useTranslation()
   return (
     <SafeAreaView>
       <CustomHeader text={t('auth.signin')} />

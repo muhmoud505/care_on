@@ -15,7 +15,7 @@ const LocationScreen=()=>{
 
     const handleLocationGranted = (coords) => {
         // Navigate back to the previous screen and pass the location data
-        navigation.navigate('Service', { location: coords });
+        navigation.navigate('service', { location: coords });
     };
 
     return(

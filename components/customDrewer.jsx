@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    useWindowDimensions,
+    View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import images from '../constants2/images';
@@ -75,7 +75,8 @@ const CustomDrawerContent = (props) => {
       id: 3, 
       title: t('drawer.find_service'),
       icon: images.gps,
-      onPress: () => handleNavigate('FindService'),
+      onPress: () => handleNavigate('ServiceStack'),
+      disabled: true,
     },
     {
       id: 4, 
@@ -94,6 +95,7 @@ const CustomDrawerContent = (props) => {
       title: t('drawer.contact_us'),
       icon: images.call,
       onPress: () => handleNavigate('ContactUs'),
+      disabled: true,
     },
   ];
 
@@ -188,6 +190,15 @@ const CustomDrawerContent = (props) => {
       fontWeight: '500',
       textAlign: isRTL ? 'right' : 'left',
     },
+    menuItemDisabled: {
+      opacity: 0.5,
+    },
+    menuTextDisabled: {
+      color: '#9AA0A6',
+    },
+    menuIconDisabled: {
+      tintColor: '#9AA0A6',
+    },
   });
 
   return (
@@ -223,12 +234,17 @@ const CustomDrawerContent = (props) => {
         {menuItems.map((item) => (
           <TouchableOpacity
             key={item.id}
-            style={[styles.menuItem, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
-            onPress={item.onPress}
-            activeOpacity={0.7}
+            style={[
+              styles.menuItem,
+              item.disabled && styles.menuItemDisabled,
+              { flexDirection: isRTL ? 'row-reverse' : 'row' },
+            ]}
+            onPress={item.disabled ? undefined : item.onPress}
+            activeOpacity={item.disabled ? 1 : 0.7}
+            disabled={!!item.disabled}
           >
-            <Image source={item.icon} style={styles.menuIcon} />
-            <Text style={styles.menuText}>{item.title}</Text>
+            <Image source={item.icon} style={[styles.menuIcon, item.disabled && styles.menuIconDisabled]} />
+            <Text style={[styles.menuText, item.disabled && styles.menuTextDisabled]}>{item.title}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

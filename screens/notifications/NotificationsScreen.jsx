@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, Dimensions, Image, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Dimensions, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import CustomHeader from '../../components/CustomHeader';
 import Images from '../../constants2/images';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -100,20 +101,7 @@ const NotificationsScreen = () => {
     <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image 
-            source={Images.arrowLeft} 
-            style={[styles.backIcon, { transform: [{ rotate: i18n.dir() === 'rtl' ? '180deg' : '0deg' }] }]}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          {t('notifications.title', { defaultValue: 'الاشعارات' })}
-        </Text>
-        <View style={styles.placeholder} />
-      </View>
-
+     <CustomHeader text={"الاشعارات"}/>
       {/* Toggle pill */}
       <View style={styles.toggleOuter}>
         <View style={styles.toggleContainer}>

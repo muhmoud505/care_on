@@ -1,5 +1,6 @@
 // In project root/index.js
 import { AppRegistry } from 'react-native';
+import 'react-native-url-polyfill/auto';
 import App from './app';
 import './i18n/i18n';
 

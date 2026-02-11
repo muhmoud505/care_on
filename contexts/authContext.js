@@ -114,6 +114,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       console.log('Token is expiring soon, attempting to refresh...');
+      console.log('[AuthContext] Refresh URL:', `${API_URL}/api/v1/auth/refresh`);
       const response = await fetch(`${API_URL}/api/v1/auth/refresh`, {
         method: 'POST',
         headers: {
@@ -123,14 +124,21 @@ export const AuthProvider = ({ children }) => {
         },
       });
 
-      const responseData = await response.json();
+      const responseText = await response.text();
+      let responseData;
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (e) {
+        console.warn('[AuthContext] Refresh response not JSON:', responseText);
+      }
 
       if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to refresh token.');
+        const msg = responseData?.message || responseText || 'Failed to refresh token.';
+        throw new Error(msg);
       }
 
       // Assuming the refresh endpoint returns a new user object with a new token
-      const newUserState = normalizePrimaryUser(responseData.data);
+      const newUserState = normalizePrimaryUser(responseData?.data || responseData);
       await AsyncStorage.setItem('primary_user', JSON.stringify(newUserState));
       setPrimaryUser(newUserState);
       // If we are currently impersonating, keep the active user as-is; otherwise sync it.

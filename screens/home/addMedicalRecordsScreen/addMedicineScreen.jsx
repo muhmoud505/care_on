@@ -14,7 +14,7 @@ import { hp, wp } from '../../../utils/responsive'
 
 
 
-const addMedicineScreen = () => {
+const AddMedicineScreen = () => {
   const navigation=useNavigation();
   const { addRecord } = useMedicalRecords();
   const { user } = useAuth();
@@ -108,7 +108,7 @@ const addMedicineScreen = () => {
   )
 }
 
-export default addMedicineScreen
+export default AddMedicineScreen
 
 
 const styles = StyleSheet.create({
