@@ -1,8 +1,10 @@
-import { API_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import i18next from 'i18next';
 import { jwtDecode } from 'jwt-decode';
 import { createContext, useContext, useEffect, useState } from 'react';
+
+const API_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
 
 const AuthContext = createContext(null);
 

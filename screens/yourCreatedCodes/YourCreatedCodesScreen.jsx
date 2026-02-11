@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, Dimensions, Image, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Dimensions, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Images from '../../constants2/images';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -19,57 +19,47 @@ const YourCreatedCodesScreen = () => {
     {
       id: 1,
       code: '5824',
-      createdAt: '10 Jan 2026 05:47 PM',
+      createdAt: t('codes.createdAt', { defaultValue: '10 January 2026 05:47 PM' }),
       status: 'active',
-      expiresAt: '10 Jan 2026 06:47 PM'
+      expiresAt: t('codes.expiresAt', { defaultValue: '10 January 2026 06:47 PM' })
     },
     {
       id: 2,
-      code: '1234',
-      createdAt: '9 Jan 2026 03:30 PM',
+      code: '9135',
+      createdAt: t('codes.createdAt', { defaultValue: '10 January 2026 01:15 PM' }),
       status: 'expired',
-      expiresAt: '9 Jan 2026 04:30 PM'
+      expiresAt: t('codes.expiresAt', { defaultValue: '10 January 2026 02:15 PM' })
     },
     {
       id: 3,
-      code: '9876',
-      createdAt: '8 Jan 2026 11:15 AM',
-      status: 'expired',
-      expiresAt: '8 Jan 2026 12:15 PM'
+      code: '7462',
+      createdAt: t('codes.createdAt', { defaultValue: '09 January 2026 11:30 AM' }),
+      status: 'active',
+      expiresAt: t('codes.expiresAt', { defaultValue: '09 January 2026 12:30 PM' })
     }
   ]);
 
   const renderCodeItem = ({ item }) => (
-    <View style={styles.codeItem}>
-      <View style={styles.codeHeader}>
-        <Text style={styles.codeLabel}>
-          {t('your_created_codes.code', { defaultValue: 'الكود:' })}
-        </Text>
+    <View style={styles.codeCard}>
+      <View style={styles.cardContent}>
+        {/* Icon on the left */}
+        <View style={styles.iconContainer}>
+          <Image source={Images.createCodeG} style={styles.codeIcon} />
+        </View>
+        
+        {/* Code in the center */}
         <Text style={styles.codeValue}>{item.code}</Text>
-      </View>
-      
-      <View style={styles.codeDetails}>
-        <Text style={styles.detailText}>
-          {t('your_created_codes.created', { defaultValue: 'تم الانشاء:' })} {item.createdAt}
-        </Text>
-        <Text style={styles.detailText}>
-          {t('your_created_codes.expires', { defaultValue: 'ينتهي:' })} {item.expiresAt}
-        </Text>
-      </View>
-      
-      <View style={[
-        styles.statusBadge,
-        item.status === 'active' ? styles.activeBadge : styles.expiredBadge
-      ]}>
-        <Text style={[
-          styles.statusText,
-          item.status === 'active' ? styles.activeText : styles.expiredText
-        ]}>
-          {item.status === 'active' 
-            ? t('your_created_codes.active', { defaultValue: 'نشط' })
-            : t('your_created_codes.expired', { defaultValue: 'منتهي' })
-          }
-        </Text>
+        
+        {/* Status and time on the right */}
+        <View style={styles.statusContainer}>
+          <View style={[styles.statusBadge, item.status === 'active' ? styles.activeStatus : styles.expiredStatus]}>
+            <Text style={styles.statusText}>{item.status === 'active' ? t('codes.active', { defaultValue: 'Active' }) : t('codes.expired', { defaultValue: 'Expired' })}</Text>
+          </View>
+          <View style={styles.timeContainer}>
+            <Text style={styles.timeText}>{item.createdAt}</Text>
+            <Text style={styles.timeText}>{item.expiresAt}</Text>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -142,7 +132,7 @@ const styles = StyleSheet.create({
     padding: wp(4),
     gap: hp(2),
   },
-  codeItem: {
+  codeCard: {
     backgroundColor: '#ffffff',
     borderRadius: wp(3),
     padding: wp(4),
@@ -156,51 +146,57 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  codeHeader: {
+  cardContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: hp(2),
+    justifyContent: 'space-between',
   },
-  codeLabel: {
-    fontSize: wp(4),
-    fontWeight: '600',
-    color: '#495057',
+  iconContainer: {
+    width: wp(12),
+    height: wp(12),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  codeIcon: {
+    width: wp(6),
+    height: wp(6),
+    tintColor: '#007AFF',
   },
   codeValue: {
     fontSize: wp(5),
     fontWeight: '700',
     color: '#007AFF',
+    letterSpacing: wp(1),
+    flex: 1,
+    textAlign: 'center',
   },
-  codeDetails: {
-    marginBottom: hp(2),
-  },
-  detailText: {
-    fontSize: wp(3.5),
-    color: '#6C757D',
-    marginBottom: hp(0.5),
+  statusContainer: {
+    alignItems: 'flex-end',
+    gap: hp(1),
   },
   statusBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: wp(3),
-    paddingVertical: hp(0.8),
-    borderRadius: wp(4),
+    paddingHorizontal: wp(2),
+    paddingVertical: hp(0.5),
+    borderRadius: wp(2),
   },
-  activeBadge: {
-    backgroundColor: '#D4EDDA',
+  activeStatus: {
+    backgroundColor: '#28A745',
   },
-  expiredBadge: {
-    backgroundColor: '#F8D7DA',
+  expiredStatus: {
+    backgroundColor: '#DC3545',
   },
   statusText: {
-    fontSize: wp(3.5),
+    fontSize: wp(3),
     fontWeight: '600',
+    color: '#ffffff',
   },
-  activeText: {
-    color: '#155724',
+  timeContainer: {
+    alignItems: 'flex-end',
+    gap: hp(0.5),
   },
-  expiredText: {
-    color: '#721C24',
+  timeText: {
+    fontSize: wp(3),
+    color: '#6C757D',
   },
 });
 

@@ -48,7 +48,8 @@
     "extra": {
       "eas": {
         "projectId": "b9c85fcc-27eb-4828-bf3b-dcaf85a001f7"
-      }
+      },
+      "API_URL": "https://dash.rayaa360.cloud"
     }
   }
 }

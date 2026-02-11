@@ -1,11 +1,13 @@
-import { API_URL } from '@env';
 import { useNavigation } from '@react-navigation/native';
+import Constants from 'expo-constants';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Dimensions, Image, Modal, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Clipboard, Dimensions, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import CustomHeader from '../../components/CustomHeader';
 import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
+
+const API_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -18,7 +20,7 @@ const CreateCodeScreen = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [isCreating, setIsCreating] = useState(false);
-  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [showCode, setShowCode] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
 
   const createPatientAccessCode = async () => {
@@ -27,22 +29,25 @@ const CreateCodeScreen = () => {
       
       // Get auth token from user context
       const token = user?.token;
+      const userId = user?.user?.id;
       if (!token) {
         throw new Error('No authentication token found');
       }
 
       console.log('API_URL:', API_URL);
       console.log('Making API call to:', `${API_URL}/api/v1/patient-access-codes`);
-      
+      console.log('User ID:', userId);
+      console.log('Token:', token);
       const response = await fetch(`${API_URL}/api/v1/patient-access-codes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token.value}`,
         },
         body: JSON.stringify({
           // Add any required body data here
-          patient_id: user?.user?.id,
+          patient_id: userId,
         }),
       });
 
@@ -63,7 +68,7 @@ const CreateCodeScreen = () => {
       }
 
       setGeneratedCode(code.toString());
-      setShowCodeModal(true);
+      setShowCode(true);
       
       // Show success alert with response details
       Alert.alert(
@@ -82,8 +87,8 @@ const CreateCodeScreen = () => {
       console.error('Error details:', {
         message: error.message,
         stack: error.stack,
-        user: user?.user?.id,
-        hasToken: !!user?.token,
+        user: userId,
+        hasToken: !!token,
       });
       
       Alert.alert(
@@ -101,18 +106,31 @@ const CreateCodeScreen = () => {
     }
   };
 
-  const handleCopyCode = () => {
-    // Simple alert showing the code for now
-    Alert.alert(
-      t('create_code.code_display', { defaultValue: 'Code' }),
-      t('create_code.code_value', { defaultValue: `Your code is: ${generatedCode}` }),
-      [
-        {
-          text: t('common.ok', { defaultValue: 'OK' }),
-          onPress: () => console.log('Code displayed'),
-        },
-      ]
-    );
+  const handleCopyCode = async () => {
+    try {
+      await Clipboard.setStringAsync(generatedCode);
+      Alert.alert(
+        t('create_code.copied', { defaultValue: 'Copied!' }),
+        t('create_code.code_copied', { defaultValue: 'Code copied to clipboard' }),
+        [
+          {
+            text: t('common.ok', { defaultValue: 'OK' }),
+            onPress: () => console.log('Copy success confirmed'),
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert(
+        t('create_code.error', { defaultValue: 'Error' }),
+        t('create_code.copy_failed', { defaultValue: 'Failed to copy code' }),
+        [
+          {
+            text: t('common.ok', { defaultValue: 'OK' }),
+            onPress: () => console.log('Copy error confirmed'),
+          },
+        ]
+      );
+    }
   };
 
   return (
@@ -124,74 +142,62 @@ const CreateCodeScreen = () => {
 
       {/* Main Content */}
       <View style={styles.mainContent}>
-        {/* Blue Border Box */}
-        <View style={styles.codeBox}>
-          {/* Circular Icon */}
-          <View style={styles.iconContainer}>
-            
+        {!showCode ? (
+          /* Blue Border Box - Creation Interface */
+          <View style={styles.codeBox}>
+            {/* Circular Icon without Border */}
+            <View style={styles.iconContainer}>
               <Image source={Images.createCodeG} style={styles.codeIcon} />
+            </View>
             
-          </View>
-          
-          {/* Description Text */}
-          <Text style={styles.descriptionText}>
-            {t('create_code.code_description', { defaultValue: 'سيتم انشاء كود صالح لمدة ساعة واحدة' })}
-          </Text>
-          
-          {/* Create Code Button */}
-          <TouchableOpacity 
-            style={[styles.createButton, isCreating && styles.createButtonDisabled]}
-            onPress={createPatientAccessCode}
-            disabled={isCreating}
-          >
-            <Text style={styles.createButtonText}>
-              {isCreating 
-                ? t('create_code.creating', { defaultValue: 'جاري الانشاء...' })
-                : t('create_code.create_new_code', { defaultValue: 'انشئ كود جديد' })
-              }
+            {/* Description Text */}
+            <Text style={styles.descriptionText}>
+              {t('create_code.code_description', { defaultValue: 'سيتم انشاء كود صالح لمدة ساعة واحدة' })}
             </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Code Display Modal */}
-      <Modal
-        visible={showCodeModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowCodeModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            {/* Modal Header */}
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('create_code.your_code', { defaultValue: 'كودك الخاص' })}</Text>
-              <TouchableOpacity 
-                style={styles.closeButton}
-                onPress={() => setShowCodeModal(false)}
-              >
-                <Image source={Images.close} style={styles.closeIcon} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Code Display */}
-            <View style={styles.codeDisplayContainer}>
-              <Text style={styles.codeText}>
-                {generatedCode.split('').join(' ')}
-              </Text>
-            </View>
-
-            {/* Copy Button */}
+            
+            {/* Create Code Button */}
             <TouchableOpacity 
-              style={styles.copyButton}
-              onPress={handleCopyCode}
+              style={[styles.createButton, isCreating && styles.createButtonDisabled]}
+              onPress={createPatientAccessCode}
+              disabled={isCreating}
             >
-              <Image source={Images.download} style={styles.copyIcon} />
-              <Text style={styles.copyButtonText}>{t('create_code.copy', { defaultValue: 'نسخ' })}</Text>
+              <Text style={styles.createButtonText}>
+                {isCreating 
+                  ? t('create_code.creating', { defaultValue: 'جاري الانشاء...' })
+                  : t('create_code.create_new_code', { defaultValue: 'انشئ كود جديد' })
+                }
+              </Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        ) : (
+          /* Code Display Section */
+          <View style={styles.codeDisplaySection}>
+            <View style={styles.codeContainer}>
+              <View style={styles.codeHeader}>
+                <Text style={styles.codeTitle}>{t('create_code.your_code', { defaultValue: 'كودك الخاص' })}</Text>
+              </View>
+              <TouchableOpacity 
+                style={styles.closeButton}
+                onPress={() => setShowCode(false)}
+              >
+                <Text style={styles.closeButtonText}>×</Text>
+              </TouchableOpacity>
+              <View style={styles.codeBox}>
+                <Text style={styles.codeText}>
+                  {generatedCode.split('').join(' ')}
+                </Text>
+              </View>
+              <TouchableOpacity 
+                style={styles.copyButton}
+                onPress={handleCopyCode}
+              >
+                <Image source={Images.download} style={styles.copyIcon} />
+                <Text style={styles.copyButtonText}>{t('create_code.copy', { defaultValue: 'نسخ' })}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      </View>
     </SafeAreaView>
   );
 };
@@ -208,32 +214,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(5),
   },
   codeBox: {
-    width: wp(85),  // Keep this or replace with: (327 / SCREEN_WIDTH) * 100
+    width: wp(85),
     height: hp(38), 
     borderRadius: wp(3),
-      paddingVertical: hp(6),  
+    paddingVertical: hp(6),  
     paddingHorizontal: wp(8),
     alignItems: 'center',
     backgroundColor: '#ffffff',
-        justifyContent: 'space-between', 
+    justifyContent: 'center',
   },
   iconContainer: {
       marginBottom: hp(2), 
   },
-  iconCircle: {
-    width: wp(25),
-    height: wp(25),
-    borderRadius: wp(12.5),
-    borderWidth: 4,
-   
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-  },
   codeIcon: {
     width: wp(20),
     height: wp(20),
- 
   },
   descriptionText: {
     fontSize: wp(4.8),
@@ -262,60 +257,70 @@ const styles = StyleSheet.create({
     fontSize: wp(4.5),
     fontWeight: '600',
   },
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  // Code Display Section Styles
+  codeDisplaySection: {
+    paddingHorizontal: wp(5),
+    paddingBottom: hp(5),
   },
-  modalContainer: {
-    width: wp(80),
+  codeContainer: {
     backgroundColor: '#ffffff',
-    borderRadius: wp(2),
-    overflow: 'hidden',
-  },
-  modalHeader: {
-    backgroundColor: '#007AFF',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    borderRadius: wp(3),
+    padding: wp(5),
     alignItems: 'center',
-    paddingHorizontal: wp(4),
-    paddingVertical: hp(1.5),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    position: 'relative',
   },
-  modalTitle: {
-    fontSize: wp(4.5),
+  codeTitle: {
+    fontSize: wp(5),
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#000000',
+    marginBottom: hp(2),
   },
   closeButton: {
-    padding: wp(1),
-  },
-  closeIcon: {
-    width: wp(4),
-    height: wp(4),
-    tintColor: '#ffffff',
-  },
-  codeDisplayContainer: {
-    paddingVertical: hp(6),
-    alignItems: 'center',
+    position: 'absolute',
+    top: wp(2),
+    right: wp(2),
+    width: wp(8),
+    height: wp(8),
+    borderRadius: wp(4),
+    backgroundColor: '#F0F0F0',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  closeButtonText: {
+    fontSize: wp(6),
+    fontWeight: '600',
+    color: '#666666',
+  },
+  codeBox: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: wp(2),
+    padding: wp(4),
+    marginBottom: hp(3),
+    alignItems: 'center',
   },
   codeText: {
-    fontSize: wp(10),
+    fontSize: wp(8),
     fontWeight: '700',
     color: '#000000',
-    letterSpacing: wp(3),
+    letterSpacing: wp(2),
+    textAlign: 'center',
   },
   copyButton: {
     backgroundColor: '#007AFF',
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: hp(2),
-    marginHorizontal: wp(4),
-    marginBottom: hp(2),
     borderRadius: wp(2),
     gap: wp(1.5),
   },
