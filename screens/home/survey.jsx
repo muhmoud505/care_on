@@ -8,9 +8,10 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 import Check from '../../components/check';
 
@@ -21,8 +22,6 @@ import { HomeHeader } from '../../components/homeHeader';
 import Uploader from '../../components/Uploader';
 
 import { useAuth } from '../../contexts/authContext'; // 1. Import useAuth
-
-
 
 
 
@@ -284,30 +283,50 @@ const Survey = () => {
 
 
 
-        Alert.alert(t('survey.success_title'), t('survey.success_message'));
+        Toast.show({
+          type: 'success',
+          text1: t('survey.success_title'),
+          text2: t('survey.success_message'),
+          position: 'top',
+          visibilityTime: 3000,
+        });
 
         navigation.goBack();
 
       } else {
 
-        Alert.alert(t('common.error'), result.message || t('survey.submit_failed'));
-
+        Toast.show({
+          type: 'error',
+          text1: t('common.error'),
+          text2: result.message || t('survey.submit_failed'),
+          position: 'top',
+          visibilityTime: 3000,
+        });
       }
 
     } catch (error) {
-
       console.error('Submission Error:', error);
 
       // Provide a more specific error message for network failures.
 
       if (error instanceof TypeError && error.message === 'Network request failed') {
 
-        Alert.alert(t('survey.network_error'), t('survey.network_error_message'));
-
+        Toast.show({
+          type: 'error',
+          text1: t('survey.network_error'),
+          text2: t('survey.network_error_message'),
+          position: 'top',
+          visibilityTime: 3000,
+        });
       } else {
 
-        Alert.alert(t('common.error'), t('survey.unexpected_error'));
-
+        Toast.show({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('survey.unexpected_error'),
+          position: 'top',
+          visibilityTime: 3000,
+        });
       }
 
     } finally {
@@ -318,48 +337,16 @@ const Survey = () => {
 
   };
 
-
-
-  if (isQuestionsLoading) {
-
-    return (
-
-      <SafeAreaView style={styles.mainContainer}>
-
-        <HomeHeader showUserInfo={false}/>
-
-        <View style={styles.centered}>
-
-          <ActivityIndicator size="large" color="#80D280" />
-
-          <Text>{t('survey.loading_questions')}</Text>
-
-        </View>
-
-      </SafeAreaView>
-
-    );
-
-  }
-
-
-
   if (questionsError) {
 
     return (
-
       <SafeAreaView style={styles.mainContainer}>
-
         <HomeHeader showUserInfo={false}/>
-
         <View style={styles.centered}>
-
           <Text style={styles.errorText}>{t('survey.error_prefix')}{questionsError}</Text>
-
         </View>
-
+        <Toast />
       </SafeAreaView>
-
     );
 
   }

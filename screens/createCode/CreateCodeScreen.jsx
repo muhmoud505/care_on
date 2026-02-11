@@ -1,10 +1,14 @@
 import { useNavigation } from '@react-navigation/native';
+import Constants from 'expo-constants';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Clipboard, Dimensions, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Clipboard, Dimensions, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
 import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
+
+const API_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -31,6 +35,10 @@ const CreateCodeScreen = () => {
         throw new Error('No authentication token found');
       }
 
+      console.log('API_URL:', API_URL);
+      console.log('Making API call to:', `${API_URL}/api/v1/patient-access-codes`);
+      console.log('User ID:', userId);
+
       const response = await authFetch(`${API_URL}/api/v1/patient-access-codes`, {
         method: 'POST',
         body: JSON.stringify({
@@ -39,6 +47,8 @@ const CreateCodeScreen = () => {
       });
 
       const responseData = await response.json();
+      console.log('API Response Status:', response.status);
+      console.log('API Response Data:', responseData);
 
       if (!response.ok) {
         throw new Error(responseData.message || `HTTP error! status: ${response.status}`);
@@ -53,29 +63,23 @@ const CreateCodeScreen = () => {
       setGeneratedCode(code.toString());
       setShowCode(true);
       
-      // Show success alert with response details
-      Alert.alert(
-        t('create_code.success', { defaultValue: 'Success!' }),
-        t('create_code.code_created', { defaultValue: `Code created successfully: ${code}` }),
-        [
-          {
-            text: t('common.ok', { defaultValue: 'OK' }),
-            onPress: () => console.log('Success alert dismissed'),
-          },
-        ]
-      );
+      // Show success toast
+      Toast.show({
+        type: 'success',
+        text1: t('create_code.success', { defaultValue: 'Success!' }),
+        text2: t('create_code.code_created', { defaultValue: `Code created successfully: ${code}` }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
 
     } catch (error) {
-      Alert.alert(
-        t('create_code.error', { defaultValue: 'Error' }),
-        t('create_code.failed_to_create', { defaultValue: `Failed to create code: ${error.message}` }),
-        [
-          {
-            text: t('common.ok', { defaultValue: 'OK' }),
-            onPress: () => console.log('Error alert dismissed'),
-          },
-        ]
-      );
+      Toast.show({
+        type: 'error',
+        text1: t('create_code.error', { defaultValue: 'Error' }),
+        text2: t('create_code.failed_to_create', { defaultValue: `Failed to create code: ${error.message}` }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
     } finally {
       setIsCreating(false);
     }
@@ -83,28 +87,22 @@ const CreateCodeScreen = () => {
 
   const handleCopyCode = async () => {
     try {
-      await Clipboard.setStringAsync(generatedCode);
-      Alert.alert(
-        t('create_code.copied', { defaultValue: 'Copied!' }),
-        t('create_code.code_copied', { defaultValue: 'Code copied to clipboard' }),
-        [
-          {
-            text: t('common.ok', { defaultValue: 'OK' }),
-            onPress: () => console.log('Copy success confirmed'),
-          },
-        ]
-      );
+      await Clipboard.setString(generatedCode);
+      Toast.show({
+        type: 'success',
+        text1: t('create_code.copied', { defaultValue: 'Copied!' }),
+        text2: t('create_code.code_copied', { defaultValue: 'Code copied to clipboard' }),
+        position: 'top',
+        visibilityTime: 2000,
+      });
     } catch (error) {
-      Alert.alert(
-        t('create_code.error', { defaultValue: 'Error' }),
-        t('create_code.copy_failed', { defaultValue: 'Failed to copy code' }),
-        [
-          {
-            text: t('common.ok', { defaultValue: 'OK' }),
-            onPress: () => console.log('Copy error confirmed'),
-          },
-        ]
-      );
+      Toast.show({
+        type: 'error',
+        text1: t('create_code.error', { defaultValue: 'Error' }),
+        text2: t('create_code.copy_failed', { defaultValue: 'Failed to copy code' }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
     }
   };
 
@@ -173,6 +171,7 @@ const CreateCodeScreen = () => {
           </View>
         )}
       </View>
+      <Toast />
     </SafeAreaView>
   );
 };

@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ActivityIndicator,
-  Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -50,12 +49,24 @@ const Code = () => {
     setIsResending(true);
     try {
       await resendResetCode({ email: email });
-      Alert.alert(t('common.success'), t('auth.code_resent_success'));
-      // Reset the timer
-      setTimeLeft(60);
-      setShowResend(false);
+      Toast.show({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('auth.code_resent_success'),
+          position: 'top',
+          visibilityTime: 3000,
+        });
+        // Reset the timer
+        setTimeLeft(60);
+        setShowResend(false);
     } catch (error) {
-      Alert.alert(t('common.error'), error.message);
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: error.message,
+        position: 'top',
+        visibilityTime: 3000,
+      });
     } finally {
       setIsResending(false);
     }
@@ -73,7 +84,13 @@ const Code = () => {
       // On success, navigate to the next step, passing the necessary data.
       navigation.navigate('aftercode', { code: form.code, email: email });
     } catch (error) {
-      Alert.alert(t('common.error'), error.message || t('auth.invalid_code_error'));
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: error.message || t('auth.invalid_code_error'),
+        position: 'top',
+        visibilityTime: 3000,
+      });
     }
   };
 
@@ -102,7 +119,9 @@ const Code = () => {
                 )}
               </TouchableOpacity>
             ) : (
-              <Text style={styles.txt2}>{t('auth.resend_in', { defaultValue: 'اعادة الارسال بعد' })} {formatTime(timeLeft)}</Text>
+              <TouchableOpacity>
+                <Text style={styles.txt2}>{t('auth.resend_in', { defaultValue: 'اعادة الارسال بعد' })} {formatTime(timeLeft)}</Text>
+              </TouchableOpacity>
             )}
           </View>
         </View>
@@ -119,7 +138,9 @@ const Code = () => {
           )}
         </TouchableOpacity>
       </View>
+       <Toast />
     </SafeAreaView>
+   
   )
 }
 

@@ -1,8 +1,7 @@
-
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
 import FormField from '../../components/FormInput';
@@ -31,7 +30,13 @@ const SignIn = () => {
         });
         // Navigation will be handled automatically by the AuthProvider
       } catch (error) {
-        Alert.alert(t('auth.login_failed'), error.message);
+        Toast.show({
+          type: 'error',
+          text1: t('auth.login_failed'),
+          text2: error.message,
+          position: 'top',
+          visibilityTime: 3000,
+        });
       } 
     }
   };
@@ -76,6 +81,7 @@ const SignIn = () => {
             )}
                     </TouchableOpacity>
       </View>
+      <Toast />
     </SafeAreaView>
   )
 }

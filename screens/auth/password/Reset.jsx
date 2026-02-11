@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
@@ -29,7 +29,13 @@ const Reset = () => {
   const handleConfirm = async () => {
     if (!formIsValid) {
       if (!passwordsMatch) {
-        Alert.alert(t('common.error', { defaultValue: 'Error' }), t('auth.passwords_do_not_match', { defaultValue: 'Passwords do not match' }));
+        Toast.show({
+          type: 'error',
+          text1: t('common.error', { defaultValue: 'Error' }),
+          text2: t('auth.passwords_do_not_match', { defaultValue: 'Passwords do not match' }),
+          position: 'top',
+          visibilityTime: 3000,
+        });
       }
       return;
     }
@@ -41,13 +47,23 @@ const Reset = () => {
         password_confirmation: form.password_confirmation,
       });
 
-      Alert.alert(
-        t('common.success', { defaultValue: 'Success' }),
-        t('auth.password_reset_success', { defaultValue: 'Your password has been reset successfully.' }),
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
+      Toast.show({
+        type: 'success',
+        text1: t('common.success', { defaultValue: 'Success' }),
+        text2: t('auth.password_reset_success', { defaultValue: 'Your password has been reset successfully.' }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
+
+      navigation.goBack();
     } catch (error) {
-      Alert.alert(t('common.error', { defaultValue: 'Error' }), error.message);
+      Toast.show({
+        type: 'error',
+        text1: t('common.error', { defaultValue: 'Error' }),
+        text2: error.message,
+        position: 'top',
+        visibilityTime: 3000,
+      });
     }
   };
 
