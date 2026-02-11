@@ -90,15 +90,15 @@ export const AuthProvider = ({ children }) => {
   }, []); // The fetchChildren dependency is managed inside the effect
 
   const refreshToken = async () => {
-    if (!user?.token?.value) {
-      console.log('No user or token available to refresh.');
-      return user; // Return current user state
+    // Always refresh based on the primary user session.
+    if (!primaryUser?.token?.value) {
+      return primaryUser; // Nothing to refresh
     }
 
     try {
       let decodedToken;
       try {
-        decodedToken = jwtDecode(user.token.value);
+        decodedToken = jwtDecode(primaryUser.token.value);
       } catch (e) {
         console.error('Failed to decode token:', e);
         // If token is invalid, treat it as expired and log out.
@@ -110,16 +110,16 @@ export const AuthProvider = ({ children }) => {
 
       // If the token is not close to expiring, no need to refresh.
       if (decodedToken.exp > now + buffer) {
-        return user;
+        return primaryUser;
       }
 
       console.log('Token is expiring soon, attempting to refresh...');
-      const response = await fetch(`${API_URL}api/v1/auth/refresh`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': `Bearer ${user.token.value}`,
+          'Authorization': `Bearer ${primaryUser.token.value}`,
         },
       });
 
@@ -130,9 +130,11 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Assuming the refresh endpoint returns a new user object with a new token
-      const newUserState = responseData.data;
+      const newUserState = normalizePrimaryUser(responseData.data);
       await AsyncStorage.setItem('primary_user', JSON.stringify(newUserState));
-      setUser(newUserState);
+      setPrimaryUser(newUserState);
+      // If we are currently impersonating, keep the active user as-is; otherwise sync it.
+      setUser(prev => (prev && prev.user && primaryUser && prev.user.id !== primaryUser.user.id ? prev : newUserState));
       console.log('Token refreshed successfully.');
       return newUserState;
     } catch (error) {
@@ -144,10 +146,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const fetchChildren = async (token, userId) => {
-    console.log(token);
-    console.log(userId);
-    
-    
     // The token is now passed directly. We can still use refreshToken to ensure it's not expired, but the primary check is if a token was passed.
     if (!token || !userId) {
     
@@ -156,8 +154,6 @@ export const AuthProvider = ({ children }) => {
       return;
     }
     try {
-      console.log('Fetching children with provided token...');
-      
       const response = await fetch(`${API_URL}/api/v1/auth/users`, {
         method: 'GET',
         headers: {
@@ -316,8 +312,6 @@ export const AuthProvider = ({ children }) => {
         url += `?user_id=${parent_id}`;
       }
 
-      console.log("Constructed Signup URL:", url); // For debugging
-
       const headers = {
         // 'Content-Type': 'multipart/form-data' is set automatically by fetch for FormData.
         "accept": "application/json"
@@ -372,7 +366,7 @@ export const AuthProvider = ({ children }) => {
   const forgotPassword = async (payload) => {
     setIsAuthLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/auth/password/email`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/password/email`, {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: {

@@ -1,13 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
-import Constants from 'expo-constants';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Clipboard, Dimensions, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import CustomHeader from '../../components/CustomHeader';
 import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
-
-const API_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -18,7 +15,7 @@ const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 const CreateCodeScreen = () => {
   const navigation = useNavigation();
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, authFetch } = useAuth();
   const [isCreating, setIsCreating] = useState(false);
   const [showCode, setShowCode] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
@@ -34,28 +31,14 @@ const CreateCodeScreen = () => {
         throw new Error('No authentication token found');
       }
 
-      console.log('API_URL:', API_URL);
-      console.log('Making API call to:', `${API_URL}/api/v1/patient-access-codes`);
-      console.log('User ID:', userId);
-      console.log('Token:', token);
-      const response = await fetch(`${API_URL}/api/v1/patient-access-codes`, {
+      const response = await authFetch(`${API_URL}/api/v1/patient-access-codes`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token.value}`,
-        },
         body: JSON.stringify({
-          // Add any required body data here
           patient_id: userId,
         }),
       });
 
-      console.log('API Response Status:', response.status);
-      console.log('API Response Headers:', response.headers);
-
       const responseData = await response.json();
-      console.log('API Response Data:', responseData);
 
       if (!response.ok) {
         throw new Error(responseData.message || `HTTP error! status: ${response.status}`);
@@ -83,14 +66,6 @@ const CreateCodeScreen = () => {
       );
 
     } catch (error) {
-      console.error('Error creating patient access code:', error);
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        user: userId,
-        hasToken: !!token,
-      });
-      
       Alert.alert(
         t('create_code.error', { defaultValue: 'Error' }),
         t('create_code.failed_to_create', { defaultValue: `Failed to create code: ${error.message}` }),

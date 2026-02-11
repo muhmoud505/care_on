@@ -1,6 +1,5 @@
-import { API_URL } from '@env';
-
 import { createContext, useCallback, useContext, useState } from 'react';
+import Constants from 'expo-constants';
 
 import { useTranslation } from 'react-i18next';
 
@@ -22,7 +21,10 @@ export const useMedicalRecords = () => {
 
 
 
-const BASE_URL = API_URL; // Use the URL from the .env file
+// Prefer the same API base resolution strategy as in authContext:
+// 1) Use expo extra.API_URL when available
+// 2) Fallback to the production backend URL
+const BASE_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
 
 
 
@@ -99,14 +101,6 @@ const mapApiDataToComponentProps = (item, componentType) => {
   } else {
 
     type = componentType;
-
-  }
-
-
-
-  if (item.documents && item.documents.length > 0) {
-
-    console.log(`[Context] Mapping item ${item.id} - Documents found:`, JSON.stringify(item.documents));
 
   }
 
@@ -307,10 +301,6 @@ export const MedicalRecordsProvider = ({ children }) => {
         // The national_number is still needed for the URL.
 
         const nationalNumber = user?.user?.resource?.national_number;
-
-        console.log(nationalNumber);
-
-        
 
 
 

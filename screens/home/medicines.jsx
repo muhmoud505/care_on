@@ -17,10 +17,7 @@ const Medicines = () => {
   const route = useRoute();
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  console.log(user?.token?.value);
-  
   const { medicines, loading, error, fetchMedicines, addMedicine, loadMoreMedicines } = useMedicalRecords();
-  console.log(medicines);
 
   // This effect runs every time the screen comes into focus
   useFocusEffect(
@@ -91,7 +88,7 @@ const Medicines = () => {
         error={error.medicines}
         data={medicines}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
+        keyExtractor={(item, index) => (item.id != null ? item.id.toString() : `medicine-${index}`)}
         onRefresh={onRefresh}
         refreshing={loading.medicines}
         onEndReached={loadMoreMedicines}

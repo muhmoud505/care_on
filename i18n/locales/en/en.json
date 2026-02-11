@@ -280,6 +280,19 @@
     "billing": "Billing & Payments",
     "find_service": "Find Nearest Service",
     "contact_us": "Contact Us",
-    "linked_accounts":"Linked Accounts"
+    "linked_accounts":"Linked Accounts",
+    "doctors_used_codes": "Doctors who used your codes",
+    "your_created_codes": "Your created codes"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "all": "All",
+    "new": "New",
+    "items": {
+      "request_records": "Request to access records.",
+      "pay_invoice": "Invoice payment.",
+      "upload_result": "Lab result uploaded.",
+      "system_announcement": "Announcement from the system."
+    }
   }
 }

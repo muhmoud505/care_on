@@ -19,17 +19,15 @@ const DrawerNavigator = () => {
         drawerType: 'front',
         drawerStyle: {
           width: width * 1,
-          margin:0,
-          padding:0 ,
-            borderWidth: 2, // Temporary - remove after debugging
-  borderColor: 'green',// Use 80% of the current window width
-   // Remove shadow/elevation
+          margin: 0,
+          padding: 0,
+          // Remove shadow/elevation
           shadowColor: 'transparent',
           shadowOpacity: 0,
           shadowOffset: { width: 0, height: 0 },
           shadowRadius: 0,
           elevation: 0,
-          borderRightWidth: 0, // Remove border if RTL is false
+          borderRightWidth: 0,
           borderLeftWidth: 0,
         },
         drawerContentContainerStyle: {

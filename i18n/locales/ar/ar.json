@@ -272,6 +272,19 @@
     "billing": "الفواتير والمدفوعات",
     "find_service": "البحث عن أقرب خدمة",
     "contact_us": "تواصل معنا",
-    "linked_accounts":"الحسابات المرتبطة"
+    "linked_accounts":"الحسابات المرتبطة",
+    "doctors_used_codes": "الأطباء الذين استخدموا الأكواد",
+    "your_created_codes": "الأكواد التي أنشأتها"
+  },
+  "notifications": {
+    "title": "الاشعارات",
+    "all": "الكل",
+    "new": "جديد",
+    "items": {
+      "request_records": "طلب الحصول علي السجلات.",
+      "pay_invoice": "سداد الفاتورة.",
+      "upload_result": "رفع نتيجة تحليل.",
+      "system_announcement": "اعلان من السيستيم."
+    }
   }
 }
