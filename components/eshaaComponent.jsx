@@ -1,7 +1,8 @@
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useTranslation } from 'react-i18next';
-import { Alert, Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import CollapsibleCard from './CollapsibleCard';
 
 const Eshaa = ({ 
@@ -26,16 +27,36 @@ const Eshaa = ({
       const { uri } = await FileSystem.downloadAsync(fileUrl, fileUri);
       
       if (Platform.OS === 'android') {
-        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-        if (permissions.granted) {
-          const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
-          await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, fileName, 'application/octet-stream')
-            .then(async (createdUri) => {
-              await FileSystem.writeAsStringAsync(createdUri, base64, { encoding: FileSystem.EncodingType.Base64 });
-              Alert.alert(t('common.success'), t('common.file_saved', { defaultValue: 'File saved successfully' }));
-            })
-            .catch(e => console.error(e));
-        } else {
+        try {
+          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+          if (permissions.granted) {
+            const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+            await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, fileName, 'application/octet-stream')
+              .then(async (createdUri) => {
+                await FileSystem.writeAsStringAsync(createdUri, base64, { encoding: FileSystem.EncodingType.Base64 });
+                Toast.show({
+                  type: 'success',
+                  text1: t('common.success'),
+                  text2: t('common.file_saved', { defaultValue: 'File saved successfully' }),
+                  position: 'top',
+                  visibilityTime: 3000,
+                });
+              })
+              .catch(e => {
+                console.error(e);
+                Toast.show({
+                  type: 'error',
+                  text1: t('common.error'),
+                  text2: t('common.download_failed', { defaultValue: 'Download failed' }),
+                  position: 'top',
+                  visibilityTime: 3000,
+                });
+              });
+          } else {
+            await Sharing.shareAsync(uri);
+          }
+        } catch (permissionError) {
+          console.error('Permission error:', permissionError);
           await Sharing.shareAsync(uri);
         }
       } else {
@@ -43,7 +64,13 @@ const Eshaa = ({
       }
     } catch (err) {
       console.error("Download error:", err);
-      Alert.alert(t('common.error'), t('common.download_failed', { defaultValue: 'Download failed' }));
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: t('common.download_failed', { defaultValue: 'Download failed' }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
     }
   };
 
