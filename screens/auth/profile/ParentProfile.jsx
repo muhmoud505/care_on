@@ -1,10 +1,10 @@
-import * as ImagePicker from 'expo-image-picker';
-import { Alert, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { useNavigation } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import CustomHeader from '../../../components/CustomHeader';
 import Images from '../../../constants2/images';
 import { useAuth } from '../../../contexts/authContext';
@@ -25,7 +25,13 @@ const ParentProfile = () => {
       if (type === 'camera') {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert(t('common.error'), t('permissions.camera_required', { defaultValue: 'Camera permission is required' }));
+          Toast.show({
+            type: 'error',
+            text1: t('common.error'),
+            text2: t('permissions.camera_required', { defaultValue: 'Camera permission is required' }),
+            position: 'top',
+            visibilityTime: 3000,
+          });
           return;
         }
         result = await ImagePicker.launchCameraAsync({
@@ -62,10 +68,22 @@ const ParentProfile = () => {
         }
 
         await updateUserProfile(user.user.id, formData);
-        Alert.alert(t('common.success'), t('profile.photo_updated', { defaultValue: 'Profile photo updated successfully' }));
+        Toast.show({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('profile.photo_updated', { defaultValue: 'Profile photo updated successfully' }),
+          position: 'top',
+          visibilityTime: 3000,
+        });
       }
     } catch (error) {
-      Alert.alert(t('common.error'), error.message);
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: error.message,
+        position: 'top',
+        visibilityTime: 3000,
+      });
     }
   };
 

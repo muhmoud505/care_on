@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useState } from 'react';
 import Constants from 'expo-constants';
+import { createContext, useCallback, useContext, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -622,28 +622,17 @@ export const MedicalRecordsProvider = ({ children }) => {
 
       console.log('--- Server Response ---', responseText);
 
-
-
       let responseData;
 
       try {
-
         // Try to parse the text as JSON.
-
         responseData = JSON.parse(responseText);
-
       } catch (e) {
-
         // If parsing fails, responseData will be undefined.
-
         // We can still use the raw responseText for error messages if needed.
-
       }
 
-
-
-      
-
+      // Check if response is OK before trying to parse it
       if (!response.ok) {
 
         // Use the parsed message if available, otherwise use the raw text or a generic error.

@@ -2,7 +2,8 @@ import { useNavigation } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Dimensions, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
 import Images from '../../constants2/images';
 
@@ -39,10 +40,22 @@ const YourCreatedCodesScreen = () => {
     const handleCopy = async () => {
       try {
         await Clipboard.setStringAsync(item.code);
-        Alert.alert('', 'تم النسخ');
+        Toast.show({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('common.copied', { defaultValue: 'تم النسخ' }),
+          position: 'top',
+          visibilityTime: 2000,
+        });
       } catch (e) {
         console.error('Clipboard copy failed', e);
-        Alert.alert('', 'فشل النسخ');
+        Toast.show({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('common.copy_failed', { defaultValue: 'فشل النسخ' }),
+          position: 'top',
+          visibilityTime: 3000,
+        });
       }
     };
 

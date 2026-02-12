@@ -6,10 +6,14 @@ import CustomHeader from '../../../components/CustomHeader';
 
 const LinkedAcount = () => {
   const { t } = useTranslation();
-  const navigation = useNavigation();
+const navigation = useNavigation();
   return (
     <SafeAreaView style={{position:'relative'}}>
-        <CustomHeader text={t('account.linked_accounts_mother', { defaultValue: 'الحسابات المرتبطة بحساب الأم' })}/>
+        <CustomHeader text={t('account.linked_accounts_mother', { defaultValue: 'الحسابات المرتبطة بحساب الأم' })}
+
+        // EXPLICIT BACK ACTION:
+        onBack={() => navigation.navigate('HomeStack', { screen: 'Home' })} 
+        />
       <View style={styles.container}>
         <Image
          source={require('../../../assets2/images/profile.png')}

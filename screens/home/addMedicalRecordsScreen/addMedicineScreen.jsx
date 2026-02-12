@@ -1,16 +1,16 @@
-import { useNavigation } from '@react-navigation/native'
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import CustomHeader from '../../../components/CustomHeader'
+import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
+import CustomHeader from '../../../components/CustomHeader';
 
-import DatePick from '../../../components/datePicker'
-import FormField from '../../../components/FormInput'
-import { useAuth } from '../../../contexts/authContext'
-import { useMedicalRecords } from '../../../contexts/medicalRecordsContext'
-import useForm from '../../../hooks/useForm'
-import { hp, wp } from '../../../utils/responsive'
+import DatePick from '../../../components/datePicker';
+import FormField from '../../../components/FormInput';
+import { useAuth } from '../../../contexts/authContext';
+import { useMedicalRecords } from '../../../contexts/medicalRecordsContext';
+import useForm from '../../../hooks/useForm';
+import { hp, wp } from '../../../utils/responsive';
 
 
 
@@ -51,7 +51,13 @@ const AddMedicineScreen = () => {
     if (result.success) {
       navigation.goBack();
     } else {
-      Alert.alert(t('common.error'), result.error);
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: result.error,
+        position: 'top',
+        visibilityTime: 3000,
+      });
     }
   };
 
