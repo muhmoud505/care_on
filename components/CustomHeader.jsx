@@ -14,6 +14,40 @@ const CustomHeader = ({ text }) => {
   const navigation = useNavigation();
   const { user } = useAuth();
 
+  // Check if previous screen was password-related and navigate to home instead
+  const handleBackPress = () => {
+    const state = navigation.getState();
+    const prevRoute = state.routes[state.routes.length - 2]?.name;
+    const currentRoute = state.routes[state.routes.length - 1]?.name;
+    
+    console.log('Current route:', currentRoute);
+    console.log('Previous route:', prevRoute);
+    console.log('All routes:', state.routes.map(r => r.name));
+    
+    // Check if we're in account management flow (after creating child account)
+    const isInAccountFlow = (
+      prevRoute === 'ProfileStack' && 
+      currentRoute === 'accounts'
+    ) || (
+      prevRoute === 'accounts' && 
+      currentRoute === 'ProfileStack'
+    );
+    
+    if (isInAccountFlow) {
+      console.log('In account flow - navigating to home instead of back');
+      console.log('About to call navigation.navigate("App")');
+      try {
+        navigation.reset({ index: 0, routes: [{ name: 'App' }] }); // Navigate to App screen (home)
+        console.log('Navigation call executed');
+      } catch (error) {
+        console.error('Navigation error:', error);
+      }
+    } else {
+      console.log('Using normal goBack');
+      navigation.goBack();
+    }
+  };
+
   return (
     <SafeAreaView 
       style={[
@@ -24,7 +58,7 @@ const CustomHeader = ({ text }) => {
       <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}> 
         <TouchableOpacity 
           style={[styles.touchable, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
-          onPress={() => navigation.goBack()}
+          onPress={handleBackPress}
         >
           <Image 
             source={require('../assets2/images/Vector.png')}
