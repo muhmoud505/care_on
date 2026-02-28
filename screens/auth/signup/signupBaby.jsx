@@ -93,7 +93,7 @@ const Signup2 = () => {
         <CustomHeader text={t('auth.create_account')} />
         
         <View style={styles.headerTextContainer}>
-          <Text style={[styles.headerText, { textAlign: isRTL ? 'left' : 'right' }]}>
+          <Text style={[styles.headerText, { textAlign: isRTL ? 'right' : 'left' }]}>
             {(() => {
               const fullText = t('auth.create_child_account_prompt');
               const highlightText = t('auth.your_child_account');

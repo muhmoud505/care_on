@@ -22,6 +22,8 @@ import { hp, wp } from '../../../utils/responsive';
 
 const PasswordScreen = ({ route }) => { // Accept route as a prop
   const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+
   const navigation =useNavigation()
   const { signup, isAuthLoading, setSession } = useAuth(); // Get setSession function from context
   const { form, errors, handleChange, checkFormValidity } = useForm({
@@ -196,9 +198,9 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
               <Text style={styles.closeIcon}>✕</Text>
             </TouchableOpacity>
 
-            <Text style={styles.modalTitle}>{t('auth.terms_title', { defaultValue: 'الشروط والأحكام' })}</Text>
+            <Text style={styles.modalTitle}>{t('auth.terms_only', { defaultValue: 'الشروط والأحكام' })}</Text>
             <ScrollView style={styles.modalScroll}>
-              <Text style={styles.modalText}>
+              <Text style={[styles.modalText,{ textAlign: isRTL ? 'right' : 'left'}]}>
                 {t('auth.terms_full_text', { defaultValue: 'يرجى قراءة الشروط والأحكام بعناية...' })}
               </Text>
             </ScrollView>
@@ -324,6 +326,7 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 14,
     lineHeight: 22,
+   
   },
   modalCloseButton: {
     backgroundColor: '#014CC4',

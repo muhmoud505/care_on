@@ -14,7 +14,9 @@ const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 const Uploader = ({ title, required, error, style,onFileSelect }) => {
   const [selectedImage, setSelectedImage] = useState(null);
-  const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+
   const [imageName, setImageName] = useState(t('uploader.upload'));
 
   const pickImage = async () => {
@@ -66,7 +68,7 @@ const Uploader = ({ title, required, error, style,onFileSelect }) => {
 
   return (
     <View style={[styles.v1, style]}>
-      <Text style={[{ direction: 'rtl' }, styles.txt1]}>
+      <Text style={[{ textAlign: isRTL ? 'right' : 'left'  }, styles.txt1]}>
         {title}{required ? <Text style={{ color: 'red', fontWeight: '600' }}> *</Text> : null}
       </Text>
       <DashedBorder>

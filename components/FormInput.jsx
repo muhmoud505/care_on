@@ -54,14 +54,14 @@ const FormField = ({
     <View 
       style={[styles.container, { direction:i18n.dir()}, otherStyles]}
     >
-      <Text style={[styles.title, { textAlign: isRTL ? 'left' : 'right' }]}>
+      <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
         {title}
         {required && <Text style={styles.required}> *</Text>}
       </Text>
 
       <View style={[
         styles.inputContainer,
-        { flexDirection: isRTL ? 'row' : 'row-rerverse',direction:'rtl' },
+        { flexDirection: isRTL ? 'row' : 'row-reverse',direction:'rtl' },
         error && styles.errorInput // Added error styling
         ,type=='long'&&styles.textArea
       ]}>
@@ -77,7 +77,7 @@ const FormField = ({
         }
         {type === 'picker' ? (
           <TouchableOpacity style={[styles.pickerTouchable, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => setShowList(!showList)}>
-            <Text style={[styles.input, styles.pickerInput, { textAlign: isRTL ? 'right' : 'left' }]}>{selectedLabel}</Text>
+            <Text style={[styles.input, styles.pickerInput, { textAlign: isRTL ? 'left' : 'right' }]}>{selectedLabel}</Text>
             <Image source={Images.arrD} style={styles.icon} resizeMode="contain" />
           </TouchableOpacity>
         ) : (
@@ -209,23 +209,34 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: wp(85),
+    position: 'relative',
     height: hp(7),
     paddingHorizontal: wp(4),
     borderRadius: wp(4),
     borderWidth: 1,
     borderColor: 'rgba(128, 128, 128, 0.55)',
-    alignItems: 'center',
+ 
+    
+  justifyContent: 'flex-start',
+  
   },
   errorInput: { // Added error input style
     borderColor: 'red',
   },
   input: {
-    flex: 1,
-    color: '#000',
-    fontWeight: '600',
-    fontSize: Math.min(wp(4), 16),
+  
+  flex: 1, // <--- Add this to fill the container width
+  color: '#000',
+  fontWeight: '600',
+  fontSize: Math.min(wp(4), 16),
+  paddingVertical: 0, 
+  // For Arabic, ensure this is explicitly set
+  writingDirection: 'rtl', 
   },
   icon: {
+    position: 'absolute',
+    top: '50%',
+    transform: [{ translateY: -12}], // Center the icon vertically
     width: wp(6),
     height: wp(6),
   },
@@ -271,10 +282,7 @@ const styles = StyleSheet.create({
     color: '#014CC4',
     fontWeight: 'bold',
   },
-  flatListStyle: {
-    // The FlatList itself doesn't need a height if its container has one
-  
-  },
+
   daysGrid: {
     justifyContent: 'center',
     alignItems:'center',

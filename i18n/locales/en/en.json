@@ -154,7 +154,24 @@
     "enter_email_to_reset": "Please enter your email to reset your password",
     "under_18_error": "Users must be 18 or older to create a personal account.",
     "over_18_error": "For users 18 and over, please create a personal account.",
-    "logout":"Logout"
+    "logout":"Logout",
+     "your_child_account": "your child's account"
+     , "child_name": "Child's Name",
+ "create_account_prompt": "To create your account, please fill in the following data..",
+    "child_name_placeholder": "Enter child's name",
+    "child_email": "Child's Email",
+    "child_email_placeholder": "Enter child's email",
+    "child_national_id": "Child's National ID",
+    "child_national_id_placeholder": "Enter child's national ID",
+    "child_birth_certificate": "Child's Birth Certificate",
+   "final_step_password": "Final step, ",
+    "agree_prefix":"Agree to ",
+    "agree":"Agree",
+    "terms_only":"Terms and Conditions",
+    "terms_full_text": "Please read the terms and conditions carefully before using the application. By using this application, you agree to be bound by these terms. If you do not agree to these terms, do not use this application.",
+
+    "create_account_button": "Create Account"
+
   },
   "errors": {
     "add_medicine_failed": "Could not save medicine. Please try again.",
@@ -236,7 +253,11 @@
     "gender": "Gender",
     "reset_password": "Reset Password",
     "birth_certificate": "Birth certificate",
-    "uploaded_file":"uploaded file"
+    "uploaded_file":"uploaded file",
+    "dob_placeholder": "Select date of birth",
+    "gender_placeholder": "Select gender",
+     "male": "Male",
+    "female": "Female"
   },
 
   "marketing": {
