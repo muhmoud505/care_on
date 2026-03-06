@@ -68,7 +68,7 @@ const Uploader = ({ title, required, error, style,onFileSelect }) => {
 
   return (
     <View style={[styles.v1, style]}>
-      <Text style={[{ textAlign: isRTL ? 'right' : 'left'  }, styles.txt1]}>
+      <Text style={[{ textAlign: isRTL ? 'left' : 'right'  }, styles.txt1]}>
         {title}{required ? <Text style={{ color: 'red', fontWeight: '600' }}> *</Text> : null}
       </Text>
       <DashedBorder>
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   v1: {
     width: wp(85),
     height: hp(12),
-    marginHorizontal: wp(5),
+    marginHorizontal: wp(2.5),
     marginVertical: hp(0.6),
     justifyContent: 'space-between',
   },

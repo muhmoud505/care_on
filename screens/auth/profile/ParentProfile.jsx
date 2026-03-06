@@ -15,8 +15,35 @@ const ParentProfile = () => {
   const [previewAvatar, setPreviewAvatar] = useState(null);
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const { user, updateUserProfile, setTempAvatar } = useAuth();
+  const { user, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
   console.log('User data to get avatar:', user);
+
+  const handleDeletePhoto = async () => {
+    setModalVisible(false);
+    setPreviewAvatar(null); // optimistic clear
+
+    try {
+      const result = await deleteUserAvatar(user.user.id);
+      if (!result.success) throw new Error(result.error || 'Unknown error');
+
+      Toast.show({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('profile.photo_deleted', { defaultValue: 'Profile photo deleted successfully' }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
+    } catch (error) {
+      console.warn('deleteUserAvatar error', error);
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: error?.message || t('common.unknown_error', { defaultValue: 'Something went wrong' }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
+    }
+  };
 
   const handleImagePick = async (type) => {
     setModalVisible(false);
@@ -173,7 +200,7 @@ const ParentProfile = () => {
             >
               <Text style={localStyles.closeIcon}>✕</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={localStyles.option} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity style={localStyles.option} onPress={handleDeletePhoto}>
               <Text style={[localStyles.optionText, { color: 'red' }]}>{t('profile.delete_photo', { defaultValue: 'حذف الصورة' })}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={localStyles.option} onPress={() => handleImagePick('camera')}>

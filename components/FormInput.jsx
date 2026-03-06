@@ -54,7 +54,7 @@ const FormField = ({
     <View 
       style={[styles.container, { direction:i18n.dir()}, otherStyles]}
     >
-      <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
+      <Text style={[styles.title, { textAlign: isRTL ? 'left' : 'right' }]}>
         {title}
         {required && <Text style={styles.required}> *</Text>}
       </Text>
@@ -77,7 +77,7 @@ const FormField = ({
         }
         {type === 'picker' ? (
           <TouchableOpacity style={[styles.pickerTouchable, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => setShowList(!showList)}>
-            <Text style={[styles.input, styles.pickerInput, { textAlign: isRTL ? 'left' : 'right' }]}>{selectedLabel}</Text>
+            <Text style={[styles.input, styles.pickerInput, { textAlign: isRTL ? 'right' : 'left' }]}>{selectedLabel}</Text>
             <Image source={Images.arrD} style={styles.icon} resizeMode="contain" />
           </TouchableOpacity>
         ) : (

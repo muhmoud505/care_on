@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Clipboard, Dimensions, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
+import { Icons } from '../../components/Icons';
 import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
 
@@ -121,6 +122,7 @@ const CreateCodeScreen = () => {
             {/* Circular Icon without Border */}
             <View style={styles.iconContainer}>
               <Image source={Images.createCodeG} style={styles.codeIcon} />
+              <Icons.Home width={50} height={50} />
             </View>
             
             {/* Description Text */}

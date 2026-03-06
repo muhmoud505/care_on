@@ -5,7 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 const API_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
-
+  const ACTIVE_USER_KEY = 'active_user';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -15,9 +15,13 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
 
+  const isRemoteUrl = (url) => /^https?:\/\//i.test(url);
+  const isLocalUri = (url) => /^(file|content|data):\/\//i.test(url);
+
   const makeAbsolute = (avatarPath) => {
     if (!avatarPath) return avatarPath;
-    if (/^https?:\/\//.test(avatarPath)) return avatarPath;
+    // If it's already a remote URL or a local file/data URI, return as-is.
+    if (isRemoteUrl(avatarPath) || isLocalUri(avatarPath)) return avatarPath;
     const base = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
     return avatarPath.startsWith('/') ? `${base}${avatarPath}` : `${base}/${avatarPath}`;
   };
@@ -26,20 +30,43 @@ export const AuthProvider = ({ children }) => {
     if (!obj) return obj;
     const copy = { ...obj };
     if (copy.user && copy.user.avatar) {
-      copy.user = { ...copy.user, avatar: makeAbsolute(copy.user.avatar) };
+      const avatar = typeof copy.user.avatar === 'string' && copy.user.avatar.trim() !== ''
+        ? makeAbsolute(copy.user.avatar)
+        : null;
+      copy.user = { ...copy.user, avatar };
     }
     return copy;
   };
 
   const normalizeChild = (child) => {
     if (!child) return child;
-    if (child.avatar) {
-      return { ...child, avatar: makeAbsolute(child.avatar) };
-    }
-    return child;
+    const avatar = typeof child.avatar === 'string' && child.avatar.trim() !== ''
+      ? makeAbsolute(child.avatar)
+      : null;
+    return { ...child, avatar };
   };
 
-  // --- UPDATED AUTH FETCH WRAPPER ---
+  const updateChildAvatar = async (userId, avatar) => {
+    setChildAccounts(prev => {
+      if (!prev) return prev;
+      return prev.map(child =>
+        child.id === userId ? { ...child, avatar } : child
+      );
+    });
+
+    try {
+      const storedChildren = await AsyncStorage.getItem('child_accounts');
+      const parsed = storedChildren ? JSON.parse(storedChildren) : [];
+      const updated = (parsed || []).map(child =>
+        child.id === userId ? { ...child, avatar } : child
+      );
+      await AsyncStorage.setItem('child_accounts', JSON.stringify(updated));
+    } catch (e) {
+      console.warn('updateChildAvatar storage write failed', e.message);
+    }
+  };
+
+  // --- AUTH FETCH WRAPPER ---
   const authFetch = async (url, options = {}) => {
     const session = await refreshToken();
     const token = session?.token?.value;
@@ -49,9 +76,6 @@ export const AuthProvider = ({ children }) => {
       'lang': i18next.language,
     };
 
-    // CRITICAL FIX: 
-    // Only set Content-Type to application/json if we are NOT sending FormData.
-    // If it IS FormData, fetch must handle the boundary header automatically.
     if (options.body && !(options.body instanceof FormData)) {
       defaultHeaders['Content-Type'] = 'application/json';
     }
@@ -73,21 +97,46 @@ export const AuthProvider = ({ children }) => {
     const loadUserFromStorage = async () => {
       try {
         const storedUser = await AsyncStorage.getItem('primary_user');
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          const userObject = parsedUser.data || parsedUser;
-          const normalizedUser = normalizePrimaryUser(userObject);
-          setPrimaryUser(normalizedUser);
-          setUser(normalizedUser);
+        if (!storedUser) return;
 
-          const storedChildren = await AsyncStorage.getItem('child_accounts');
-          if (storedChildren) {
-            try {
-              const parsedChildren = JSON.parse(storedChildren);
-              setChildAccounts(parsedChildren.map(normalizeChild));
-            } catch (e) { setChildAccounts([]); }
+        const parsedUser = JSON.parse(storedUser);
+        const userObject = parsedUser.data || parsedUser;
+        const normalizedUser = normalizePrimaryUser(userObject);
+        setPrimaryUser(normalizedUser);
+
+        const storedChildren = await AsyncStorage.getItem('child_accounts');
+        let parsedChildren = [];
+        let normalizedChildren = [];
+        if (storedChildren) {
+          try {
+            parsedChildren = JSON.parse(storedChildren);
+            normalizedChildren = parsedChildren.map(normalizeChild);
+            setChildAccounts(normalizedChildren);
+          } catch (e) {
+            setChildAccounts([]);
           }
-          fetchChildren(normalizedUser.token.value, normalizedUser.user.id);
+        }
+
+        // Load last active user (parent or a child) so we can restore impersonation after reload.
+        const storedActive = await AsyncStorage.getItem(ACTIVE_USER_KEY);
+        if (storedActive) {
+          const activeId = storedActive;
+          const matchedChild = (normalizedChildren || []).find(c => c.id === activeId);
+          if (matchedChild) {
+            // Always store the user object in the shape expected by `useAuth` consumers.
+            setUser({ user: matchedChild, token: { value: normalizedUser?.token?.value } });
+          } else {
+            setUser(normalizedUser);
+            await AsyncStorage.removeItem(ACTIVE_USER_KEY);
+          }
+        } else {
+          setUser(normalizedUser);
+        }
+
+        const tokenValue = normalizedUser?.token?.value;
+        const userId = normalizedUser?.user?.id;
+        if (tokenValue && userId) {
+          fetchChildren(tokenValue, userId);
         }
       } catch (error) {
         console.error("Failed to load user", error);
@@ -137,8 +186,20 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       if (response.ok) {
         const normalized = (data.data || []).map(normalizeChild);
-        setChildAccounts(normalized);
-        await AsyncStorage.setItem('child_accounts', JSON.stringify(normalized));
+
+        // Merge with locally updated child avatars so we don't overwrite an in-memory local URI.
+        const merged = normalized.map(child => {
+          const existing = childAccounts.find(c => c.id === child.id);
+          if (!existing) return child;
+          const existingAvatar = existing.avatar;
+          if (existingAvatar && isLocalUri(existingAvatar)) {
+            return { ...child, avatar: existingAvatar };
+          }
+          return child;
+        });
+
+        setChildAccounts(merged);
+        await AsyncStorage.setItem('child_accounts', JSON.stringify(merged));
       }
     } catch (e) { console.error("Fetch children failed", e); }
   };
@@ -158,6 +219,7 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem('primary_user', JSON.stringify(normalized));
       setPrimaryUser(normalized);
       setUser(normalized);
+      await AsyncStorage.removeItem(ACTIVE_USER_KEY);
       await fetchChildren(normalized.token.value, normalized.user.id);
     } catch (error) { throw error; } finally { setIsAuthLoading(false); }
   };
@@ -168,6 +230,7 @@ export const AuthProvider = ({ children }) => {
     await AsyncStorage.setItem('primary_user', JSON.stringify(normalized));
     setPrimaryUser(normalized);
     setUser(normalized);
+    await AsyncStorage.removeItem(ACTIVE_USER_KEY);
     await fetchChildren(normalized.token.value, normalized.user.id);
   };
 
@@ -239,12 +302,41 @@ export const AuthProvider = ({ children }) => {
       if (!response.ok) throw new Error(data?.message || "Update failed");
 
       let updatedUser = data?.data || data;
-      if (updatedUser.avatar) updatedUser.avatar = makeAbsolute(updatedUser.avatar);
 
-      setUser(prev => ({ ...prev, user: { ...prev?.user, ...updatedUser } }));
+      // When server explicitly returns `avatar: null`, treat it as "avatar removed".
+      // Otherwise, keep existing avatar when it isn't part of the response.
+      if (Object.prototype.hasOwnProperty.call(updatedUser, 'avatar')) {
+        updatedUser.avatar = updatedUser.avatar ? makeAbsolute(updatedUser.avatar) : null;
+      }
+
+      // Determine final avatar to keep (API > existing state) so we can sync child list too.
+      const existingAvatar = user?.user?.avatar;
+      const finalAvatar = updatedUser.avatar || existingAvatar || null;
+
+      setUser(prev => {
+        const currentAvatar = prev?.user?.avatar;
+        const finalAvatarLocal = updatedUser.avatar || currentAvatar || null;
+        return { ...prev, user: { ...prev?.user, ...updatedUser, avatar: finalAvatarLocal } };
+      });
+
+      // If updating a child account (not the primary user), keep the child list in sync.
+      if (primaryUser?.user?.id !== userId) {
+        await updateChildAvatar(userId, finalAvatar);
+      }
 
       if (primaryUser?.user?.id === userId) {
-        const newPrimary = { ...primaryUser, user: { ...primaryUser.user, ...updatedUser } };
+        // Read the latest stored data (which setTempAvatar already wrote to AsyncStorage)
+        const latestStored = await AsyncStorage.getItem('primary_user');
+        const latestParsed = latestStored ? JSON.parse(latestStored) : null;
+        const latestAvatar =
+          latestParsed?.user?.avatar ||
+          latestParsed?.data?.user?.avatar ||
+          null;
+        // Prefer: API real URL > temp URI already in AsyncStorage > old avatar in state
+        const finalAvatar = updatedUser.avatar || latestAvatar || primaryUser?.user?.avatar || null;
+
+        const mergedUser = { ...primaryUser.user, ...updatedUser, avatar: finalAvatar };
+        const newPrimary = { ...primaryUser, user: mergedUser };
         setPrimaryUser(newPrimary);
         await AsyncStorage.setItem('primary_user', JSON.stringify(newPrimary));
       }
@@ -254,18 +346,131 @@ export const AuthProvider = ({ children }) => {
     } finally { setIsAuthLoading(false); }
   };
 
-  const switchAccount = (account) => {
+  const deleteUserAvatar = async (userId) => {
+    // Optimistic update: clear avatar immediately (but restore on error).
+    const previousAvatar = user?.user?.avatar;
+    setUser(prev => prev ? { ...prev, user: { ...prev.user, avatar: null } } : prev);
+
+    if (primaryUser?.user?.id === userId) {
+      const mergedUser = { ...primaryUser.user, avatar: null };
+      const newPrimary = { ...primaryUser, user: mergedUser };
+      setPrimaryUser(newPrimary);
+      await AsyncStorage.setItem('primary_user', JSON.stringify(newPrimary));
+    } else {
+      await updateChildAvatar(userId, null);
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('_method', 'PUT');
+      // backend should interpret this as "clear avatar"
+      formData.append('avatar', '');
+      formData.append('remove_avatar', '1');
+
+      const result = await updateUserProfile(userId, formData);
+      if (!result.success) throw new Error(result.error || 'Delete avatar failed');
+
+      return { success: true };
+    } catch (error) {
+      // Restore previous avatar on failure.
+      setUser(prev => prev ? { ...prev, user: { ...prev.user, avatar: previousAvatar } } : prev);
+
+      if (primaryUser?.user?.id === userId) {
+        const mergedUser = { ...primaryUser.user, avatar: previousAvatar };
+        const newPrimary = { ...primaryUser, user: mergedUser };
+        setPrimaryUser(newPrimary);
+        await AsyncStorage.setItem('primary_user', JSON.stringify(newPrimary));
+      } else {
+        await updateChildAvatar(userId, previousAvatar);
+      }
+
+      return { success: false, error: error.message };
+    }
+  };
+
+  const setActiveAccount = async (account) => {
     if (!account) {
+      await AsyncStorage.removeItem(ACTIVE_USER_KEY);
       if (primaryUser) setUser(primaryUser);
       return;
     }
-    const token = account.token?.value || account.token;
-    if (!token) return;
-    setUser({ user: account, token: { value: token } });
+
+    // If the child object doesn't include a token, use the parent's token for API calls.
+    const tokenValue = account?.token?.value || account?.token || primaryUser?.token?.value;
+    if (!tokenValue) return;
+
+    const matchedChild = childAccounts.find(c => c.id === account.id);
+    const childWithAvatar = matchedChild ? { ...matchedChild, ...account } : account;
+
+    await AsyncStorage.setItem(ACTIVE_USER_KEY, `${account.id}`);
+
+    // Show whatever we have immediately, then try to fetch the full profile if it is incomplete.
+    setUser({ user: childWithAvatar, token: { value: tokenValue } });
+
+    const needsFullProfile =
+      !childWithAvatar.resource ||
+      !childWithAvatar.resource?.birthdate ||
+      childWithAvatar.avatar === '' ||
+      childWithAvatar.avatar == null;
+
+    if (needsFullProfile) {
+      const full = await fetchUserProfile(account.id);
+      if (full) {
+        const normalized = normalizeChild(full);
+        setUser({ user: normalized, token: { value: tokenValue } });
+        await updateChildAvatar(account.id, normalized.avatar);
+
+        const updatedChildren = (childAccounts || []).map(c =>
+          c.id === account.id ? { ...c, ...normalized } : c
+        );
+        setChildAccounts(updatedChildren);
+        await AsyncStorage.setItem('child_accounts', JSON.stringify(updatedChildren));
+      }
+    }
   };
 
+  const fetchUserProfile = async (userId) => {
+    try {
+      const response = await authFetch(`${API_URL}/api/v1/auth/users/${userId}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.message || 'Failed to load user');
+      const userData = data.data || data;
+      return userData;
+    } catch (error) {
+      console.warn('fetchUserProfile failed', error.message);
+      return null;
+    }
+  };
+
+  const switchAccount = (account) => {
+    setActiveAccount(account);
+  };
+
+  // FIX: Persist temp avatar URI to AsyncStorage so it survives app reload.
+  // Previously only React state was updated, so on reload the avatar was lost
+  // until the user signed out and back in.
   const setTempAvatar = async (userId, uri) => {
-    setUser(prev => (prev?.user?.id === userId ? { ...prev, user: { ...prev.user, avatar: uri } } : prev));
+    // Update React state immediately for instant UI feedback
+    setUser(prev =>
+      prev?.user?.id === userId ? { ...prev, user: { ...prev.user, avatar: uri } } : prev
+    );
+
+    // Cache to child list (for switching back to a child account)
+    if (primaryUser?.user?.id !== userId) {
+      await updateChildAvatar(userId, uri);
+    }
+
+    // Also persist to AsyncStorage so the avatar survives a reload
+    if (primaryUser?.user?.id === userId) {
+      try {
+        const mergedUser = { ...primaryUser.user, avatar: uri };
+        const newPrimary = { ...primaryUser, user: mergedUser };
+        setPrimaryUser(newPrimary);
+        await AsyncStorage.setItem('primary_user', JSON.stringify(newPrimary));
+      } catch (e) {
+        console.warn('setTempAvatar storage write failed', e.message);
+      }
+    }
   };
 
   const value = {
@@ -274,7 +479,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!primaryUser,
     isLoading, isAuthLoading,
     login, setSession, logout, signup, fetchChildren, forgotPassword,
-    refreshToken, authFetch, updateUserProfile, switchAccount, setTempAvatar,
+    refreshToken, authFetch, updateUserProfile, deleteUserAvatar, switchAccount, setTempAvatar,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

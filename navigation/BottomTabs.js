@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Dimensions, Image, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
+import { Icons } from '../components/Icons';
 import Images from '../constants2/images';
 import CreateCodeScreen from '../screens/createCode/CreateCodeScreen';
 import HomeStack from './HomeStack';
@@ -18,10 +19,10 @@ const TabIcon = ({ icon, color, name, focused }) => {
   if (name === 'Home') {
     activeIcon = Images.homeActive;
     inactiveIcon = Images.homeInactive;
-  } else if (name === 'Profile') {
+  } else if (name === 'profile') {
     activeIcon = Images.profileActive;
     inactiveIcon = Images.profileInactive;
-  } else if (name === 'CreateCode') {
+  } else if (name === 'password-check') {
     activeIcon = Images.createCodeA; // Using verify icon as placeholder for create code icon
     inactiveIcon = Images.createCodeB; // Using same icon for now
   } else {
@@ -31,11 +32,12 @@ const TabIcon = ({ icon, color, name, focused }) => {
   
   return (
     <View >
-      <Image
+      {/* <Image
         source={focused ? activeIcon : inactiveIcon}
         resizeMode='cover'
         style={styles.icon}
-      />
+      /> */}
+      <Icons.Home width={wp(6)} height={wp(6)} fill={color} />
     </View>
   );
 };
@@ -44,7 +46,7 @@ export default function BottomTabs() {
     <Tab.Navigator
           screenOptions={{
         headerShown: false, // This is correct
-        tabBarActiveTintColor: 'red',
+        tabBarActiveTintColor: 'green',
         tabBarInactiveTintColor: 'gray',
         tabBarStyle: styles.tabBar, // Add custom tab bar style
         tabBarItemStyle: styles.tabItem, // Style for individual tab items
@@ -58,7 +60,7 @@ export default function BottomTabs() {
          tabBarIcon: ({ color, focused }) => (
               <TabIcon
                 color={color}
-                name="Home"
+                name="GC"
                 focused={focused}
               />
             ),
@@ -72,7 +74,7 @@ export default function BottomTabs() {
          tabBarIcon: ({ color, focused }) => (
               <TabIcon
                 color={color}
-                name="CreateCode"
+                name="check"
                 focused={focused}
               />
             ),
@@ -83,7 +85,7 @@ export default function BottomTabs() {
          tabBarIcon: ({ color, focused }) => (
               <TabIcon
                 color={color}
-                name="Profile"
+                name="profile"
                 focused={focused}
               />
             ),

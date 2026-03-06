@@ -1,5 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
+import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
+import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,52 +25,116 @@ const AgeDisplay = ({ value, label }) => (
 const ChildProfile = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [previewAvatar, setPreviewAvatar] = useState(null);
-  
+
   const navigation = useNavigation();
   const { t } = useTranslation();
-  const { user, updateUserProfile, setTempAvatar } = useAuth();
-  // Safely access user data
+  // Fix 1: renamed deleteProfileImage → deleteUserAvatar to match authContext
+  const { user, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
+
   const fullName = user?.user?.name || 'User Name';
   const nationalId = user?.user?.resource?.national_number || '';
-console.log(user);
-  const birthdate = user?.user?.resource?.birthdate; // YYYY-MM-DD format
 
-  // Mask the national ID, showing the first 4 digits
+  const birthdate = user?.user?.resource?.birthdate; // YYYY-MM-DD format
+  console.log('User data in ChildProfile:', user);
+
   const maskedNationalId = nationalId
     ? `${nationalId.substring(0, 4)}${'x'.repeat(nationalId.length - 4)}`
     : 'xxxx';
 
+  // Fix 2: age calc is clean — removed the misplaced handleDeletePhoto and stray t.err typo
   const age = useMemo(() => {
-    if (!birthdate) {
-      return { years: 0, months: 0, days: 0 };
-    }
-
+    if (!birthdate) return { years: 0, months: 0, days: 0 };
     try {
       const birthDate = new Date(birthdate);
       if (isNaN(birthDate.getTime())) throw new Error('Invalid date');
 
       const today = new Date();
-
       let years = today.getFullYear() - birthDate.getFullYear();
       let months = today.getMonth() - birthDate.getMonth();
       let days = today.getDate() - birthDate.getDate();
-      
+
       if (days < 0) {
         months--;
-        // Get the last day of the previous month
         const lastDayOfPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
         days += lastDayOfPrevMonth;
       }
-      
+
       if (months < 0) {
         years--;
         months += 12;
       }
       return { years, months, days };
-    } catch (error) {
+    } catch {
       return { years: 0, months: 0, days: 0 };
     }
   }, [birthdate]);
+
+  // Fix 3: handleDeletePhoto moved here (outside useMemo), uses correct Toast + deleteUserAvatar
+  const handleDeletePhoto = async () => {
+    setModalVisible(false);
+    setPreviewAvatar(null); // optimistic clear
+
+    try {
+      const result = await deleteUserAvatar(user.user.id);
+      if (!result.success) throw new Error(result.error || 'Unknown error');
+
+      Toast.show({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('profile.photo_deleted', { defaultValue: 'Profile photo deleted successfully' }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: error?.message || t('common.unknown_error', { defaultValue: 'Something went wrong' }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
+    }
+  };
+
+  const downloadFile = async (url, filename) => {
+    if (!url) {
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: t('common.no_file_to_download', { defaultValue: 'No file available to download' }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
+    try {
+      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+      const downloadResumable = FileSystem.createDownloadResumable(url, fileUri);
+      const { uri } = await downloadResumable.downloadAsync();
+
+      if (!(await Sharing.isAvailableAsync())) {
+        Toast.show({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('common.sharing_not_available', { defaultValue: 'Sharing is not available on this device' }),
+          position: 'top',
+          visibilityTime: 3000,
+        });
+        return;
+      }
+
+      await Sharing.shareAsync(uri);
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: error.message,
+        position: 'top',
+        visibilityTime: 3000,
+      });
+    }
+  };
 
   const handleImagePick = async (type) => {
     setModalVisible(false);
@@ -110,10 +176,11 @@ console.log(user);
           type: asset.mimeType || 'image/jpeg',
         });
 
-        // Optimistic preview
+        // Optimistic preview: show the selected image immediately
         setPreviewAvatar(asset.uri);
         try {
-          await setTempAvatar(user.user.id, asset.uri);
+          // Also set a temporary avatar in the global auth state so other UI updates (drawer) reflect immediately
+          setTempAvatar(user.user.id, asset.uri);
         } catch (e) {
           console.warn('setTempAvatar failed', e.message);
         }
@@ -137,28 +204,31 @@ console.log(user);
       });
     }
   };
-
+  
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <CustomHeader text={t('profile.child_profile_title', { defaultValue: 'الحساب الشخصي' })} />
-      <ScrollView contentContainerStyle={{ paddingBottom: hp(5),paddingTop:hp(2) }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: hp(5), paddingTop: hp(2) }}>
         <View style={{ flex: 1 }}>
           <View>
-            <TouchableOpacity style={styles.btn}>
+            <TouchableOpacity style={styles.btn}
+              onPress={() => navigation.navigate('accounts')}
+            
+            >
               <Text style={styles.btnText}>{t('account.switch_to_parent', { defaultValue: 'انتقال لحساب الأم' })}</Text>
             </TouchableOpacity>
             <View style={styles.cont1}>
               <View style={styles.info}>
-               <Image
-                source={previewAvatar ? { uri: previewAvatar } : (user?.user?.avatar ? { uri: user.user.avatar } : Images.profile)}
-                style={styles.profileImg}
-                resizeMode="cover"
+                <Image
+                  source={previewAvatar ? { uri: previewAvatar } : (user?.user?.avatar ? { uri: user.user.avatar } : Images.profile)}
+                  style={styles.profileImg}
+                  resizeMode="cover"
                 />
                 <TouchableOpacity style={styles.ele1} onPress={() => setModalVisible(true)}>
                   <Image source={Images.edit} />
                 </TouchableOpacity>
               </View>
-              <View style={styles.info} >
+              <View style={styles.info}>
                 <Text style={styles.txt1} numberOfLines={1}>{fullName}</Text>
                 <Text style={styles.txt2}>{maskedNationalId}</Text>
               </View>
@@ -172,57 +242,68 @@ console.log(user);
           </View>
           <View style={styles.cont3}>
             <View>
-            <Text>{t('profile.birth_certificate', { defaultValue: 'شهادة الميلاد' })}</Text>
-            <ImageBackground 
-               source={Images.background}
-                 style={[styles.background, {width: wp(90)}]}
-                  imageStyle={{width:wp(90), height:hp(8),borderRadius:8}}
-                 resizeMode='cover'
-             >
-                <View style={styles.overlay}>
-                   <Image source={Images.download} />
-                     <Text style={[styles.txt4,{color:'#fff'}]}>{t('common.download', { defaultValue: 'تنزيل' })}</Text>
+              <Text>{t('profile.birth_certificate', { defaultValue: 'شهادة الميلاد' })}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  const url =
+                    user?.user?.resource?.birth_certificate_url ||
+                    user?.user?.resource?.birth_certificate ||
+                    user?.user?.birth_certificate ||
+                    null;
+                  downloadFile(url, 'birth_certificate.pdf');
+                }}
+              >
+                <ImageBackground
+                  source={Images.background}
+                  style={[styles.background, { width: wp(90) }]}
+                  imageStyle={{ width: wp(90), height: hp(8), borderRadius: 8 }}
+                  resizeMode='cover'
+                >
+                  <View style={styles.overlay}>
+                    <Image source={Images.download} />
+                    <Text style={[styles.txt4, { color: '#fff' }]}>{t('common.download', { defaultValue: 'تنزيل' })}</Text>
                   </View>
-            </ImageBackground>
+                </ImageBackground>
+              </TouchableOpacity>
             </View>
-            <View></View>
+            <View />
             <Text>{t('profile.uploaded_file', { defaultValue: 'الملف المرفوع سابقا' })}</Text>
-            <ImageBackground 
-               source={Images.background}
-                 style={[styles.background, {width: wp(90)}]}
-                  imageStyle={{width:wp(90), height:hp(8),borderRadius:8}}
-                 resizeMode='cover'
-             >
-                <View style={styles.overlay}>
-                   <Image source={Images.download} />
-                     <Text style={[styles.txt4,{color:'#fff'}]}>{t('common.download', { defaultValue: 'تنزيل' })}</Text>
-                  </View>
+            <ImageBackground
+              source={Images.background}
+              style={[styles.background, { width: wp(90) }]}
+              imageStyle={{ width: wp(90), height: hp(8), borderRadius: 8 }}
+              resizeMode='cover'
+            >
+              <View style={styles.overlay}>
+                <Image source={Images.download} />
+                <Text style={[styles.txt4, { color: '#fff' }]}>{t('common.download', { defaultValue: 'تنزيل' })}</Text>
+              </View>
             </ImageBackground>
-  
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('reset')}>
             <Text style={styles.link}>{t('profile.reset_password', { defaultValue: 'اعادة تعيين كلمة السر' })}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
+
       {modalVisible && (
-        <TouchableOpacity 
-          style={localStyles.modalOverlay} 
-          activeOpacity={1} 
+        <TouchableOpacity
+          style={localStyles.modalOverlay}
+          activeOpacity={1}
           onPress={() => setModalVisible(false)}
         >
-          <TouchableOpacity 
-            activeOpacity={1} 
+          <TouchableOpacity
+            activeOpacity={1}
             style={localStyles.modalContent}
             onPress={() => {}}
           >
-            <TouchableOpacity 
-              style={localStyles.closeIconContainer} 
+            <TouchableOpacity
+              style={localStyles.closeIconContainer}
               onPress={() => setModalVisible(false)}
             >
               <Text style={localStyles.closeIcon}>✕</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={localStyles.option} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity style={localStyles.option} onPress={handleDeletePhoto}>
               <Text style={[localStyles.optionText, { color: 'red' }]}>{t('profile.delete_photo', { defaultValue: 'حذف الصورة' })}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={localStyles.option} onPress={() => handleImagePick('camera')}>
@@ -236,14 +317,15 @@ console.log(user);
       )}
       <Toast />
     </SafeAreaView>
-  )
-}
+  );
+};
+
 AgeDisplay.propTypes = {
   value: PropTypes.number.isRequired,
   label: PropTypes.string.isRequired,
 };
 
-export default ChildProfile
+export default ChildProfile;
 
 const localStyles = StyleSheet.create({
   modalOverlay: {

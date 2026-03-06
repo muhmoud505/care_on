@@ -11,7 +11,7 @@ const navigation = useNavigation();
     <SafeAreaView style={{position:'relative'}}>
         <CustomHeader text={t('account.linked_accounts_mother', { defaultValue: 'الحسابات المرتبطة بحساب الأم' })}
 
-        // EXPLICIT BACK ACTION:
+        // EXPLICIT BACK ACTION:marginHorizontal
         onBack={() => navigation.navigate('HomeStack', { screen: 'Home' })} 
         />
       <View style={styles.container}>

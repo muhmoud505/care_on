@@ -9,9 +9,7 @@ import { HomeHeader } from '../../components/homeHeader';
 import SurveyPopup from '../../components/SurveyPopup';
 import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
-
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
 // Responsive helper functions
 const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
 const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
@@ -113,7 +111,6 @@ const Home = () => {
     <SafeAreaView style={[styles.mainContainer, { direction: i18n.dir() }]}>
       
       <HomeHeader/>
-
       {surveySkippedThisSession && (
         <View style={styles.surveyReminderWrapper}>
          
@@ -134,6 +131,8 @@ const Home = () => {
           onPress={() => navigation.navigate(item.navigateTo)}
           activeOpacity={0.7}
         >
+    
+
           <Image source={item.icon} />
           <Text style={styles.txt1}>{t(item.titleKey)}</Text>
         </TouchableOpacity>

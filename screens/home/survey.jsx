@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
 
         paddingHorizontal:20,
 
-        paddingVertical: 20,
+        // paddingVertical: 20,
 
         paddingBottom: 100, // Add padding to the bottom to ensure button is visible above tabs
 
