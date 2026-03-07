@@ -4,7 +4,7 @@ import ChildProfile from './ChildProfile';
 import ParentProfile from './ParentProfile';
 
 const ProfileScreen = () => {
-  const { user } = useAuth();
+  const { user, isImpersonating } = useAuth();
 
   const age = useMemo(() => {
     const birthdate = user?.user?.resource?.birthdate; // YYYY-MM-DD format
@@ -28,8 +28,8 @@ const ProfileScreen = () => {
     }
   }, [user]);
 
-  // A user is considered a child if their age is less than 18.
-  const isChild = age !== null && age < 18;
+  // A user is considered a child if they are impersonated or their age is less than 18.
+  const isChild = isImpersonating || (age !== null && age < 18);
 
   return isChild ? <ChildProfile /> : <ParentProfile />;
 };

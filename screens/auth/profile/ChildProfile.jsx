@@ -3,7 +3,7 @@ import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,7 +35,12 @@ const ChildProfile = () => {
   const nationalId = user?.user?.resource?.national_number || '';
 
   const birthdate = user?.user?.resource?.birthdate; // YYYY-MM-DD format
-  console.log('User data in ChildProfile:', user);
+
+  useEffect(() => {
+    // Log the full user payload so we can inspect what the server returns (especially `resource`).
+    console.log('ChildProfile user payload:', user);
+    console.log('ChildProfile resource:', user?.user?.resource);
+  }, [user]);
 
   const maskedNationalId = nationalId
     ? `${nationalId.substring(0, 4)}${'x'.repeat(nationalId.length - 4)}`
@@ -167,7 +172,9 @@ const ChildProfile = () => {
         });
       }
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
+      if (!result || result.canceled) return;
+
+      if (result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
         const formData = new FormData();
         formData.append('avatar', {
@@ -177,6 +184,7 @@ const ChildProfile = () => {
         });
 
         // Optimistic preview: show the selected image immediately
+        const previousAvatar = user?.user?.avatar;
         setPreviewAvatar(asset.uri);
         try {
           // Also set a temporary avatar in the global auth state so other UI updates (drawer) reflect immediately
@@ -185,7 +193,26 @@ const ChildProfile = () => {
           console.warn('setTempAvatar failed', e.message);
         }
 
-        await updateUserProfile(user.user.id, formData);
+        const result = await updateUserProfile(user.user.id, formData);
+        if (!result.success) {
+          // Roll back if the server update failed
+          setPreviewAvatar(previousAvatar);
+          try {
+            setTempAvatar(user.user.id, previousAvatar);
+          } catch (e) {
+            console.warn('reverting temp avatar failed', e.message);
+          }
+
+          Toast.show({
+            type: 'error',
+            text1: t('common.error'),
+            text2: result.error || t('common.unknown_error', { defaultValue: 'Something went wrong' }),
+            position: 'top',
+            visibilityTime: 3000,
+          });
+          return;
+        }
+
         Toast.show({
           type: 'success',
           text1: t('common.success'),

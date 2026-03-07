@@ -76,7 +76,9 @@ const ParentProfile = () => {
         });
       }
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
+      if (!result || result.canceled) return;
+
+      if (result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
         const formData = new FormData();
         formData.append('avatar', {
@@ -86,6 +88,7 @@ const ParentProfile = () => {
         });
 
         // Optimistic preview: show the selected image immediately
+        const previousAvatar = user?.user?.avatar;
         setPreviewAvatar(asset.uri);
         try {
           // Also set a temporary avatar in the global auth state so other UI updates (drawer) reflect immediately
@@ -94,7 +97,26 @@ const ParentProfile = () => {
           console.warn('setTempAvatar failed', e.message);
         }
 
-        await updateUserProfile(user.user.id, formData);
+        const result = await updateUserProfile(user.user.id, formData);
+        if (!result.success) {
+          // Roll back if the server update failed
+          setPreviewAvatar(previousAvatar);
+          try {
+            setTempAvatar(user.user.id, previousAvatar);
+          } catch (e) {
+            console.warn('reverting temp avatar failed', e.message);
+          }
+
+          Toast.show({
+            type: 'error',
+            text1: t('common.error'),
+            text2: result.error || t('common.unknown_error', { defaultValue: 'Something went wrong' }),
+            position: 'top',
+            visibilityTime: 3000,
+          });
+          return;
+        }
+
         Toast.show({
           type: 'success',
           text1: t('common.success'),
