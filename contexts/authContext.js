@@ -5,7 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 const API_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
-  const ACTIVE_USER_KEY = 'active_user';
+const ACTIVE_USER_KEY = 'active_user';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }) => {
 
   const makeAbsolute = (avatarPath) => {
     if (!avatarPath) return avatarPath;
-    // If it's already a remote URL or a local file/data URI, return as-is.
     if (isRemoteUrl(avatarPath) || isLocalUri(avatarPath)) return avatarPath;
     const base = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
     return avatarPath.startsWith('/') ? `${base}${avatarPath}` : `${base}/${avatarPath}`;
@@ -67,10 +66,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   // --- AUTH FETCH WRAPPER ---
-  const authFetch = async (url, options = {}) => {
-    // Prefer using the current user's token when impersonating a child account.
-    // Otherwise, refresh the primary user's token as before.
+  // Fix #2: correctly resolves the token for child vs primary user
+  const authFetch = async (url, options = {}, overrideToken = null) => {
     const getAuthToken = async () => {
+      // Allow callers to explicitly pass a token (e.g. for child updates)
+      if (overrideToken) return overrideToken;
+
+      // If impersonating a child, use the child's own token
       if (user && primaryUser && user.user?.id !== primaryUser.user?.id && user.token?.value) {
         return user.token.value;
       }
@@ -129,19 +131,15 @@ export const AuthProvider = ({ children }) => {
           }
         }
 
-        // Load last active user (parent or a child) so we can restore impersonation after reload.
         const storedActive = await AsyncStorage.getItem(ACTIVE_USER_KEY);
         if (storedActive) {
           const activeId = storedActive;
           const matchedChild = (normalizedChildren || []).find(c => c.id === activeId);
           if (matchedChild) {
-            // Always store the user object in the shape expected by `useAuth` consumers.
-            // Use the child's token if available, otherwise use parent's token
             const childToken = matchedChild.token?.value || matchedChild.token;
             const childUser = { user: matchedChild, token: { value: childToken || normalizedUser?.token?.value } };
             setUser(childUser);
 
-            // Refresh the child profile from the server (especially for `resource`).
             if (childToken) {
               try {
                 const response = await fetch(`${API_URL}/api/v1/auth/me`, {
@@ -165,7 +163,6 @@ export const AuthProvider = ({ children }) => {
 
                   setUser({ user: refreshedUser, token: { value: childToken } });
 
-                  // Persist refreshed child profile
                   const updatedChildren = (normalizedChildren || []).map(child =>
                     child.id === refreshedUser.id ? { ...child, ...refreshedUser } : child
                   );
@@ -238,30 +235,26 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const children = data.data || [];
 
-        // For each child, use their token to fetch complete profile information
         const childrenWithFullData = await Promise.all(
           children.map(async (child) => {
             const normalized = normalizeChild(child);
 
-            // If child has a token, try to fetch their complete profile
             if (child.token) {
               try {
                 const profileResponse = await fetch(`${API_URL}/api/v1/auth/users/${child.id}`, {
                   headers: { 'Authorization': `Bearer ${child.token}`, 'lang': i18next.language },
                 });
-                
-                // Check if response is JSON before parsing
+
                 const contentType = profileResponse.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
                   const profileData = await profileResponse.json();
 
                   if (profileResponse.ok && profileData.data) {
-                    // Merge the normalized child with full profile data
                     return {
                       ...normalized,
                       ...profileData.data,
-                      token: child.token, // Keep the child's token
-                      name: profileData.data.name || normalized.name || child.name // Ensure name is preserved
+                      token: child.token,
+                      name: profileData.data.name || normalized.name || child.name,
                     };
                   }
                 } else {
@@ -270,14 +263,13 @@ export const AuthProvider = ({ children }) => {
               } catch (error) {
                 console.warn(`Failed to fetch full profile for child ${child.id} with child token:`, error.message);
               }
-              
-              // Fallback: try with parent token if child token failed
+
               try {
                 console.log(`Trying fallback with parent token for child ${child.id}`);
                 const profileResponse = await fetch(`${API_URL}/api/v1/auth/users/${child.id}`, {
                   headers: { 'Authorization': `Bearer ${token}`, 'lang': i18next.language },
                 });
-                
+
                 const contentType = profileResponse.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
                   const profileData = await profileResponse.json();
@@ -286,8 +278,8 @@ export const AuthProvider = ({ children }) => {
                     return {
                       ...normalized,
                       ...profileData.data,
-                      token: child.token, // Keep the child's token even though we used parent token for fetch
-                      name: profileData.data.name || normalized.name || child.name // Ensure name is preserved
+                      token: child.token,
+                      name: profileData.data.name || normalized.name || child.name,
                     };
                   }
                 }
@@ -300,7 +292,6 @@ export const AuthProvider = ({ children }) => {
           })
         );
 
-        // Merge with locally updated child avatars so we don't overwrite an in-memory local URI.
         const merged = childrenWithFullData.map(child => {
           const existing = childAccounts.find(c => c.id === child.id);
           if (!existing) return child;
@@ -406,56 +397,61 @@ export const AuthProvider = ({ children }) => {
   const updateUserProfile = async (userId, formData) => {
     setIsAuthLoading(true);
     try {
+      // Always use POST + _method=PUT as the backend expects (Laravel method spoofing)
       formData.append('_method', 'PUT');
 
-      // When impersonating a child account, the backend may only allow updates via /me.
-      // Use /me for updates so we avoid 405/permission errors when using the child token.
-      const endpoint = (primaryUser?.user?.id && user?.user?.id && primaryUser.user.id !== user.user.id && user.user.id === userId)
-        ? `${API_URL}/api/v1/auth/me`
-        : `${API_URL}/api/v1/auth/users/${userId}`;
+      const isChildUpdate =
+        primaryUser?.user?.id &&
+        user?.user?.id &&
+        primaryUser.user.id !== user.user.id &&
+        user.user.id === userId;
+
+      // Always use /api/v1/auth/users/{id} — the /me endpoint may not support POST+_method
+      // Use the child's own token when updating a child account
+      const endpoint = `${API_URL}/api/v1/auth/users/${userId}`;
+      const tokenForRequest = isChildUpdate
+        ? (user.token?.value || null)
+        : null;
 
       const response = await authFetch(endpoint, {
         method: 'POST',
         body: formData,
-      });
+      }, tokenForRequest);
+
       const data = await response.json();
       if (!response.ok) throw new Error(data?.message || "Update failed");
 
       let updatedUser = data?.data || data;
 
-      // When server explicitly returns `avatar: null`, treat it as "avatar removed".
-      // Otherwise, keep existing avatar when it isn't part of the response.
+      // Guard: only overwrite avatar if the API explicitly returned it
       if (Object.prototype.hasOwnProperty.call(updatedUser, 'avatar')) {
         updatedUser.avatar = updatedUser.avatar ? makeAbsolute(updatedUser.avatar) : null;
       }
 
-      // Determine final avatar to keep (API > existing state) so we can sync child list too.
       const existingAvatar = user?.user?.avatar;
-      const finalAvatar = updatedUser.avatar || existingAvatar || null;
+      // Fix #4: keep existing avatar when API doesn't return one, avoiding null wipe
+      const finalAvatar = updatedUser.avatar ?? existingAvatar ?? null;
 
       setUser(prev => {
         const currentAvatar = prev?.user?.avatar;
-        const finalAvatarLocal = updatedUser.avatar || currentAvatar || null;
+        const finalAvatarLocal = updatedUser.avatar ?? currentAvatar ?? null;
         return { ...prev, user: { ...prev?.user, ...updatedUser, avatar: finalAvatarLocal } };
       });
 
-      // If updating a child account (not the primary user), keep the child list in sync.
       if (primaryUser?.user?.id !== userId) {
         await updateChildAvatar(userId, finalAvatar);
       }
 
       if (primaryUser?.user?.id === userId) {
-        // Read the latest stored data (which setTempAvatar already wrote to AsyncStorage)
         const latestStored = await AsyncStorage.getItem('primary_user');
         const latestParsed = latestStored ? JSON.parse(latestStored) : null;
         const latestAvatar =
           latestParsed?.user?.avatar ||
           latestParsed?.data?.user?.avatar ||
           null;
-        // Prefer: API real URL > temp URI already in AsyncStorage > old avatar in state
-        const finalAvatar = updatedUser.avatar || latestAvatar || primaryUser?.user?.avatar || null;
+        const resolvedAvatar = updatedUser.avatar ?? latestAvatar ?? primaryUser?.user?.avatar ?? null;
 
-        const mergedUser = { ...primaryUser.user, ...updatedUser, avatar: finalAvatar };
+        const mergedUser = { ...primaryUser.user, ...updatedUser, avatar: resolvedAvatar };
         const newPrimary = { ...primaryUser, user: mergedUser };
         setPrimaryUser(newPrimary);
         await AsyncStorage.setItem('primary_user', JSON.stringify(newPrimary));
@@ -463,11 +459,13 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };
-    } finally { setIsAuthLoading(false); }
+    } finally {
+      setIsAuthLoading(false);
+    }
   };
 
+  // Fix #5: removed duplicate setIsAuthLoading(false) — updateUserProfile's finally handles it
   const deleteUserAvatar = async (userId) => {
-    // Optimistic update: clear avatar immediately (but restore on error).
     const previousAvatar = user?.user?.avatar;
     setUser(prev => prev ? { ...prev, user: { ...prev.user, avatar: null } } : prev);
 
@@ -483,7 +481,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const formData = new FormData();
       formData.append('_method', 'PUT');
-      // backend should interpret this as "clear avatar"
       formData.append('avatar', '');
       formData.append('remove_avatar', '1');
 
@@ -492,7 +489,7 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true };
     } catch (error) {
-      // Restore previous avatar on failure.
+      // Restore previous avatar on failure
       setUser(prev => prev ? { ...prev, user: { ...prev.user, avatar: previousAvatar } } : prev);
 
       if (primaryUser?.user?.id === userId) {
@@ -504,21 +501,29 @@ export const AuthProvider = ({ children }) => {
         await updateChildAvatar(userId, previousAvatar);
       }
       return { success: false, error: error.message };
-    } finally {
-      setIsAuthLoading(false);
     }
   };
 
+  // Fix #3: use the correct token for the user being fetched
   const fetchUserProfile = async (userId) => {
     try {
-      const tokenValue = primaryUser?.token?.value || user?.token?.value;
+      // Prefer child's own token when fetching a child profile
+      const isChildFetch =
+        primaryUser?.user?.id &&
+        user?.user?.id &&
+        primaryUser.user.id !== user.user.id &&
+        user.user.id === userId;
+
+      const tokenValue = isChildFetch
+        ? (user?.token?.value || primaryUser?.token?.value)
+        : (primaryUser?.token?.value || user?.token?.value);
+
       if (!tokenValue) return null;
-      
-      const response = await authFetch(`${API_URL}/api/v1/auth/users/${userId}`);
+
+      const response = await authFetch(`${API_URL}/api/v1/auth/users/${userId}`, {}, isChildFetch ? tokenValue : null);
       const data = await response.json();
       if (!response.ok) throw new Error(data?.message || 'Failed to load user');
-      const userData = data.data || data;
-      return userData;
+      return data.data || data;
     } catch (error) {
       console.warn('fetchUserProfile failed', error.message);
       return null;
@@ -534,7 +539,6 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    // Use the child's own token if available, otherwise fall back to parent's token
     const tokenValue = account?.token?.value || account?.token || primaryUser?.token?.value;
     if (!tokenValue) return;
 
@@ -543,8 +547,6 @@ export const AuthProvider = ({ children }) => {
 
     await AsyncStorage.setItem(ACTIVE_USER_KEY, `${account.id}`);
 
-    // When switching to a child account, refresh the profile from the /me endpoint
-    // to ensure we have the latest data from the server.
     if (primaryUser?.user?.id !== account.id) {
       try {
         const response = await fetch(`${API_URL}/api/v1/auth/me`, {
@@ -560,7 +562,6 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         if (response.ok) {
           const meData = data.data || data;
-          // Log the child "resource" payload for debugging
           console.log('Child /me resource:', meData.resource);
 
           const serverAvatar = meData.avatar ? makeAbsolute(meData.avatar) : null;
@@ -575,7 +576,6 @@ export const AuthProvider = ({ children }) => {
 
           setUser({ user: finalUser, token: { value: tokenValue } });
 
-          // Persist /me results in storage so the next app load uses the fresh server data.
           try {
             const storedChildren = await AsyncStorage.getItem('child_accounts');
             const parsed = storedChildren ? JSON.parse(storedChildren) : [];
@@ -595,7 +595,6 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    // Fallback: use cached data if /me fails
     setUser({ user: childWithAvatar, token: { value: tokenValue } });
   };
 
@@ -604,32 +603,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   const setTempAvatar = async (userId, uri) => {
-    // Update React state immediately for instant UI feedback
     setUser(prev =>
       prev?.user?.id === userId ? { ...prev, user: { ...prev.user, avatar: uri } } : prev
     );
 
-    // Always cache to child list (for switching back to a child account)
     await updateChildAvatar(userId, uri);
 
-    // Also persist to AsyncStorage so avatar survives a reload
     try {
       if (primaryUser?.user?.id === userId) {
-        // For primary user, update primary_user storage
         const mergedUser = { ...primaryUser.user, avatar: uri };
         const newPrimary = { ...primaryUser, user: mergedUser };
         setPrimaryUser(newPrimary);
         await AsyncStorage.setItem('primary_user', JSON.stringify(newPrimary));
       } else {
-        // For child user, update child_accounts storage
         const storedChildren = await AsyncStorage.getItem('child_accounts');
         const parsed = storedChildren ? JSON.parse(storedChildren) : [];
         const updated = (parsed || []).map(child =>
           child.id === userId ? { ...child, avatar: uri } : child
         );
         await AsyncStorage.setItem('child_accounts', JSON.stringify(updated));
-        
-        // Also update in-memory childAccounts state
         setChildAccounts(updated);
       }
     } catch (e) {
@@ -644,6 +636,7 @@ export const AuthProvider = ({ children }) => {
     isLoading, isAuthLoading,
     login, setSession, logout, signup, fetchChildren, forgotPassword,
     refreshToken, authFetch, updateUserProfile, deleteUserAvatar, switchAccount, setTempAvatar,
+    fetchUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,5 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
+import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
+import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -39,6 +41,73 @@ const ParentProfile = () => {
         type: 'error',
         text1: t('common.error'),
         text2: error?.message || t('common.unknown_error', { defaultValue: 'Something went wrong' }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
+    }
+  };
+
+  const handleDownloadBirthCertificate = async () => {
+    console.log('Download button pressed');
+    
+    const url =
+      user?.user?.resource?.birth_certificate_url ||
+      user?.user?.resource?.birth_certificate ||
+      user?.user?.resource?.certificate_url ||
+      user?.user?.resource?.birth_cert_url ||
+      user?.user?.birth_certificate_url ||
+      user?.user?.birth_certificate ||
+      user?.user?.certificate_url ||
+      user?.user?.birth_cert_url ||
+      null;
+    
+    console.log('Download URL found:', url);
+    console.log('User resource data:', user?.user?.resource);
+    
+    if (!url) {
+      console.log('No URL found, showing error toast');
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: t('common.no_file_to_download', { defaultValue: 'No file available to download' }),
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
+    try {
+      console.log('Starting download...');
+      const fileUri = `${FileSystem.cacheDirectory}birth_certificate.pdf`;
+      console.log('File URI:', fileUri);
+      
+      const downloadResumable = FileSystem.createDownloadResumable(url, fileUri);
+      console.log('Download resumable created');
+      
+      const { uri } = await downloadResumable.downloadAsync();
+      console.log('Download completed, file URI:', uri);
+
+      if (!(await Sharing.isAvailableAsync())) {
+        console.log('Sharing not available');
+        Toast.show({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('common.sharing_not_available', { defaultValue: 'Sharing is not available on this device' }),
+          position: 'top',
+          visibilityTime: 3000,
+        });
+        return;
+      }
+
+      console.log('Sharing file...');
+      await Sharing.shareAsync(uri);
+      console.log('Share completed');
+    } catch (error) {
+      console.log('Download error:', error);
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: error.message,
         position: 'top',
         visibilityTime: 3000,
       });
@@ -172,17 +241,19 @@ const ParentProfile = () => {
       
       <View style={styles.cont3}>
         <Text>{t('profile.birth_certificate')}</Text>
-        <ImageBackground 
-           source={Images.id}
+        <TouchableOpacity onPress={handleDownloadBirthCertificate}>
+          <ImageBackground 
+             source={Images.id}
              style={[styles.background, {width: wp(90)}]}
-              imageStyle={{width:wp(90), height:hp(8),borderRadius:8}}
+             imageStyle={{width:wp(90), height:hp(8),borderRadius:8}}
              resizeMode='cover'
-         >
+          >
             <View style={styles.overlay}>
                <Image source={Images.download} />
                  <Text style={[styles.txt4,{color:'#fff'}]}>{t('common.download')}</Text>
               </View>
-        </ImageBackground>
+          </ImageBackground>
+        </TouchableOpacity>
 
       </View>
       <TouchableOpacity

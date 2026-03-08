@@ -27,9 +27,11 @@ const AddReportScreen = () => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { form, errors, handleChange, checkFormValidity } = useForm({
-    reportTitle: '',
+   
     doctorName: '',
-    specialty: '',
+    RequiredTests: '',
+    type: '',
+    RequiredScans: '',
     date: null,
     notes: '',
     documents: null,
@@ -78,15 +80,11 @@ const AddReportScreen = () => {
     <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
       <CustomHeader text={t('add_report.title')} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+          
         <View style={styles.formContainer}>
-          <FormField
-            title={t('add_report.report_title')}
-            placeholder={t('add_report.report_title_placeholder')}
-            value={form.reportTitle}
-            onChangeText={(text) => handleChange('reportTitle', text)}
-            error={errors.reportTitle}
-            required
-          />
+         <Text style={[styles.txt,{textAlign:'left'}]}>{t('add_medicine.enter_following_data')} </Text>
+       
+          
           <FormField
             title={t('add_report.doctor_name')}
             placeholder={t('add_report.doctor_name_placeholder')}
@@ -95,35 +93,53 @@ const AddReportScreen = () => {
             error={errors.doctorName}
             required
           />
-          <FormField
-            title={t('add_report.specialty')}
-            placeholder={t('add_report.specialty_placeholder')}
-            value={form.specialty}
-            onChangeText={(text) => handleChange('specialty', text)}
-            error={errors.specialty}
-            required
-          />
+          
           <DatePick
             title={t('add_report.date')}
             placeholder={t('add_report.date_placeholder')}
             value={form.date}
             onDateSelect={(date) => handleChange('date', date)}
             error={errors.date}
-            required
+            
           />
           <FormField
-            title={t('add_report.notes')}
-            placeholder={t('add_report.notes_placeholder')}
-            value={form.notes}
-            onChangeText={(text) => handleChange('notes', text)}
-            error={errors.notes}
-            type="long"
+            title={'النوع'}
+            placeholder={'اختر نوع الكشف'}
+            value={form.type}
+            onChangeText={(t) => {handleChange('type', t)}}
+            error={errors.type}
+            type={'picker'}
+            pickerItems={[{ label: 'كشف', value: 'كشف' }, { label: 'روشتة', value: 'روشتة' }]}
+            addOthers={false}
+            
           />
+          <FormField
+            title={"التحاليل المطلوبة"}
+            placeholder={'اختر التحاليل المطلوبة'}
+            value={form.RequiredTests}
+            onChangeText={(t) => {handleChange('RequiredTests', t)}}
+            error={errors.RequiredTests}
+            type={'picker'}
+            pickerItems={[{ label: 'تحليل دم', value: 'تحليل دم' }, { label: t('profile.female'), value: 'female' }]}
+            addLabel={'انشئ تحليل جديد'}
+          />
+          <FormField
+            title={"الاشعة المطلوبة"}
+            placeholder={'اختر الاشعة المطلوبة'}
+            value={form.RequiredScans}
+            onChangeText={(t) => {handleChange('RequiredScans', t)}}
+            error={errors.RequiredScans}
+            type={'picker'}
+            pickerItems={[{ label: 'اشعة x ray', value: 'اشعة x ray' }]}
+            addLabel={'انشئ اشعة جديدة'}
+          />
+           
+
           <Uploader
-            title={t('add_report.upload_file')}
+            title={t('الروشتة او التقرير')}
             onFileSelect={(file) => handleChange('documents', file)}
             error={errors.documents}
-            required
+          
           />
           <TouchableOpacity style={[styles.saveButton, (!formIsValid || isSubmitting) && styles.disabledButton]} onPress={handleSave} disabled={!formIsValid || isSubmitting}>
             {isSubmitting ? (
@@ -168,4 +184,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+   txt:{
+    fontWeight:'700',
+   fontSize: Math.min(wp(5), 20),
+   marginBottom: hp(2)
+  }
 })

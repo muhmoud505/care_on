@@ -33,6 +33,8 @@ const FormField = ({
   secureTextEntry, // Receive the secureTextEntry prop from parent
   onToggleSecureEntry, // Receive the toggle function from parent
   pickerItems,
+  addOthers=true,
+  addLabel,
   ...props
 }) => {
   // Removed internal state to rely on parent props
@@ -76,13 +78,59 @@ const FormField = ({
           )
         }
         {type === 'picker' ? (
-          <TouchableOpacity style={[styles.pickerTouchable, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => setShowList(!showList)}>
-            <Text style={[styles.input, styles.pickerInput, { textAlign: isRTL ? 'right' : 'left' }]}>{selectedLabel}</Text>
-            <Image source={Images.arrD} style={styles.icon} resizeMode="contain" />
+          <View style={{position:'relative',flex:1}}
+          >
+          <TouchableOpacity style={[styles.pickerTouchable, { flexDirection: isRTL ? 'row' : 'row-reverse' }]} onPress={() => setShowList(!showList)}>
+            <Text style={[styles.input, styles.pickerInput, { textAlign: isRTL ? 'left' : 'right' }]}>{selectedLabel}</Text>
+            <Image source={Images.arrowDown} style={styles.icon} resizeMode="contain" />
           </TouchableOpacity>
+          {showList && (type === 'drop' || type === 'picker') && (
+        <View style={styles.list}>
+          
+          <FlatList
+            nestedScrollEnabled={true}
+            scrollEnabled={true}
+            data={type === 'picker' ? pickerItems : data}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[styles.itemStyle, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}
+                onPress={() => {
+                  onChangeText(type === 'picker' ? item.value : item);
+                  // The list will no longer close on selection.
+                }}
+              >
+                <Text style={[styles.listItemText, { textAlign: isRTL ? 'right' : 'left' }]}>{type === 'picker' ? item.label : item}</Text>
+                {
+                  (type === 'picker' ? item.value === value : item === value)
+                    ? <Image source={Images.verify} /> : <Image source={Images.nonVerify} />
+                }
+              </TouchableOpacity>
+            )
+
+            }
+            showsVerticalScrollIndicator={false}
+            style={styles.flatListStyle}
+            contentContainerStyle={styles.daysGrid}
+            keyExtractor={(item) => (type === 'picker' ? item.value : String(item))}
+
+          />
+          {
+            addOthers&&(
+              <TouchableOpacity
+                style={[styles.itemStyle, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+              >
+                <Image source={Images.add} style={styles.icon}/>
+                <Text style={[styles.addLabel, { textAlign: isRTL ? 'right' : 'left' }]}>{addLabel}</Text>
+              </TouchableOpacity>
+            )
+          }
+        </View>
+
+      )}
+          </View>
         ) : (
           <TextInput
-            style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
+            style={[styles.input, { textAlign: isRTL ? 'left' : 'right' }]}
             value={value}
             numberOfLines={type === 'long' ? 5 : 1}
             editable={type !== 'drop' && type !== 'date'}
@@ -147,43 +195,7 @@ const FormField = ({
           scrollEnabled={false}
           contentContainerStyle={styles.daysGrid} */}
 
-      {showList && (type === 'drop' || type === 'picker') && (
-        <View style={styles.list}>
-          <View style={[styles.listHeader, { flexDirection: isRTL ? 'row' : 'row' }]}>
-            <TouchableOpacity style={{justifyContent:'center',alignItems:'center'}} onPress={() => setShowList(false)}>
-              <Text style={[styles.closeButtonText,{textAlign:'center'}]}>{t('common.close', { defaultValue: 'Close' })}</Text>
-            </TouchableOpacity>
-          </View>
-          <FlatList
-            nestedScrollEnabled={true}
-            scrollEnabled={true}
-            data={type === 'picker' ? pickerItems : data}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[styles.itemStyle, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
-                onPress={() => {
-                  onChangeText(type === 'picker' ? item.value : item);
-                  // The list will no longer close on selection.
-                }}
-              >
-                <Text style={[styles.listItemText, { textAlign: isRTL ? 'right' : 'left' }]}>{type === 'picker' ? item.label : item}</Text>
-                {
-                  (type === 'picker' ? item.value === value : item === value)
-                    ? <Image source={Images.verify} /> : <Image source={Images.nonVerify} />
-                }
-              </TouchableOpacity>
-            )
-
-            }
-            showsVerticalScrollIndicator={false}
-            style={styles.flatListStyle}
-            contentContainerStyle={styles.daysGrid}
-            keyExtractor={(item) => (type === 'picker' ? item.value : String(item))}
-
-          />
-        </View>
-
-      )}
+      
     </View>
   );
 };
@@ -234,9 +246,9 @@ const styles = StyleSheet.create({
   writingDirection: 'rtl', 
   },
   icon: {
-    position: 'absolute',
-    top: '50%',
-    transform: [{ translateY: -12}], // Center the icon vertically
+   
+   
+    // Center the icon vertically
     width: wp(6),
     height: wp(6),
   },
@@ -246,7 +258,8 @@ const styles = StyleSheet.create({
     marginTop: hp(0.5),
   },
   pickerInput: {
-    color: '#000', // Ensure selected value is visible
+    color: '#999',
+    fontWeight: '600', // Ensure selected value is visible
   },
   pickerTouchable: {
     flex: 1,
@@ -257,17 +270,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
+  addLabel:{
+    fontSize: 14,
+    color: '#014CC4',
+    fontWeight: 'bold',
+  },
   list:{
-    width: wp(80),
+    width: wp(85),
     maxHeight: hp(30), // Use maxHeight to be more flexible
     alignSelf:'center',
-    borderRadius: wp(4),
+    borderRadius: wp(5),
     borderColor:'#014CC4',
     borderWidth:1,
     backgroundColor: '#FFF',
     padding: wp(2.5),
     position:'absolute',
-    top: hp(10), // Position below the input field
+    top: hp(7), // Position below the input field
     zIndex: 1000,
     elevation: 5, // for Android shadow
   },

@@ -28,16 +28,13 @@ const ChildProfile = () => {
 
   const navigation = useNavigation();
   const { t } = useTranslation();
-  // Fix 1: renamed deleteProfileImage → deleteUserAvatar to match authContext
   const { user, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
 
   const fullName = user?.user?.name || 'User Name';
   const nationalId = user?.user?.resource?.national_number || '';
-
-  const birthdate = user?.user?.resource?.birthdate; // YYYY-MM-DD format
+  const birthdate = user?.user?.resource?.birthdate;
 
   useEffect(() => {
-    // Log the full user payload so we can inspect what the server returns (especially `resource`).
     console.log('ChildProfile user payload:', user);
     console.log('ChildProfile resource:', user?.user?.resource);
   }, [user]);
@@ -46,7 +43,6 @@ const ChildProfile = () => {
     ? `${nationalId.substring(0, 4)}${'x'.repeat(nationalId.length - 4)}`
     : 'xxxx';
 
-  // Fix 2: age calc is clean — removed the misplaced handleDeletePhoto and stray t.err typo
   const age = useMemo(() => {
     if (!birthdate) return { years: 0, months: 0, days: 0 };
     try {
@@ -74,10 +70,9 @@ const ChildProfile = () => {
     }
   }, [birthdate]);
 
-  // Fix 3: handleDeletePhoto moved here (outside useMemo), uses correct Toast + deleteUserAvatar
   const handleDeletePhoto = async () => {
     setModalVisible(false);
-    setPreviewAvatar(null); // optimistic clear
+    setPreviewAvatar(null);
 
     try {
       const result = await deleteUserAvatar(user.user.id);
@@ -102,7 +97,11 @@ const ChildProfile = () => {
   };
 
   const downloadFile = async (url, filename) => {
+    console.log('ChildProfile downloadFile called with URL:', url);
+    console.log('ChildProfile user resource data:', user?.user?.resource);
+
     if (!url) {
+      console.log('No URL found, showing error toast');
       Toast.show({
         type: 'error',
         text1: t('common.error'),
@@ -114,11 +113,18 @@ const ChildProfile = () => {
     }
 
     try {
+      console.log('Starting download for file:', filename);
       const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+      console.log('File URI:', fileUri);
+
       const downloadResumable = FileSystem.createDownloadResumable(url, fileUri);
+      console.log('Download resumable created');
+
       const { uri } = await downloadResumable.downloadAsync();
+      console.log('Download completed, file URI:', uri);
 
       if (!(await Sharing.isAvailableAsync())) {
+        console.log('Sharing not available');
         Toast.show({
           type: 'error',
           text1: t('common.error'),
@@ -129,8 +135,11 @@ const ChildProfile = () => {
         return;
       }
 
+      console.log('Sharing file...');
       await Sharing.shareAsync(uri);
+      console.log('Share completed');
     } catch (error) {
+      console.log('Download error:', error);
       Toast.show({
         type: 'error',
         text1: t('common.error'),
@@ -144,7 +153,8 @@ const ChildProfile = () => {
   const handleImagePick = async (type) => {
     setModalVisible(false);
     try {
-      let result;
+      let pickerResult;  // Fix #1: renamed to avoid shadowing the updateUserProfile result below
+
       if (type === 'camera') {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
@@ -157,14 +167,14 @@ const ChildProfile = () => {
           });
           return;
         }
-        result = await ImagePicker.launchCameraAsync({
+        pickerResult = await ImagePicker.launchCameraAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsEditing: true,
           aspect: [1, 1],
           quality: 0.5,
         });
       } else {
-        result = await ImagePicker.launchImageLibraryAsync({
+        pickerResult = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsEditing: true,
           aspect: [1, 1],
@@ -172,10 +182,10 @@ const ChildProfile = () => {
         });
       }
 
-      if (!result || result.canceled) return;
+      if (!pickerResult || pickerResult.canceled) return;
 
-      if (result.assets && result.assets.length > 0) {
-        const asset = result.assets[0];
+      if (pickerResult.assets && pickerResult.assets.length > 0) {
+        const asset = pickerResult.assets[0];
         const formData = new FormData();
         formData.append('avatar', {
           uri: asset.uri,
@@ -183,19 +193,19 @@ const ChildProfile = () => {
           type: asset.mimeType || 'image/jpeg',
         });
 
-        // Optimistic preview: show the selected image immediately
         const previousAvatar = user?.user?.avatar;
         setPreviewAvatar(asset.uri);
+
         try {
-          // Also set a temporary avatar in the global auth state so other UI updates (drawer) reflect immediately
           setTempAvatar(user.user.id, asset.uri);
         } catch (e) {
           console.warn('setTempAvatar failed', e.message);
         }
 
-        const result = await updateUserProfile(user.user.id, formData);
-        if (!result.success) {
-          // Roll back if the server update failed
+        // Fix #1: use a different variable name for the update result
+        const updateResult = await updateUserProfile(user.user.id, formData);
+        if (!updateResult.success) {
+          // Roll back on failure
           setPreviewAvatar(previousAvatar);
           try {
             setTempAvatar(user.user.id, previousAvatar);
@@ -206,7 +216,7 @@ const ChildProfile = () => {
           Toast.show({
             type: 'error',
             text1: t('common.error'),
-            text2: result.error || t('common.unknown_error', { defaultValue: 'Something went wrong' }),
+            text2: updateResult.error || t('common.unknown_error', { defaultValue: 'Something went wrong' }),
             position: 'top',
             visibilityTime: 3000,
           });
@@ -231,23 +241,29 @@ const ChildProfile = () => {
       });
     }
   };
-  
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <CustomHeader text={t('profile.child_profile_title', { defaultValue: 'الحساب الشخصي' })} />
       <ScrollView contentContainerStyle={{ paddingBottom: hp(5), paddingTop: hp(2) }}>
         <View style={{ flex: 1 }}>
           <View>
-            <TouchableOpacity style={styles.btn}
+            <TouchableOpacity
+              style={styles.btn}
               onPress={() => navigation.navigate('accounts')}
-            
             >
               <Text style={styles.btnText}>{t('account.switch_to_parent', { defaultValue: 'انتقال لحساب الأم' })}</Text>
             </TouchableOpacity>
             <View style={styles.cont1}>
               <View style={styles.info}>
                 <Image
-                  source={previewAvatar ? { uri: previewAvatar } : (user?.user?.avatar ? { uri: user.user.avatar } : Images.profile)}
+                  source={
+                    previewAvatar
+                      ? { uri: previewAvatar }
+                      : user?.user?.avatar
+                        ? { uri: user.user.avatar }
+                        : Images.profile
+                  }
                   style={styles.profileImg}
                   resizeMode="cover"
                 />
@@ -272,11 +288,18 @@ const ChildProfile = () => {
               <Text>{t('profile.birth_certificate', { defaultValue: 'شهادة الميلاد' })}</Text>
               <TouchableOpacity
                 onPress={() => {
+                  console.log('ChildProfile birth certificate download button pressed');
                   const url =
                     user?.user?.resource?.birth_certificate_url ||
                     user?.user?.resource?.birth_certificate ||
+                    user?.user?.resource?.certificate_url ||
+                    user?.user?.resource?.birth_cert_url ||
+                    user?.user?.birth_certificate_url ||
                     user?.user?.birth_certificate ||
+                    user?.user?.certificate_url ||
+                    user?.user?.birth_cert_url ||
                     null;
+                  console.log('ChildProfile birth certificate URL found:', url);
                   downloadFile(url, 'birth_certificate.pdf');
                 }}
               >
