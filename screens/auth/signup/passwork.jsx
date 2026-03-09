@@ -14,18 +14,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import CustomHeader from '../../../components/CustomHeader'; // Assuming CustomHeader exists
+import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
 import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 
-const PasswordScreen = ({ route }) => { // Accept route as a prop
+const PasswordScreen = ({ route }) => {
   const { t, i18n } = useTranslation();
-  const isRTL = i18n.dir() === 'rtl';
-
-  const navigation =useNavigation()
-  const { signup, isAuthLoading, setSession } = useAuth(); // Get setSession function from context
+  const navigation = useNavigation();
+  const { signup, isAuthLoading } = useAuth();
   const { form, errors, handleChange, checkFormValidity } = useForm({
     password: '',
     password_confirmation: '',
@@ -34,74 +32,54 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
   const [isConfirmPasswordSecure, setIsConfirmPasswordSecure] = useState(true);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-    const { signupData } = route.params || {};
+  const { signupData } = route.params || {};
 
-     console.log(signupData.birthdate)
-     console.log(signupData.age)
+  if (!signupData) {
+    console.error("Critical Error: signupData is missing in PasswordScreen.");
+    Alert.alert(t('common.error'), t('errors.unexpected_signup_error'));
+    return null;
+  }
 
   const formIsValid = checkFormValidity();
 
-  // useEffect(() => {
-  //   if (form.password && form.password_confirmation && form.password !== form.password_confirmation) {
-  //     // This is a simple example of cross-field validation.
-  //     // You might want to integrate this into your useForm hook.
-  //     errors.password_confirmation = t('auth.passwords_do_not_match', { defaultValue: 'Passwords do not match' });
-  //   } else if (errors.password_confirmation) {
-  //     // Clear error if they match
-  //     delete errors.password_confirmation;
-  //   }
-  // }, [form, errors]);
-
   const handleSignup = async () => {
     if (!formIsValid || form.password !== form.password_confirmation) {
-        Alert.alert(t('common.error'), t('auth.passwords_do_not_match'));
-
-        return;
-    };
+      Alert.alert(t('common.error'), t('auth.passwords_do_not_match'));
+      return;
+    }
 
     if (!agreedToTerms) {
       Alert.alert(t('common.error'), t('auth.must_agree_terms', { defaultValue: 'يجب الموافقة علي الشروط والاحكام' }));
       return;
     }
 
-    // Safely get signupData from route.params inside the handler
-    const { signupData } = route.params || {};
-    // Defensive check to ensure signupData exists before using it.
-    if (!signupData) {
-      console.error("Critical Error: signupData is missing in PasswordScreen.");
-      Alert.alert(t('common.error'), t('errors.unexpected_signup_error'));
-      return;
-    }
-
-    // Add the password fields to the object.
     signupData.password = form.password;
     signupData.password_confirmation = form.password_confirmation;
 
     try {
-      // Perform the signup API call
       const response = await signup(signupData);
-      console.log(response);
-      
+      console.log('Signup response:', response);
 
-      // Check if a parent is adding a child
       if (signupData.isParentAddingChild) {
-        // 1. Store the new child's token. We'll store it under a key related to the parent.
+        // Store the new child's token
         if (response && response.token) {
-          // A more robust solution would be to get existing child accounts and append the new one.
           const existingChildAccounts = await AsyncStorage.getItem('child_accounts');
           const childAccounts = existingChildAccounts ? JSON.parse(existingChildAccounts) : [];
-          childAccounts.push({ id: response.user.id, token: response.token, name: response.user.name });
+          childAccounts.push({ id: response.user?.id, token: response.token, name: response.user?.name });
           await AsyncStorage.setItem('child_accounts', JSON.stringify(childAccounts));
         }
-        
-        // 2. Navigate back to the 'accounts' screen instead of the child's homepage.
         navigation.navigate('accounts');
         Alert.alert(t('common.success'), t('auth.child_account_created'));
       } else {
-        // For a regular signup, navigate to the WelcomeScreen and pass the session data.
-        // The WelcomeScreen will then handle setting the session.
+        // Navigate to welcome screen and pass the raw response as sessionData.
+        // setSession is intentionally NOT called here — WelcomeScreen will call it
+        // when the user presses Continue, so the root navigator doesn't flip to
+        // the home stack before the welcome screen can be shown.
         navigation.dispatch(
-          CommonActions.reset({ index: 0, routes: [{ name: 'welcome', params: { sessionData: response } }] })
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'welcome', params: { sessionData: response } }],
+          })
         );
       }
     } catch (error) {
@@ -111,7 +89,7 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
 
   return (
     <SafeAreaView style={[styles.safeArea, { direction: 'rtl' }]}>
-      <CustomHeader text={route.params?.title || t('auth.create_account')}/>
+      <CustomHeader text={route.params?.title || t('auth.create_account')} />
       <View style={[styles.headerTextContainer, { direction: i18n.dir() }]}>
         <Text numberOfLines={2} style={styles.txt1}>
           {(() => {
@@ -138,7 +116,7 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
           onChangeText={(text) => handleChange('password', text)}
           error={errors.password}
           secureTextEntry={isPasswordSecure}
-          type={'password'}
+          type="password"
           onToggleSecureEntry={() => setIsPasswordSecure(!isPasswordSecure)}
         />
         <FormField
@@ -149,27 +127,27 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
           onChangeText={(text) => handleChange('password_confirmation', text)}
           error={errors.password_confirmation}
           secureTextEntry={isConfirmPasswordSecure}
-          type={'password'}
+          type="password"
           onToggleSecureEntry={() => setIsConfirmPasswordSecure(!isConfirmPasswordSecure)}
-
         />
-        
       </View>
+
       <View style={styles.termsContainer}>
-          <TouchableOpacity
-            style={styles.checkbox}
-            onPress={() => setAgreedToTerms(!agreedToTerms)}
-            activeOpacity={0.7}
-          >
-            {agreedToTerms && <View style={styles.checkboxInner} />}
-          </TouchableOpacity>
-          <Text style={styles.termsText}>
-            {t('auth.agree_prefix', { defaultValue: 'الموافقة علي ' })}
-            <Text style={styles.termsLink} onPress={() => setShowTermsModal(true)}>
-              {t('auth.terms_only', { defaultValue: 'الشروط والاحكام' })}
-            </Text>
+        <TouchableOpacity
+          style={styles.checkbox}
+          onPress={() => setAgreedToTerms(!agreedToTerms)}
+          activeOpacity={0.7}
+        >
+          {agreedToTerms && <View style={styles.checkboxInner} />}
+        </TouchableOpacity>
+        <Text style={styles.termsText}>
+          {t('auth.agree_prefix', { defaultValue: 'الموافقة علي ' })}
+          <Text style={styles.termsLink} onPress={() => setShowTermsModal(true)}>
+            {t('auth.terms_only', { defaultValue: 'الشروط والاحكام' })}
           </Text>
-        </View>
+        </Text>
+      </View>
+
       <TouchableOpacity
         onPress={handleSignup}
         activeOpacity={0.7}
@@ -184,27 +162,29 @@ const PasswordScreen = ({ route }) => { // Accept route as a prop
       </TouchableOpacity>
 
       <Modal
-        animationType="slide" 
+        animationType="slide"
         transparent={true}
         visible={showTermsModal}
         onRequestClose={() => setShowTermsModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TouchableOpacity 
-              style={styles.closeIconContainer} 
+            <TouchableOpacity
+              style={styles.closeIconContainer}
               onPress={() => setShowTermsModal(false)}
             >
               <Text style={styles.closeIcon}>✕</Text>
             </TouchableOpacity>
-
-            <Text style={styles.modalTitle}>{t('auth.terms_only', { defaultValue: 'الشروط والأحكام' })}</Text>
+            <Text style={styles.modalTitle}>{t('auth.terms_title', { defaultValue: 'الشروط والأحكام' })}</Text>
             <ScrollView style={styles.modalScroll}>
-              <Text style={[styles.modalText,{ textAlign: isRTL ? 'right' : 'left'}]}>
+              <Text style={styles.modalText}>
                 {t('auth.terms_full_text', { defaultValue: 'يرجى قراءة الشروط والأحكام بعناية...' })}
               </Text>
             </ScrollView>
-            <TouchableOpacity style={styles.modalCloseButton} onPress={() => { setAgreedToTerms(true); setShowTermsModal(false); }}>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => { setAgreedToTerms(true); setShowTermsModal(false); }}
+            >
               <Text style={styles.modalCloseButtonText}>{t('auth.agree', { defaultValue: 'الموافقة' })}</Text>
             </TouchableOpacity>
           </View>
@@ -218,13 +198,11 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: StatusBar.currentHeight
+    paddingTop: StatusBar.currentHeight,
   },
   headerTextContainer: {
-    // Styles for the header text block
     paddingHorizontal: wp(5),
-    paddingTop: hp(2)
-
+    paddingTop: hp(2),
   },
   txt1: {
     fontSize: Math.min(wp(5.5), 22),
@@ -232,7 +210,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   formContainer: {
-    // Container for FormField components
     marginTop: hp(4),
     paddingHorizontal: wp(5),
   },
@@ -282,7 +259,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: Math.min(wp(6), 24)
+    fontSize: Math.min(wp(6), 24),
   },
   modalOverlay: {
     flex: 1,
@@ -326,7 +303,6 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 14,
     lineHeight: 22,
-   
   },
   modalCloseButton: {
     backgroundColor: '#014CC4',

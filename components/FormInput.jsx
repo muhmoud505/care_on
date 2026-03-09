@@ -33,7 +33,7 @@ const FormField = ({
   secureTextEntry, // Receive the secureTextEntry prop from parent
   onToggleSecureEntry, // Receive the toggle function from parent
   pickerItems,
-  addOthers=true,
+  addOthers=false,
   addLabel,
   ...props
 }) => {
@@ -96,7 +96,7 @@ const FormField = ({
                 style={[styles.itemStyle, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}
                 onPress={() => {
                   onChangeText(type === 'picker' ? item.value : item);
-                  // The list will no longer close on selection.
+                  setShowList(false); // Close the list after selection
                 }}
               >
                 <Text style={[styles.listItemText, { textAlign: isRTL ? 'right' : 'left' }]}>{type === 'picker' ? item.label : item}</Text>
@@ -117,7 +117,11 @@ const FormField = ({
           {
             addOthers&&(
               <TouchableOpacity
-                style={[styles.itemStyle, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+                style={[styles.itemStyle,{marginHorizontal: wp(2.5)}, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+                onPress={() => {
+                  onChangeText(addLabel); // Handle addOthers functionality
+                  setShowList(false); // Close the list after selection
+                }}
               >
                 <Image source={Images.add} style={styles.icon}/>
                 <Text style={[styles.addLabel, { textAlign: isRTL ? 'right' : 'left' }]}>{addLabel}</Text>
@@ -130,7 +134,7 @@ const FormField = ({
           </View>
         ) : (
           <TextInput
-            style={[styles.input, { textAlign: isRTL ? 'left' : 'right' }]}
+            style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
             value={value}
             numberOfLines={type === 'long' ? 5 : 1}
             editable={type !== 'drop' && type !== 'date'}
@@ -144,7 +148,7 @@ const FormField = ({
           />
         )}
         {type === "password" && (
-          <TouchableOpacity onPress={onToggleSecureEntry}>
+          <TouchableOpacity onPress={onToggleSecureEntry} >
             <Image
               source={secureTextEntry ? Images.eye : Images.eyeHide}
               style={styles.icon}
@@ -205,7 +209,8 @@ const styles = StyleSheet.create({
     marginVertical: hp(2),
     marginTop: hp(0.6),
     gap: hp(1.5),
-    marginHorizontal: wp(2.5)
+    marginHorizontal: wp(2.5),
+
   },
   title: {
     fontSize: Math.min(wp(3.5), 14),
@@ -248,7 +253,9 @@ const styles = StyleSheet.create({
   icon: {
    
    
-    // Center the icon vertically
+    position:'absolute',
+    right: wp(2),
+    top: hp(1.5),
     width: wp(6),
     height: wp(6),
   },
@@ -311,6 +318,7 @@ const styles = StyleSheet.create({
     height: hp(4),
     justifyContent:'space-between',
     alignItems:'center',
+
   }
 });
 

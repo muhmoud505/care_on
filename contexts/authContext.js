@@ -72,13 +72,18 @@ export const AuthProvider = ({ children }) => {
       // Allow callers to explicitly pass a token (e.g. for child updates)
       if (overrideToken) return overrideToken;
 
-      // If impersonating a child, use the child's own token
+      // If impersonating a child, use the child's own token and refresh if needed
       if (user && primaryUser && user.user?.id !== primaryUser.user?.id && user.token?.value) {
-        return user.token.value;
+        const childId = user.user.id;
+        const refreshedChild = await refreshToken(childId);
+        return refreshedChild?.token?.value || refreshedChild?.token || user.token.value;
       }
+      
       if (!primaryUser && user?.token?.value) {
         return user.token.value;
       }
+      
+      // Refresh primary user token if needed
       const session = await refreshToken();
       return session?.token?.value;
     };
@@ -98,13 +103,38 @@ export const AuthProvider = ({ children }) => {
       defaultHeaders['Authorization'] = `Bearer ${token}`;
     }
 
-    return fetch(url, {
-      ...options,
-      headers: {
-        ...defaultHeaders,
-        ...options.headers,
-      },
-    });
+    const makeRequest = async () => {
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...defaultHeaders,
+          ...options.headers,
+        },
+      });
+    };
+
+    let response = await makeRequest();
+
+    // If we get a 401 Unauthorized, try to refresh token and retry once
+    if (response.status === 401 && !overrideToken) {
+      console.log('Received 401, attempting token refresh and retry...');
+      
+      // Determine which user's token to refresh
+      const userIdToRefresh = user?.user?.id !== primaryUser?.user?.id ? user.user.id : null;
+      const refreshed = await refreshToken(userIdToRefresh);
+      
+      if (refreshed) {
+        // Get the new token
+        const newToken = refreshed?.token?.value || refreshed?.token;
+        if (newToken) {
+          defaultHeaders['Authorization'] = `Bearer ${newToken}`;
+          console.log('Retrying request with refreshed token...');
+          response = await makeRequest();
+        }
+      }
+    }
+
+    return response;
   };
 
   useEffect(() => {
@@ -117,6 +147,10 @@ export const AuthProvider = ({ children }) => {
         const userObject = parsedUser.data || parsedUser;
         const normalizedUser = normalizePrimaryUser(userObject);
         setPrimaryUser(normalizedUser);
+
+        // Auto-refresh primary user token on startup
+        console.log('Auto-refreshing primary user token on startup...');
+        await refreshToken();
 
         const storedChildren = await AsyncStorage.getItem('child_accounts');
         let parsedChildren = [];
@@ -140,52 +174,52 @@ export const AuthProvider = ({ children }) => {
             const childUser = { user: matchedChild, token: { value: childToken || normalizedUser?.token?.value } };
             setUser(childUser);
 
+            // Auto-refresh active child token on startup
             if (childToken) {
+              console.log('Auto-refreshing active child token on startup...');
               try {
                 const response = await fetch(`${API_URL}/api/v1/auth/me`, {
-                  method: 'GET',
-                  headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    lang: i18next.language,
-                    Authorization: `Bearer ${childToken}`,
-                  },
+                  headers: { 'Authorization': `Bearer ${childToken}`, 'lang': i18next.language },
                 });
 
                 const data = await response.json();
                 if (response.ok) {
                   const meData = data.data || data;
+                  console.log('Child /me resource:', meData.resource);
+
                   const serverAvatar = meData.avatar ? makeAbsolute(meData.avatar) : null;
-                  const finalAvatar = isLocalUri(matchedChild.avatar)
-                    ? matchedChild.avatar
-                    : (serverAvatar || matchedChild.avatar);
-                  const refreshedUser = { ...matchedChild, ...meData, avatar: finalAvatar };
+                  const childWithAvatar = childAccounts.find(c => c.id === matchedChild.id);
+                  const finalUser = {
+                    ...matchedChild,
+                    ...meData,
+                    avatar: serverAvatar || childWithAvatar?.avatar || matchedChild.avatar,
+                    token: childToken,
+                  };
 
-                  setUser({ user: refreshedUser, token: { value: childToken } });
+                  setUser({ user: finalUser, token: { value: childToken } });
 
-                  const updatedChildren = (normalizedChildren || []).map(child =>
-                    child.id === refreshedUser.id ? { ...child, ...refreshedUser } : child
-                  );
-                  setChildAccounts(updatedChildren);
-                  await AsyncStorage.setItem('child_accounts', JSON.stringify(updatedChildren));
+                  try {
+                    const storedChildren = await AsyncStorage.getItem('child_accounts');
+                    const parsed = storedChildren ? JSON.parse(storedChildren) : [];
+                    const updated = (parsed || []).map(child =>
+                      child.id === finalUser.id ? { ...child, ...finalUser } : child
+                    );
+                    await AsyncStorage.setItem('child_accounts', JSON.stringify(updated));
+                    setChildAccounts(updated);
+                  } catch (e) {
+                    console.warn('Failed to persist child profile after /me:', e.message);
+                  }
+
+                  return;
                 }
-              } catch (e) {
-                console.warn('Failed to refresh child profile on load:', e.message);
+              } catch (error) {
+                console.warn('Failed to refresh /me after startup:', error.message);
               }
             }
-          } else {
-            setUser(normalizedUser);
-            await AsyncStorage.removeItem(ACTIVE_USER_KEY);
           }
-        } else {
-          setUser(normalizedUser);
         }
 
-        const tokenValue = normalizedUser?.token?.value;
-        const userId = normalizedUser?.user?.id;
-        if (tokenValue && userId) {
-          fetchChildren(tokenValue, userId);
-        }
+        setUser({ user: normalizedUser.user, token: { value: normalizedUser.token?.value } });
       } catch (error) {
         console.error("Failed to load user", error);
       }
@@ -197,30 +231,83 @@ export const AuthProvider = ({ children }) => {
     });
   }, []);
 
-  const refreshToken = async () => {
-    if (!primaryUser?.token?.value) return primaryUser;
+  const refreshToken = async (specificUserId = null) => {
+    // Determine which user to refresh (primary or specific child)
+    const targetUserId = specificUserId || primaryUser?.user?.id;
+    const isRefreshingChild = specificUserId && primaryUser?.user?.id !== specificUserId;
+    
+    if (!targetUserId) return primaryUser;
+    
     try {
-      const decodedToken = jwtDecode(primaryUser.token.value);
+      let currentUser, tokenValue;
+      
+      if (isRefreshingChild) {
+        // Find the child in childAccounts
+        currentUser = childAccounts.find(child => child.id === specificUserId);
+        tokenValue = currentUser?.token?.value || currentUser?.token;
+        if (!tokenValue) {
+          console.warn(`No token found for child ${specificUserId}`);
+          return null;
+        }
+      } else {
+        // Refresh primary user
+        currentUser = primaryUser;
+        tokenValue = primaryUser?.token?.value;
+        if (!tokenValue) return primaryUser;
+      }
+      
+      // Check if token needs refresh (expires in less than 5 minutes)
+      const decodedToken = jwtDecode(tokenValue);
       const now = Date.now() / 1000;
-      if (decodedToken.exp > now + 300) return primaryUser;
+      if (decodedToken.exp > now + 300) return currentUser;
 
+      console.log(`Refreshing token for ${isRefreshingChild ? 'child' : 'primary'} user ${targetUserId}`);
+      
       const response = await fetch(`${API_URL}/api/v1/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${primaryUser.token.value}`,
+          'Authorization': `Bearer ${tokenValue}`,
         },
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error("Refresh failed");
+      if (!response.ok) {
+        console.error(`Token refresh failed for ${isRefreshingChild ? 'child' : 'primary'} user:`, data.message);
+        throw new Error("Refresh failed");
+      }
 
-      const newUserState = normalizePrimaryUser(data.data || data);
-      await AsyncStorage.setItem('primary_user', JSON.stringify(newUserState));
-      setPrimaryUser(newUserState);
-      return newUserState;
+      const refreshedUser = data.data || data;
+      
+      if (isRefreshingChild) {
+        // Update child in storage and state
+        const updatedChildren = childAccounts.map(child =>
+          child.id === specificUserId ? { ...child, ...refreshedUser } : child
+        );
+        await AsyncStorage.setItem('child_accounts', JSON.stringify(updatedChildren));
+        setChildAccounts(updatedChildren);
+        
+        // Update current user if this is the active child
+        if (user?.user?.id === specificUserId) {
+          setUser(prev => ({ ...prev, user: { ...prev.user, ...refreshedUser }, token: { value: refreshedUser.token || refreshedUser.token?.value } }));
+        }
+        
+        return refreshedUser;
+      } else {
+        // Update primary user
+        const newUserState = normalizePrimaryUser(refreshedUser);
+        await AsyncStorage.setItem('primary_user', JSON.stringify(newUserState));
+        setPrimaryUser(newUserState);
+        return newUserState;
+      }
     } catch (error) {
-      await logout();
+      console.error(`Token refresh error for ${isRefreshingChild ? 'child' : 'primary'} user ${targetUserId}:`, error.message);
+      
+      // For primary user refresh failure, logout
+      if (!isRefreshingChild) {
+        await logout();
+      }
+      
       return null;
     }
   };
@@ -346,6 +433,7 @@ export const AuthProvider = ({ children }) => {
     setChildAccounts([]);
   };
 
+ 
   const signup = async (userData) => {
     setIsAuthLoading(true);
     try {
@@ -369,11 +457,12 @@ export const AuthProvider = ({ children }) => {
 
       if (!response.ok) throw new Error(data?.message || "Signup failed");
 
-      if (!parent_id) {
-        await setSession(data);
-      } else {
+      if (parent_id) {
         await fetchChildren(primaryUser.token.value, primaryUser.user.id);
       }
+      // For new user signup, do NOT call setSession here.
+      // setSession will be called by WelcomeScreen when the user presses Continue,
+      // so the root navigator doesn't switch to home before we can show the welcome screen.
       return data;
     } catch (error) {
       console.error("Signup error:", error);
