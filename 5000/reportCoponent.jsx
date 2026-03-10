@@ -5,43 +5,9 @@ import { Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, V
 import Toast from 'react-native-toast-message';
 import CollapsibleCard from './CollapsibleCard';
 
-/**
- * Normalizes the description field for display.
- *
- * New records: plain text like "التاريخ: 9/3/2026\nالتشخيص: شك"
- * Legacy records: JSON string like "{\"doctorName\":\"Doc1\", ...}"
- *
- * Always returns a plain string safe to render directly.
- */
-const normalizeDescription = (description) => {
-  if (!description || typeof description !== 'string') return '';
-
-  // Try to detect and unwrap legacy JSON descriptions
-  const trimmed = description.trim();
-  if (trimmed.startsWith('{')) {
-    try {
-      const parsed = JSON.parse(trimmed);
-      // Rebuild as plain text from the JSON fields
-      const parts = [];
-      if (parsed.date)          parts.push(`التاريخ: ${parsed.date}`);
-      if (parsed.RequiredTests) parts.push(`التحاليل المطلوبة: ${parsed.RequiredTests}`);
-      if (parsed.requiredTests) parts.push(`التحاليل المطلوبة: ${parsed.requiredTests}`);
-      if (parsed.RequiredScans) parts.push(`الاشعة المطلوبة: ${parsed.RequiredScans}`);
-      if (parsed.requiredScans) parts.push(`الاشعة المطلوبة: ${parsed.requiredScans}`);
-      if (parsed.diagnosis && parsed.diagnosis !== 'None') parts.push(`التشخيص: ${parsed.diagnosis}`);
-      if (parsed.notes     && parsed.notes     !== 'None') parts.push(`الوصف الطبي: ${parsed.notes}`);
-      return parts.join('\n');
-    } catch (e) {
-      // Not valid JSON — fall through to plain text
-    }
-  }
-
-  return description;
-};
-
-const Report = ({
-  title,
-  date,
+const Report = ({ 
+  title,  
+  date, 
   description,
   doctorName,
   requiredScans,
@@ -49,38 +15,27 @@ const Report = ({
   expanded,
   onExpandedChange,
   icon,
-  fileUrl,
-  documents,
+  fileUrl
 }) => {
+  console.log(doctorName)
+
   const { t } = useTranslation();
 
-  const displayDescription   = normalizeDescription(description);
-  const displayDoctorName    = doctorName    || '';
-  const displayDate          = date          || '';
-  const displayRequiredTests = requiredTests || '';
-  const displayRequiredScans = requiredScans || '';
-
-  // Support both direct fileUrl prop and documents array
-  const resolvedFileUrl =
-    fileUrl ||
-    (Array.isArray(documents) && documents.length > 0 ? documents[0]?.url : null);
-
   const handleDownload = async () => {
-    if (!resolvedFileUrl) return;
+    if (!fileUrl) return;
 
     try {
-      const fileName = resolvedFileUrl.split('/').pop().split('?')[0] || 'download';
+      const fileName = fileUrl.split('/').pop().split('?')[0] || 'download';
       const fileUri = FileSystem.documentDirectory + fileName;
-
-      const { uri } = await FileSystem.downloadAsync(resolvedFileUrl, fileUri);
-
+      
+      const { uri } = await FileSystem.downloadAsync(fileUrl, fileUri);
+      
       if (Platform.OS === 'android') {
         try {
           const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
           if (permissions.granted) {
             const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
-            await FileSystem.StorageAccessFramework
-              .createFileAsync(permissions.directoryUri, fileName, 'application/octet-stream')
+            await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, fileName, 'application/octet-stream')
               .then(async (createdUri) => {
                 await FileSystem.writeAsStringAsync(createdUri, base64, { encoding: FileSystem.EncodingType.Base64 });
                 Toast.show({
@@ -112,7 +67,7 @@ const Report = ({
         await Sharing.shareAsync(uri);
       }
     } catch (err) {
-      console.error('Download error:', err);
+      console.error("Download error:", err);
       Toast.show({
         type: 'error',
         text1: t('common.error'),
@@ -132,58 +87,52 @@ const Report = ({
     >
       <>
         {/* اسم الدكتور */}
-        {!!displayDoctorName && (
-          <View style={styles.miccontianer}>
-            <Image source={require('../assets2/images/r2.png')} />
-            <Text style={styles.txt2}>{t('report.doctor_name')}:</Text>
-            <Text style={styles.txt3}>{displayDoctorName}</Text>
-          </View>
-        )}
+        <View style={styles.miccontianer}>
+          <Image source={require('../assets2/images/r2.png')} />
+          <Text style={styles.txt2}>{t('report.doctor_name')}:</Text>
+          <Text style={styles.txt3}>{doctorName}</Text>
+        </View>
 
         {/* التاريخ */}
-        {!!displayDate && (
-          <View style={styles.miccontianer}>
-            <Image source={require('../assets2/images/r4.png')} />
-            <Text style={styles.txt2}>{t('report.report_date')}:</Text>
-            <Text style={styles.txt3}>{displayDate}</Text>
-          </View>
-        )}
+        <View style={styles.miccontianer}>
+          <Image source={require('../assets2/images/r4.png')} />
+          <Text style={styles.txt2}>{t('report.report_date')}:</Text>
+          <Text style={styles.txt3}>{date}</Text>
+        </View>
 
-        {/* الوصف — plain text, may contain multiple lines */}
-        {!!displayDescription && (
-          <View style={styles.miccontianer}>
-            <Image source={require('../assets2/images/r5.png')} />
-            <Text style={styles.txt2}>{t('result.description')}:</Text>
-            <Text style={[styles.txt3, { flexShrink: 1 }]}>{displayDescription}</Text>
-          </View>
-        )}
+        {/* الوصف */}
+        <View style={styles.miccontianer}>
+          <Image source={require('../assets2/images/r5.png')} />
+          <Text style={styles.txt2}>{t('result.description')}:</Text>
+          <Text style={styles.txt3}>{description}</Text>
+        </View>
 
-        {/* الاشعة المطلوبة — only shown if passed explicitly as a prop */}
-        {!!displayRequiredScans && (
+        {/* الاشعة المطلوبة */}
+        {!!requiredScans && (
           <View style={styles.miccontianer}>
             <Image source={require('../assets2/images/r5.png')} />
             <Text style={styles.txt2}>{t('report.required_scans', { defaultValue: 'الاشعة المطلوبة' })}:</Text>
-            <Text style={styles.txt3}>{displayRequiredScans}</Text>
+            <Text style={styles.txt3}>{requiredScans}</Text>
           </View>
         )}
 
-        {/* التحليل المطلوب — only shown if passed explicitly as a prop */}
-        {!!displayRequiredTests && (
+        {/* التحليل المطلوب */}
+        {!!requiredTests && (
           <View style={styles.miccontianer}>
             <Image source={require('../assets2/images/r2.png')} />
             <Text style={styles.txt2}>{t('report.required_tests', { defaultValue: 'التحليل المطلوب' })}:</Text>
-            <Text style={styles.txt3}>{displayRequiredTests}</Text>
+            <Text style={styles.txt3}>{requiredTests}</Text>
           </View>
         )}
 
         {/* تنزيل */}
-        {!!resolvedFileUrl && (
+        {fileUrl && (
           <TouchableOpacity onPress={handleDownload} activeOpacity={0.8}>
-            <ImageBackground
+            <ImageBackground 
               source={require('../assets2/images/backg.png')}
               style={styles.background}
-              imageStyle={{ width: 319, height: 61 }}
-              resizeMode="cover"
+              imageStyle={{width:319, height:61}}
+              resizeMode='cover'
             >
               <View style={styles.overlay}>
                 <Image source={require('../assets2/images/download.png')} />

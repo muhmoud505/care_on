@@ -23,6 +23,7 @@ const Reports = () => {
     useCallback(() => {
       if (user?.token?.value) {
         fetchReports();
+        console.log("the reports are:", reports);
       }
     }, [user?.token?.value, fetchReports])
   );
@@ -55,7 +56,6 @@ const Reports = () => {
   const renderItem = ({ item }) => {
     // Extract file URL from the documents array (taking the first one) or fallback to other keys
     const fileUrl = item.documents?.[0]?.url || item.documents?.[0]?.file || item.fileUrl || item.file || item.url;
-    console.log(`[Reports] Item ${item.id} documents:`, JSON.stringify(item.documents));
     return (
     <Report
       {...item}
