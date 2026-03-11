@@ -2,13 +2,13 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
-  Image,
   Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from "react-native";
+import { Icons } from "./Icons";
 import Calendar from "./Test";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -59,11 +59,7 @@ const DatePick = ({
           {value || placeholder}
         </Text>
 
-        <Image
-          source={require('../assets2/images/c2.png')}
-          style={styles.icon}
-          resizeMode="contain"
-        />
+        <Icons.Calendarb width={wp(5)} height={wp(5)} style={styles.icon} />
       </TouchableOpacity>
 
       <Modal
@@ -134,6 +130,7 @@ const styles = StyleSheet.create({
     width: wp(6),
     height: wp(6),
     marginHorizontal: wp(2.5),
+    
   },
   modalContainer: {
     flex: 1,

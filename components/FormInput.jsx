@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import Images from '../constants2/images';
 import DatePick from "./datePicker";
+import { Icons } from "./Icons";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -106,7 +107,7 @@ const FormField = ({
               <Text style={[styles.input, styles.pickerInput, { textAlign: isRTL ? 'left' : 'right' }]}>
                 {selectedLabel}
               </Text>
-              <Image source={Images.arrowDown} style={styles.icon} resizeMode="contain" />
+              <Icons.Arrd width={wp(6)} height={wp(6)}  stroke="#ff0000"  />
             </TouchableOpacity>
 
             {showList && (
@@ -171,12 +172,8 @@ const FormField = ({
         )}
 
         {type === "password" && (
-          <TouchableOpacity onPress={onToggleSecureEntry}>
-            <Image
-              source={secureTextEntry ? Images.eye : Images.eyeHide}
-              style={styles.icon}
-              resizeMode="contain"
-            />
+          <TouchableOpacity onPress={onToggleSecureEntry} style={styles.icon}>
+            <Icons.Eye width={wp(5)} height={wp(5)}/>
           </TouchableOpacity>
         )}
 

@@ -7,10 +7,13 @@ const CollapsibleCard = ({
   title,
   isExpanded: controlledExpanded,
   onToggle,
+  TYPE,
   icon,
   children,
 }) => {
   const { isExpanded, toggle } = useCollapsible(controlledExpanded, onToggle);
+ 
+  
 
   return (
     <Shadow
@@ -27,6 +30,9 @@ const CollapsibleCard = ({
           <View style={styles.mincontainer}>
             {icon && <Image source={icon} />}
             <Text style={styles.txt1}>{title}</Text>
+            <View style={styles.TYPE}>
+              <Text style={{color:"#FFF"}}>{TYPE}</Text>
+            </View>
             <Image
               source={isExpanded ? Images.reportStep1 : Images.reportStep2_2}
             />
@@ -58,6 +64,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#014CC4',
   },
+  TYPE:{
+    backgroundColor:'#014CC4',
+    padding:5,
+    borderRadius:5,
+    width:50,
+    height:30,
+    justifyContent:"center",
+    alignItems:"center",
+    color:"#fff",
+    fontSize:12,
+    fontWeight:"bold"
+  }
 });
 
 export default CollapsibleCard;

@@ -1,8 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Icons } from '../../../components/Icons';
 import { hp, wp } from '../../../utils/responsive';
 
 
@@ -12,7 +13,7 @@ const S1 = () => {
 
   return (
     <SafeAreaView style={styles.safeContainer} >
-      <Image style={styles.img} source={require('../../../assets2/images/img1.png')}/>
+      <Icons.A1 width={wp(80)} height={wp(80)} />
      <View style={styles.v1} >
       <Text style={styles.txt1} >
         {t('marketing.health_in_pocket_part1')} <Text style={styles.txt2}>{t('marketing.health_in_pocket_part2')}</Text>

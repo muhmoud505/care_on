@@ -26,6 +26,7 @@ const BASE_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.
 /**
  * The API always returns Arabic type strings in item.type.
  * English keys are kept as a safety net in case the API ever changes.
+ * Maps API type → internal component type used for rendering decisions.
  */
 const API_TYPE_MAP = {
   // Arabic — what the real API returns
@@ -42,35 +43,101 @@ const API_TYPE_MAP = {
   'consultation': 'report',
 };
 
+/**
+ * Maps API type → Arabic display label shown in the UI.
+ * Used to populate the `subType` field so components can display
+ * "كشف" or "روشتة" instead of the internal "report" string.
+ */
+const API_TYPE_LABEL_MAP = {
+  // Arabic API values
+  'تشخيص':       'كشف',
+  'استشارة':      'كشف',
+  'وصفة طبية':   'روشتة',
+  // English API values
+  'diagnosis':    'كشف',
+  'consultation': 'كشف',
+  'prescription': 'روشتة',
+  'lab_test':     'اختبار معملي',
+  'radiology':    'أشعة',
+};
+
+/**
+ * Values that mean "nothing entered" — used to clean up description JSON fields.
+ * Covers common English and Arabic placeholder strings users type when a field
+ * is not applicable.
+ */
+const EMPTY_VALUES = new Set([
+  'none', 'null', 'undefined', '', '-', 'n/a',
+  // Arabic equivalents
+  'لا يوجد', 'لا يوحد', 'لايوجد', 'لايوحد', 'غير محدد', 'غير متاح', 'لا شيء',
+]);
+
+const isEmpty = (val) =>
+  val == null || EMPTY_VALUES.has(String(val).trim().toLowerCase());
+
+/**
+ * Parses the description string into a clean structured object for report cards.
+ * Handles both JSON (new records) and plain text (legacy records).
+ * Filters out Arabic/English "empty" placeholder values so blank rows are hidden.
+ */
+const parseDescriptionToProps = (description) => {
+  if (!description || typeof description !== 'string') return { description: '' };
+
+  const trimmed = description.trim();
+
+  if (trimmed.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      return {
+        description:   trimmed,
+        parsedDate:    !isEmpty(parsed.date)                                  ? parsed.date                                    : '',
+        requiredTests: !isEmpty(parsed.RequiredTests ?? parsed.requiredTests) ? (parsed.RequiredTests ?? parsed.requiredTests) : '',
+        requiredScans: !isEmpty(parsed.RequiredScans ?? parsed.requiredScans) ? (parsed.RequiredScans ?? parsed.requiredScans) : '',
+        diagnosis:     !isEmpty(parsed.diagnosis)                             ? parsed.diagnosis                               : '',
+        notes:         !isEmpty(parsed.notes)                                 ? parsed.notes                                   : '',
+      };
+    } catch (_e) {
+      // Not valid JSON — fall through and treat whole string as plain-text notes
+    }
+  }
+
+  // Legacy plain-text description
+  return { description: trimmed };
+};
 
 
 const mapApiDataToComponentProps = (item, componentType) => {
   let type;
+  // Raw API type string (Arabic or English)
+  const rawApiType = item.type || item.record_type || item.recordType;
 
   if (componentType === 'all') {
-    const apiType = item.type || item.record_type || item.recordType;
-    type = API_TYPE_MAP[apiType] || 'unknown';
+    type = API_TYPE_MAP[rawApiType] || 'unknown';
   } else {
     type = componentType;
   }
 
+  // Arabic display label — e.g. "كشف", "روشتة", "اختبار معملي"
+  const subType = API_TYPE_LABEL_MAP[rawApiType] || rawApiType || '';
+
   const commonProps = {
     id:        item.id,
     type,
-    icon:      item.imageUrl ? { uri: item.imageUrl } : Images.r5,
+    subType,
+    icon:      item.imageUrl ? { uri: item.imageUrl } : (Images.r5 ?? null),
     date:      item.dates?.created_at?.full,
     documents: item.documents,
   };
 
-  // description is always a plain text string from the API
-  const description = typeof item.description === 'string' ? item.description : '';
+  // Raw description string from the API
+  const rawDescription = typeof item.description === 'string' ? item.description : '';
 
   switch (type) {
     case 'result': // اختبار معملي
       return {
         ...commonProps,
         title:       item.title,
-        description,
+        description: rawDescription,
         labName:     item.provider?.name || '',
       };
 
@@ -78,30 +145,38 @@ const mapApiDataToComponentProps = (item, componentType) => {
       return {
         ...commonProps,
         title:       item.title,
-        description,
+        description: rawDescription,
         labName:     item.provider?.name || '',
       };
 
-    case 'report': // تشخيص / استشارة
+    case 'report': { // تشخيص / استشارة
+      // Pre-parse the JSON description so Report.js receives clean individual props
+      const descProps = parseDescriptionToProps(rawDescription);
       return {
         ...commonProps,
-        title:       item.title,
-        description,
-        doctorName:  item.provider?.name || item.title || '',
+        title:         item.title,
+        doctorName:    item.provider?.name || item.title || '',
+        date:          item.dates?.created_at?.full || descProps.parsedDate || '',
+        description:   descProps.description   || '',
+        requiredTests: descProps.requiredTests  || '',
+        requiredScans: descProps.requiredScans  || '',
+        diagnosis:     descProps.diagnosis      || '',
+        notes:         descProps.notes          || '',
       };
+    }
 
     case 'medicine': // وصفة طبية
       return {
         ...commonProps,
-        icon:        item.imageUrl ? { uri: item.imageUrl } : Images.medicine,
+        icon:        item.imageUrl ? { uri: item.imageUrl } : (Images.medicine ?? null),
         title:       item.title,
-        description,
+        description: rawDescription,
         from:        item.dates?.start_date?.full || '',
         to:          item.dates?.end_date?.full   || '',
       };
 
     default:
-      return { ...commonProps, title: item.title, description };
+      return { ...commonProps, title: item.title, description: rawDescription };
   }
 };
 
@@ -154,8 +229,6 @@ export const MedicalRecordsProvider = ({ children }) => {
       try {
         const nationalNumber = user?.user?.resource?.national_number;
 
-        // Use allSettled so that one failing type (e.g. consultation 401)
-        // does NOT discard the successfully fetched other type (e.g. diagnosis).
         const settledResults = await Promise.allSettled(
           types.map(async ({ apiType, componentType }) => {
             const typeQuery = apiType ? `&type=${apiType}` : '';
@@ -166,7 +239,6 @@ export const MedicalRecordsProvider = ({ children }) => {
 
             const json = await response.json();
 
-            // Update pagination from the last successful fetch
             setPagination(prev => ({
               ...prev,
               [stateKey]: {
@@ -183,7 +255,6 @@ export const MedicalRecordsProvider = ({ children }) => {
           })
         );
 
-        // Collect fulfilled results; log but don't crash on rejections
         let combinedData = [];
         let allFailed = true;
 
@@ -196,7 +267,6 @@ export const MedicalRecordsProvider = ({ children }) => {
           }
         });
 
-        // Only set error if every sub-request failed
         if (allFailed && types.length > 0) {
           throw new Error(`All fetch attempts failed for ${stateKey}`);
         }
@@ -248,7 +318,6 @@ export const MedicalRecordsProvider = ({ children }) => {
   const fetchReports = createFetcher({
     stateKey:    'reports',
     stateSetter: setReports,
-    // Both diagnosis and consultation — allSettled ensures one failure doesn't lose the other
     types: [
       { apiType: 'diagnosis',    componentType: 'report' },
       { apiType: 'consultation', componentType: 'report' },
@@ -286,7 +355,6 @@ export const MedicalRecordsProvider = ({ children }) => {
           formData.append(`documents[${index}]`, doc);
         });
       } else if (newRecordData[key] != null && newRecordData[key] !== '') {
-        // Skip null / undefined / empty string — FormData converts them to literal strings
         formData.append(key, newRecordData[key]);
       }
     });

@@ -1,12 +1,12 @@
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
 import FormField from '../../components/FormInput';
-import Images from '../../constants2/images';
+import { Icons } from '../../components/Icons';
 import { useAuth } from '../../contexts/authContext';
 import useForm from '../../hooks/useForm';
 import { hp, wp } from '../../utils/responsive';
@@ -46,7 +46,7 @@ const SignIn = () => {
     <SafeAreaView>
       <CustomHeader text={t('auth.signin')} />
       <View style={styles.container} >
-        <Image style={styles.img} source={Images.login}/>
+        <Icons.Login width={wp(80)} height={wp(80)} />
         <View style={styles.smcontainer}> 
  
         <FormField  

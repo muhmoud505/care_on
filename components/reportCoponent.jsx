@@ -6,37 +6,40 @@ import Toast from 'react-native-toast-message';
 import CollapsibleCard from './CollapsibleCard';
 
 /**
- * Normalizes the description field for display.
+ * Parses the description field into a structured object.
  *
- * New records: plain text like "التاريخ: 9/3/2026\nالتشخيص: شك"
- * Legacy records: JSON string like "{\"doctorName\":\"Doc1\", ...}"
+ * New records: JSON string like:
+ *   '{"date":"9/3/2026","RequiredTests":"تحليل دم","RequiredScans":"اشعة x ray","diagnosis":"شك","notes":"ملاحظة"}'
  *
- * Always returns a plain string safe to render directly.
+ * Legacy records: plain text string — treated as a plain notes value.
+ *
+ * Always returns:
+ *   { date, requiredTests, requiredScans, diagnosis, notes }
  */
-const normalizeDescription = (description) => {
-  if (!description || typeof description !== 'string') return '';
+const parseDescription = (description) => {
+  const empty = { date: '', requiredTests: '', requiredScans: '', diagnosis: '', notes: '' };
 
-  // Try to detect and unwrap legacy JSON descriptions
+  if (!description || typeof description !== 'string') return empty;
+
   const trimmed = description.trim();
+
   if (trimmed.startsWith('{')) {
     try {
       const parsed = JSON.parse(trimmed);
-      // Rebuild as plain text from the JSON fields
-      const parts = [];
-      if (parsed.date)          parts.push(`التاريخ: ${parsed.date}`);
-      if (parsed.RequiredTests) parts.push(`التحاليل المطلوبة: ${parsed.RequiredTests}`);
-      if (parsed.requiredTests) parts.push(`التحاليل المطلوبة: ${parsed.requiredTests}`);
-      if (parsed.RequiredScans) parts.push(`الاشعة المطلوبة: ${parsed.RequiredScans}`);
-      if (parsed.requiredScans) parts.push(`الاشعة المطلوبة: ${parsed.requiredScans}`);
-      if (parsed.diagnosis && parsed.diagnosis !== 'None') parts.push(`التشخيص: ${parsed.diagnosis}`);
-      if (parsed.notes     && parsed.notes     !== 'None') parts.push(`الوصف الطبي: ${parsed.notes}`);
-      return parts.join('\n');
-    } catch (e) {
-      // Not valid JSON — fall through to plain text
+      return {
+        date:          parsed.date          || '',
+        requiredTests: parsed.RequiredTests || parsed.requiredTests || '',
+        requiredScans: parsed.RequiredScans || parsed.requiredScans || '',
+        diagnosis:     (parsed.diagnosis && parsed.diagnosis !== 'None') ? parsed.diagnosis : '',
+        notes:         (parsed.notes     && parsed.notes     !== 'None') ? parsed.notes     : '',
+      };
+    } catch (_e) {
+      // Not valid JSON — fall through and treat as plain text notes
     }
   }
 
-  return description;
+  // Legacy plain-text description: show it as-is in the notes row
+  return { ...empty, notes: trimmed };
 };
 
 const Report = ({
@@ -51,14 +54,21 @@ const Report = ({
   icon,
   fileUrl,
   documents,
+  TYPE
 }) => {
   const { t } = useTranslation();
 
-  const displayDescription   = normalizeDescription(description);
+  // Parse structured fields out of the description string
+  const parsed = parseDescription(description);
+
+
+  // Prop-level values take priority; fall back to what's inside the description JSON
   const displayDoctorName    = doctorName    || '';
-  const displayDate          = date          || '';
-  const displayRequiredTests = requiredTests || '';
-  const displayRequiredScans = requiredScans || '';
+  const displayDate          = date          || parsed.date          || '';
+  const displayRequiredTests = requiredTests || parsed.requiredTests || '';
+  const displayRequiredScans = requiredScans || parsed.requiredScans || '';
+  const displayDiagnosis     = parsed.diagnosis || '';
+  const displayNotes         = parsed.notes     || '';
 
   // Support both direct fileUrl prop and documents array
   const resolvedFileUrl =
@@ -129,6 +139,7 @@ const Report = ({
       icon={icon}
       isExpanded={expanded}
       onToggle={onExpandedChange}
+      TYPE={TYPE}
     >
       <>
         {/* اسم الدكتور */}
@@ -149,16 +160,16 @@ const Report = ({
           </View>
         )}
 
-        {/* الوصف — plain text, may contain multiple lines */}
-        {!!displayDescription && (
+        {/* التحاليل المطلوبة */}
+        {!!displayRequiredTests && (
           <View style={styles.miccontianer}>
-            <Image source={require('../assets2/images/r5.png')} />
-            <Text style={styles.txt2}>{t('result.description')}:</Text>
-            <Text style={[styles.txt3, { flexShrink: 1 }]}>{displayDescription}</Text>
+            <Image source={require('../assets2/images/r2.png')} />
+            <Text style={styles.txt2}>{t('report.required_tests', { defaultValue: 'التحليل المطلوب' })}:</Text>
+            <Text style={styles.txt3}>{displayRequiredTests}</Text>
           </View>
         )}
 
-        {/* الاشعة المطلوبة — only shown if passed explicitly as a prop */}
+        {/* الاشعة المطلوبة */}
         {!!displayRequiredScans && (
           <View style={styles.miccontianer}>
             <Image source={require('../assets2/images/r5.png')} />
@@ -167,12 +178,21 @@ const Report = ({
           </View>
         )}
 
-        {/* التحليل المطلوب — only shown if passed explicitly as a prop */}
-        {!!displayRequiredTests && (
+        {/* التشخيص */}
+        {!!displayDiagnosis && (
           <View style={styles.miccontianer}>
-            <Image source={require('../assets2/images/r2.png')} />
-            <Text style={styles.txt2}>{t('report.required_tests', { defaultValue: 'التحليل المطلوب' })}:</Text>
-            <Text style={styles.txt3}>{displayRequiredTests}</Text>
+            <Image source={require('../assets2/images/r5.png')} />
+            <Text style={styles.txt2}>{t('report.diagnosis', { defaultValue: 'التشخيص' })}:</Text>
+            <Text style={[styles.txt3, { flexShrink: 1 }]}>{displayDiagnosis}</Text>
+          </View>
+        )}
+
+        {/* الوصف الطبي */}
+        {!!displayNotes && (
+          <View style={styles.miccontianer}>
+            <Image source={require('../assets2/images/r5.png')} />
+            <Text style={styles.txt2}>{t('report.notes', { defaultValue: 'الوصف الطبي' })}:</Text>
+            <Text style={[styles.txt3, { flexShrink: 1 }]}>{displayNotes}</Text>
           </View>
         )}
 

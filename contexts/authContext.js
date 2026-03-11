@@ -78,7 +78,8 @@ export const AuthProvider = ({ children }) => {
       const decoded = jwtDecode(tokenValue);
       const now = Date.now() / 1000;
       return decoded.exp <= now + 300;
-    } catch {
+    } catch (_e) {
+      // FIX 1: changed bare `catch` to `catch (_e)` — fixes SyntaxError in older Babel/Hermes
       // If we can't decode it, treat as expired so we attempt a refresh
       return true;
     }
@@ -203,10 +204,14 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    // If we still get 401 after all retries, clear session to avoid infinite retry loops.
+    // FIX 3: Only clear session if we truly have no valid token left.
+    // Previously any 401 after one retry would wipe the session aggressively.
     if (response.status === 401) {
-      console.warn('Unauthorized response after retry; clearing session.');
-      await clearSession();
+      const lastResort = await getBestPrimaryToken();
+      if (!lastResort) {
+        console.warn('Unauthorized response after retry; clearing session.');
+        await clearSession();
+      }
     }
 
     return response;
@@ -347,23 +352,24 @@ export const AuthProvider = ({ children }) => {
           },
         });
 
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          // Non-JSON = server/proxy hiccup, NOT an auth failure.
-          // Return null so callers know the refresh didn't produce a new token,
-          // and they can fall back to getBestPrimaryToken() from AsyncStorage.
+        // FIX 2: Don't trust the Content-Type header — some servers (e.g. Laravel behind
+        // a proxy) return `text/html` or no content-type even when the body is valid JSON.
+        // Instead, read as text and attempt JSON.parse ourselves.
+        let data;
+        try {
+          const text = await response.text();
+          data = JSON.parse(text);
+        } catch (_e) {
           console.warn(`Token refresh returned non-JSON (status ${response.status}). Will try stored token.`);
           return null;
         }
-
-        const data = await response.json();
 
         if (!response.ok) {
           if (response.status === 401) {
             console.error('Refresh token is invalid or expired. Logging out.');
             if (!isRefreshingChild) await logout();
           } else {
-            console.error(`Token refresh failed (${response.status}):`, data.message || 'Unknown error');
+            console.error(`Token refresh failed (${response.status}):`, data?.message || 'Unknown error');
           }
           return null;
         }
@@ -381,7 +387,7 @@ export const AuthProvider = ({ children }) => {
             setUser(prev => ({
               ...prev,
               user: { ...prev.user, ...refreshedUser },
-              token: { value: refreshedUser.token || refreshedUser.token?.value },
+              token: { value: refreshedUser.token?.value || refreshedUser.token },
             }));
           }
 

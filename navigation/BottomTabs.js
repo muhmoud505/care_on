@@ -1,7 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { Icons } from '../components/Icons';
-import Images from '../constants2/images';
 import CreateCodeScreen from '../screens/createCode/CreateCodeScreen';
 import HomeStack from './HomeStack';
 import ProfileStack from './ProfileStack';
@@ -13,31 +12,16 @@ const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
 const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 const Tab=createBottomTabNavigator()
-const TabIcon = ({ icon, color, name, focused }) => {
-  let activeIcon, inactiveIcon;
-  
-  if (name === 'Home') {
-    activeIcon = Images.homeActive;
-    inactiveIcon = Images.homeInactive;
-  } else if (name === 'profile') {
-    activeIcon = Images.profileActive;
-    inactiveIcon = Images.profileInactive;
-  } else if (name === 'password-check') {
-    activeIcon = Images.createCodeA; // Using verify icon as placeholder for create code icon
-    inactiveIcon = Images.createCodeB; // Using same icon for now
-  } else {
-    activeIcon = Images.homeActive;
-    inactiveIcon = Images.homeInactive;
-  }
-  
+const TabIcon = ({ color, name }) => {
+  const IconComponent =
+    name === 'home' ? Icons.Home :
+    name === 'code' ? Icons.Code :
+    name === 'profile' ? Icons.Profile :
+    Icons.Home;
+
   return (
-    <View >
-      {/* <Image
-        source={focused ? activeIcon : inactiveIcon}
-        resizeMode='cover'
-        style={styles.icon}
-      /> */}
-      <Icons.Home width={wp(6)} height={wp(6)} fill={color} />
+    <View style={styles.icon}>
+      <IconComponent width={wp(10)} height={wp(10)} fill={color} />
     </View>
   );
 };
@@ -57,11 +41,10 @@ export default function BottomTabs() {
        
         options={{
           
-         tabBarIcon: ({ color, focused }) => (
+         tabBarIcon: ({ color }) => (
               <TabIcon
                 color={color}
-                name="GC"
-                focused={focused}
+                name="home"
               />
             ),
         
@@ -71,22 +54,20 @@ export default function BottomTabs() {
       </Tab.Screen>
       <Tab.Screen name="createCode" component={CreateCodeScreen}
         options={{
-         tabBarIcon: ({ color, focused }) => (
+         tabBarIcon: ({ color }) => (
               <TabIcon
                 color={color}
-                name="check"
-                focused={focused}
+                name="code"
               />
             ),
         }}
       />
       <Tab.Screen name="profileTab" component={ProfileStack} 
          options={{
-         tabBarIcon: ({ color, focused }) => (
+         tabBarIcon: ({ color }) => (
               <TabIcon
                 color={color}
                 name="profile"
-                focused={focused}
               />
             ),
         
