@@ -104,7 +104,7 @@ const LastReports = () => {
       case 'eshaa':
         return <Eshaa {...itemProps} />;
       case 'report':
-        return <Report {...itemProps} />;
+        return <Report {...itemProps} showType={true} TYPE={item.subType} />;
       default:
         return null;
     }

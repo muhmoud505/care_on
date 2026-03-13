@@ -211,7 +211,9 @@
   "medicine": {
     "from": "من",
     "to": "إلى",
-    "dosage": "الجرعة"
+    "dosage": "الجرعة",
+    "start_date": "تاريخ البداية:",
+    "end_date": "تاريخ النهاية:"
   },
   "result": {
     "analysis_name": "اسم التحليل",

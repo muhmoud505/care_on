@@ -1,17 +1,18 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import images from '../constants2/images';
 import { useAuth } from '../contexts/authContext';
+import { Icons } from './Icons';
 import LanguageSwitch from './switchlng';
 
 const CustomDrawerContent = (props) => {
@@ -62,38 +63,38 @@ const CustomDrawerContent = (props) => {
     {
       id: 1, 
       title: t('drawer.profile'),
-      icon: images.user,
+      icon: Icons.Profilec,
       onPress: () => handleNavigate('ProfileStack'),
     },
     { 
       id: 2, 
       title: t('drawer.billing'),
-      icon: images.wallet,
+      icon: Icons.Wallet,
       onPress: () => handleNavigate('PaymentStack'),
     },
     {
       id: 3, 
       title: t('drawer.find_service'),
-      icon: images.gps,
+      icon: Icons.Gps,
       onPress: () => handleNavigate('ServiceStack'),
       disabled: true,
     },
     {
       id: 4, 
       title: t('drawer.doctors_used_codes'),
-      icon: images.scan,
+      icon: Icons.Codea,
       onPress: () => handleNavigate('DoctorsUsedCodes'),
     },
     {
       id: 5, 
       title: t('drawer.your_created_codes'),
-      icon: images.createCode,
+      icon: Icons.Codea,
       onPress: () => handleNavigate('YourCreatedCodes'),
     },
     {
       id: 6, 
       title: t('drawer.contact_us'),
-      icon: images.call,
+      icon: Icons.Call,
       onPress: () => handleNavigate('ContactUs'),
       disabled: true,
     },
@@ -209,11 +210,13 @@ const CustomDrawerContent = (props) => {
           {/* User Info: Avatar and Name */}
           <View style={[styles.profileInfo, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <TouchableOpacity onPress={() => handleNavigate('ProfileStack')}>
-              <Image
-                source={user?.user?.avatar ? { uri: user.user.avatar } : images.profile}
-                style={styles.avatar}
-                resizeMode="cover"
-              />
+              {
+                        user?.user?.avatar ? (
+                         <Image source={{uri:user.user.avatar}} style={styles.profileImage} />
+                        ) : (
+                         <Icons.Profilea width={40} height={40} imageUrl={user.user.avatar} />
+                        )
+                      }
             </TouchableOpacity>
             <Text style={styles.profileName} numberOfLines={1}>
               {user?.user?.name || t('drawer.user_name_placeholder')}
@@ -243,7 +246,7 @@ const CustomDrawerContent = (props) => {
             activeOpacity={item.disabled ? 1 : 0.7}
             disabled={!!item.disabled}
           >
-            <Image source={item.icon} style={[styles.menuIcon, item.disabled && styles.menuIconDisabled]} />
+            <item.icon style={[styles.menuIcon, item.disabled && styles.menuIconDisabled]} />
             <Text style={[styles.menuText, item.disabled && styles.menuTextDisabled]}>{item.title}</Text>
           </TouchableOpacity>
         ))}

@@ -1,7 +1,8 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Shadow } from 'react-native-shadow-2';
-import Images from '../constants2/images';
 import { useCollapsible } from '../hooks/useCollapsible';
+import { wp } from '../utils/responsive';
+import { Icons } from './Icons';
 
 const CollapsibleCard = ({
   title,
@@ -10,6 +11,7 @@ const CollapsibleCard = ({
   TYPE,
   icon,
   children,
+  showType = false,
 }) => {
   const { isExpanded, toggle } = useCollapsible(controlledExpanded, onToggle);
  
@@ -28,14 +30,21 @@ const CollapsibleCard = ({
         <View style={styles.smcontainer}>
           {/* Header - always visible */}
           <View style={styles.mincontainer}>
-            {icon && <Image source={icon} />}
+            {icon && <Icons.Medicine width={wp(6)} height={wp(6)} />}
             <Text style={styles.txt1}>{title}</Text>
-            <View style={styles.TYPE}>
-              <Text style={{color:"#FFF"}}>{TYPE}</Text>
-            </View>
-            <Image
-              source={isExpanded ? Images.reportStep1 : Images.reportStep2_2}
-            />
+            {showType && (
+              <View style={styles.TYPE}>
+                <Text style={{color:"#FFF"}}>{TYPE}</Text>
+              </View>
+            )}
+            {
+              isExpanded?(
+                <Icons.Expand width={wp(6)} height={wp(6)} />
+              ):(
+                <Icons.Expand width={wp(6)} height={wp(6)} style={{transform:[{rotate:'180deg'}],}} />
+              )
+            }
+           
           </View>
 
           {/* Collapsible content */}

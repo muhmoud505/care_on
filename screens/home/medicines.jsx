@@ -64,6 +64,7 @@ const Medicines = () => {
   const finalAddButtonStyle = isToggleButtonVisible
     ? styles.addButtonHigh
     : styles.addButtonLow;
+    console.log("the medicines are:", JSON.stringify(medicines[0] || {}));
   const renderItem = ({ item }) => (
     <Medicine
       title={item.title} // Assuming item.title is already the translated/displayable title

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HomeHeader } from '../../components/homeHeader';
+import { Icons } from '../../components/Icons';
 import SurveyPopup from '../../components/SurveyPopup';
 import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
@@ -24,11 +25,11 @@ const Home = () => {
   const [surveySkippedThisSession, setSurveySkippedThisSession] = useState(false);
 
   const menuItems = [
-    { key: 'results', titleKey: 'home.results_title', icon: Images.results, navigateTo: 'results' },
-    { key: 'eshaa', titleKey: 'home.xray_title', icon: Images.eshaa, navigateTo: 'eshaa' },
-    { key: 'reports', titleKey: 'home.reports_title', icon: Images.reports, navigateTo: 'reports' },
-    { key: 'medicines', titleKey: 'home.medicines_title', icon: Images.medicine, navigateTo: 'medicines' },
-    { key: 'last', titleKey: 'home.last_reports_title', icon: Images.last_reports, navigateTo: 'last' },
+    { key: 'results', titleKey: 'home.results_title', icon: Icons.Analysis, navigateTo: 'results' },
+    { key: 'eshaa', titleKey: 'home.xray_title', icon: Icons.Scan, navigateTo: 'eshaa' },
+    { key: 'reports', titleKey: 'home.reports_title', icon: Icons.Scan, navigateTo: 'reports' },
+    { key: 'medicines', titleKey: 'home.medicines_title', icon: Icons.Medicine, navigateTo: 'medicines' },
+    { key: 'last', titleKey: 'home.last_reports_title', icon: Icons.Scan, navigateTo: 'last' },
   ];
 
   const age = useMemo(() => {
@@ -133,7 +134,7 @@ const Home = () => {
         >
     
 
-          <Image source={item.icon} />
+          <item.icon width={wp(7)} height={wp(7)} stroke="#000" />
           <Text style={styles.txt1}>{t(item.titleKey)}</Text>
         </TouchableOpacity>
       ))}

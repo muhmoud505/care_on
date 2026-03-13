@@ -241,6 +241,8 @@
     },
     "medicines": {
       "dosage": "Dosage:",
+      "start_date": "Start Date:",
+      "end_date": "End Date:",
       "frequency_twice_daily": "Twice daily"
     }
   },

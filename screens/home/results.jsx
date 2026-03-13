@@ -55,11 +55,13 @@ const Results = () => {
   const finalAddButtonStyle = isToggleButtonVisible
     ? styles.addButtonHigh
     : styles.addButtonLow;
+    console.log(results[0]);
+    
   const renderItem = ({ item }) => {
     // Extract file URL from the documents array (taking the first one) or fallback to other keys
     const fileUrl = item.documents?.[0]?.url || item.documents?.[0]?.file || item.fileUrl || item.file || item.url;
-    console.log(`[Results] Item ${item.id} documents:`, JSON.stringify(item.documents));
     
+      
     return (
     <Result
       {...item}

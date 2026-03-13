@@ -1,9 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, FlatList, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import CustomHeader from '../../components/CustomHeader';
-import Images from '../../constants2/images';
+import { Icons } from '../../components/Icons';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -73,7 +73,7 @@ const DoctorsUsedCodesScreen = () => {
         {/* Doctor Name */}
         <View style={styles.doctorInfoContainer}>
           <Text style={styles.infoText}>{item.doctorName}</Text>
-          <Image source={Images.user} style={styles.infoIcon} />
+          <Icons.Profilec width={wp(5)} height={wp(5)} style={{ tintColor: '#6C757D' }} />
         </View>
       </View>
 
@@ -85,7 +85,7 @@ const DoctorsUsedCodesScreen = () => {
         <View />
         <View style={styles.dateContainer}>
           <Text style={styles.infoText}>{item.requestDate}</Text>
-          <Image source={Images.alarm} style={styles.infoIcon} />
+          <Icons.Calendarb width={wp(5)} height={wp(5)} stroke='#ff0000' style={styles.infoIcon} />
         </View>
          <Text style={[styles.timestamp, { textAlign: isRTL ? 'left' : 'right' }]}>
         {item.timestamp}

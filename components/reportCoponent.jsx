@@ -1,9 +1,10 @@
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useTranslation } from 'react-i18next';
-import { Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import CollapsibleCard from './CollapsibleCard';
+import { Icons } from './Icons';
 
 /**
  * Parses the description field into a structured object.
@@ -140,12 +141,13 @@ const Report = ({
       isExpanded={expanded}
       onToggle={onExpandedChange}
       TYPE={TYPE}
+      showType={true}
     >
       <>
         {/* اسم الدكتور */}
         {!!displayDoctorName && (
           <View style={styles.miccontianer}>
-            <Image source={require('../assets2/images/r2.png')} />
+            <Icons.Doctor width={20} height={20} />
             <Text style={styles.txt2}>{t('report.doctor_name')}:</Text>
             <Text style={styles.txt3}>{displayDoctorName}</Text>
           </View>
@@ -154,7 +156,7 @@ const Report = ({
         {/* التاريخ */}
         {!!displayDate && (
           <View style={styles.miccontianer}>
-            <Image source={require('../assets2/images/r4.png')} />
+            <Icons.Calendara width={20} height={20} />
             <Text style={styles.txt2}>{t('report.report_date')}:</Text>
             <Text style={styles.txt3}>{displayDate}</Text>
           </View>
@@ -163,7 +165,7 @@ const Report = ({
         {/* التحاليل المطلوبة */}
         {!!displayRequiredTests && (
           <View style={styles.miccontianer}>
-            <Image source={require('../assets2/images/r2.png')} />
+            <Icons.analysisA width={20} height={20} />
             <Text style={styles.txt2}>{t('report.required_tests', { defaultValue: 'التحليل المطلوب' })}:</Text>
             <Text style={styles.txt3}>{displayRequiredTests}</Text>
           </View>
@@ -172,7 +174,7 @@ const Report = ({
         {/* الاشعة المطلوبة */}
         {!!displayRequiredScans && (
           <View style={styles.miccontianer}>
-            <Image source={require('../assets2/images/r5.png')} />
+            <Icons.Union width={20} height={20} />
             <Text style={styles.txt2}>{t('report.required_scans', { defaultValue: 'الاشعة المطلوبة' })}:</Text>
             <Text style={styles.txt3}>{displayRequiredScans}</Text>
           </View>
@@ -181,7 +183,7 @@ const Report = ({
         {/* التشخيص */}
         {!!displayDiagnosis && (
           <View style={styles.miccontianer}>
-            <Image source={require('../assets2/images/r5.png')} />
+            <Icons.ReceiptEdit width={20} height={20} />
             <Text style={styles.txt2}>{t('report.diagnosis', { defaultValue: 'التشخيص' })}:</Text>
             <Text style={[styles.txt3, { flexShrink: 1 }]}>{displayDiagnosis}</Text>
           </View>
@@ -190,7 +192,7 @@ const Report = ({
         {/* الوصف الطبي */}
         {!!displayNotes && (
           <View style={styles.miccontianer}>
-            <Image source={require('../assets2/images/r5.png')} />
+            <Icons.ReceiptEdit width={20} height={20} />
             <Text style={styles.txt2}>{t('report.notes', { defaultValue: 'الوصف الطبي' })}:</Text>
             <Text style={[styles.txt3, { flexShrink: 1 }]}>{displayNotes}</Text>
           </View>
@@ -206,7 +208,7 @@ const Report = ({
               resizeMode="cover"
             >
               <View style={styles.overlay}>
-                <Image source={require('../assets2/images/download.png')} />
+                <Icons.Download width={20} height={20} />
                 <Text style={styles.txt4}>{t('common.download')}</Text>
               </View>
             </ImageBackground>

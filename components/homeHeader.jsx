@@ -1,8 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Images from '../constants2/images';
 import { useAuth } from '../contexts/authContext';
+import { Icons } from './Icons';
 
 export const HomeHeader=({ showUserInfo = true })=>{
   const {user}=useAuth()
@@ -11,12 +11,14 @@ export const HomeHeader=({ showUserInfo = true })=>{
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
   const userName = user?.user?.name;
+  console.log(user?.user.avatar);
+  
   
   return(
     <View style={[styles.headerContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
       {/* Left side: Menu button */}
       <TouchableOpacity onPress={() => navigation.getParent()?.toggleDrawer()}>
-        <Image style={styles.menuIcon} source={Images.menu} />
+        <Icons.Menu width={24} height={24} color="#000" />
       </TouchableOpacity>
 
       {/* Center: Greeting */}
@@ -27,7 +29,7 @@ export const HomeHeader=({ showUserInfo = true })=>{
             <Text style={styles.txt2}>{userName || ''}</Text>
             <Text style={{ color: '#888888' }}>!</Text>
           </Text>
-          <Image source={Images.wave} style={[styles.waveIcon, { [isRTL ? 'marginRight' : 'marginLeft']: 5 }]} />
+          <Icons.Wave width={24} height={24} color="#888888" style={styles.waveIcon} />
         </View>
       )}
 
@@ -36,16 +38,19 @@ export const HomeHeader=({ showUserInfo = true })=>{
         <TouchableOpacity
           onPress={() => navigation.navigate('Notifications')}
         >
-          <Image source={Images.notification} style={styles.actionIcon} />
+          <Icons.Notification width={24} height={24} color="#000" style={styles.actionIcon} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate('ProfileStack')}
         >
-          <Image
-            style={styles.profileImage}
-            source={user?.user?.avatar ? { uri: user.user.avatar } : Images.profile}
-            resizeMode="cover"
-          />
+          {
+          user?.user?.avatar ? (
+           <Image source={{uri:user.user.avatar}} style={styles.profileImage} />
+          ) : (
+           <Icons.Profilea width={40} height={40} imageUrl={user.user.avatar} />
+          )
+        }
+          
         </TouchableOpacity>
       </View>
     </View>
@@ -86,6 +91,7 @@ const styles = StyleSheet.create({
   waveIcon: {
     width: 24,
     height: 24,
+    margin:5
   },
   actionsContainer: {
     alignItems: 'center',

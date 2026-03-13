@@ -1,9 +1,10 @@
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useTranslation } from 'react-i18next';
-import { Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import CollapsibleCard from './CollapsibleCard';
+import { Icons } from './Icons';
 
 const Result = ({ 
   title, 
@@ -16,6 +17,23 @@ const Result = ({
   fileUrl
 }) => {
   const { t } = useTranslation();
+
+  // Parse the description if it's a JSON string
+  let parsedDescription = { labName: '', notes: '', date: '' };
+  if (description && typeof description === 'string' && description.startsWith('{')) {
+    try {
+      parsedDescription = JSON.parse(description);
+    } catch (e) {
+      parsedDescription.notes = description; // Fallback to plain text
+    }
+  } else {
+    parsedDescription.notes = description || '';
+  }
+
+  // Use parsed values, fallback to props
+  const displayLabName = parsedDescription.labName || labName || '';
+  const displayDate = parsedDescription.date || date || '';
+  const displayNotes = parsedDescription.notes || '';
 
   const handleDownload = async () => {
     if (!fileUrl) return;
@@ -73,6 +91,8 @@ const Result = ({
       });
     }
   };
+ 
+  
 
   return (
     <CollapsibleCard
@@ -82,25 +102,25 @@ const Result = ({
       onToggle={onExpandedChange}
     >
                    <View style={styles.miccontianer}>
-                     <Image source={require('../assets2/images/r2.png')} />
+                     <Icons.analysisA width={20} height={20} />
                      <Text style={styles.txt2}>{t('result.analysis_name')}:</Text>
                      <Text style={styles.txt3}>{title}</Text>
                    </View>
                    <View style={styles.miccontianer}>
-                     <Image source={require('../assets2/images/r3.png')} />
+                     <Icons.Union width={20} height={20} />
                      <Text style={styles.txt2}>{t('result.lab_name')}:</Text>
-                     <Text style={styles.txt3}>{labName}</Text>
+                     <Text style={styles.txt3}>{displayLabName}</Text>
                    </View>
                    <View style={styles.miccontianer}>
-                     <Image source={require('../assets2/images/r4.png')} />
+                     <Icons.Calendara width={20} height={20} />
                      <Text style={styles.txt2}>{t('result.analysis_date')}:</Text>
-                     <Text style={styles.txt3}>{date}</Text>
+                     <Text style={styles.txt3}>{displayDate}</Text>
                    </View>
                    <View style={styles.miccontianer}>
-                     <Image source={require('../assets2/images/r5.png')} />
+                     <Icons.ReceiptEdit width={20} height={20} />
                      <Text style={styles.txt2}>{t('result.description')}:</Text>
                      <Text style={styles.txt3}>
-                        {description}
+                        {displayNotes}
                      </Text>
                    </View>
                    
@@ -113,7 +133,7 @@ const Result = ({
                          resizeMode='cover'
                        >
                          <View style={styles.overlay}>
-                           <Image source={require('../assets2/images/download.png')} />
+                           <Icons.Download width={20} height={20} />
                            <Text style={styles.txt4}>{t('common.download')}</Text>
                          </View>
                        </ImageBackground>

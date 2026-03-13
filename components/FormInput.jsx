@@ -128,8 +128,8 @@ const FormField = ({
                         {item.label}
                       </Text>
                       {item.value === value
-                        ? <Image source={Images.verify} />
-                        : <Image source={Images.nonVerify} />
+                        ? <Icons.Verify width={wp(5)} height={wp(5)} stroke="#581f1f"  color='#000' />
+                        : <Icons.Verify width={wp(5)} height={wp(5)}  color='#581f1f' />
                       }
                     </TouchableOpacity>
                   )}

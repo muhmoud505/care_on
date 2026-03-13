@@ -21,7 +21,7 @@ const TabIcon = ({ color, name }) => {
 
   return (
     <View style={styles.icon}>
-      <IconComponent width={wp(10)} height={wp(10)} fill={color} />
+      <IconComponent style={styles.icon} width={wp(10)} height={wp(10)} fill={color} />
     </View>
   );
 };

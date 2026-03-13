@@ -2,10 +2,10 @@ import { useNavigation } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, FlatList, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
-import Images from '../../constants2/images';
+import { Icons } from '../../components/Icons';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -73,7 +73,7 @@ const YourCreatedCodesScreen = () => {
             <View style={styles.codeRow}>
               <Text style={[styles.codeValueBig, isRTL ? { marginLeft: wp(3) } : { marginRight: wp(3) }]}>{item.code}</Text>
               <TouchableOpacity onPress={handleCopy} style={styles.copyBox}>
-                <Image source={Images.createCode} style={styles.copyIcon} />
+                <Icons.Codea width={wp(6)} height={wp(6)} style={styles.copyIcon} />
               </TouchableOpacity>
             </View>
           </View>

@@ -2,11 +2,10 @@ import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Clipboard, Dimensions, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Clipboard, Dimensions, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
 import { Icons } from '../../components/Icons';
-import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
 
 const API_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
@@ -121,8 +120,8 @@ const CreateCodeScreen = () => {
           <View style={styles.codeBox}>
             {/* Circular Icon without Border */}
             <View style={styles.iconContainer}>
-              <Image source={Images.createCodeG} style={styles.codeIcon} />
-              <Icons.Home width={50} height={50} />
+              <Icons.Code width={wp(20)} height={wp(20)} style={styles.codeIcon} />
+              =
             </View>
             
             {/* Description Text */}
@@ -166,7 +165,7 @@ const CreateCodeScreen = () => {
                 style={styles.copyButton}
                 onPress={handleCopyCode}
               >
-                <Image source={Images.download} style={styles.copyIcon} />
+                <Icons.Download width={wp(4)} height={wp(4)} style={styles.copyIcon} />
                 <Text style={styles.copyButtonText}>{t('create_code.copy', { defaultValue: 'نسخ' })}</Text>
               </TouchableOpacity>
             </View>
