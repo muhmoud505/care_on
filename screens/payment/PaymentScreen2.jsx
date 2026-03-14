@@ -1,9 +1,10 @@
 import { useNavigation } from "@react-navigation/native"
 import { useTranslation } from 'react-i18next'
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import CustomHeader from "../../components/CustomHeader"
-import Images from '../../constants2/images'
+import { Icons } from "../../components/Icons"
+import { hp, wp } from "../../utils/responsive"
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -15,13 +16,13 @@ const PaymentStatus=()=>{
             <CustomHeader text={t('payment.details', { defaultValue: 'تفاصيل المعاملة' })}/>
             <View style={styles.mainContainer}>
                 <View style={styles.cont1}>
-                      <Image source={Images.success}/>
+                      <Icons.Ok width={wp(15)} height={hp(15)} />
                 <Text style={styles.txt1}>10 {t('payment.currency', { defaultValue: 'EGP' })}</Text>
                 </View>
                 <View style={[styles.cont2,{
                     padding:20
                 }]}>
-                     <Image source={Images.pay}/>
+                     <Icons.Payb width={wp(8)} height={hp(8)} />
                     <View 
                      style={{
                         rowGap:10

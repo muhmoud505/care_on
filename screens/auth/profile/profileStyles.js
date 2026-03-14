@@ -29,8 +29,8 @@ export const profileStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',
-    right: wp(5),
-    top: hp(-0.6),
+    right: wp(4),
+    top: hp(-2),
     zIndex: 1,
 
   },
@@ -65,8 +65,8 @@ export const profileStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',
-    top: hp(7),
-    right: wp(22),
+    top: hp(9),
+    right: wp(25),
   },
   ele2: {
     backgroundColor: '#014CC4',

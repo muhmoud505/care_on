@@ -3,8 +3,8 @@ import * as FileSystem from 'expo-file-system';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Images from '../constants2/images';
 import DashedBorder from './dashed';
+import { Icons } from './Icons';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -90,7 +90,7 @@ const Uploader = ({ title, required, error, style,onFileSelect }) => {
           ) : (
             <>
               <Text style={styles.txt1}>{imageName}</Text>
-              <Image source={Images.upload} />
+              <Icons.Uploada width={wp(6)} height={wp(6)} />
             </>
           )}
         </TouchableOpacity>

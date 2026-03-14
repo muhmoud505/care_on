@@ -715,19 +715,24 @@ export const AuthProvider = ({ children }) => {
 
     if (primaryUser?.user?.id !== account.id) {
       try {
-        const response = await fetch(`${API_URL}/api/v1/auth/me`, {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            lang: i18next.language,
-            Authorization: `Bearer ${tokenValue}`,
-          },
-        });
+        console.log('Fetching child profile using /me API with parent token for user:', account.id);
+        
+        // Use parent token to call /me API for child account
+        const parentToken = primaryUser?.token?.value;
+        if (!parentToken) {
+          throw new Error('No parent token available');
+        }
 
+        const response = await authFetch(`${API_URL}/api/v1/auth/me`, {}, parentToken);
         const data = await response.json();
-        if (response.ok) {
-          const meData = data.data || data;
+        
+        if (!response.ok) {
+          throw new Error(data?.message || `HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const meData = data.data || data;
+        
+        if (meData) {
           const serverAvatar = meData.avatar ? makeAbsolute(meData.avatar) : null;
           const finalAvatar = isLocalUri(childWithAvatar.avatar)
             ? childWithAvatar.avatar
@@ -745,13 +750,18 @@ export const AuthProvider = ({ children }) => {
             await AsyncStorage.setItem('child_accounts', JSON.stringify(updated));
             setChildAccounts(updated);
           } catch (e) {
-            console.warn('Failed to persist child profile after /me:', e.message);
+            console.warn('Failed to persist child profile after /me API:', e.message);
           }
 
+          console.log('Successfully fetched child profile with /me API using parent token');
           return;
+        } else {
+          console.warn('/me API returned null data');
         }
       } catch (error) {
-        console.warn('Failed to refresh /me after switching account:', error.message);
+        console.warn('Failed to fetch child profile using /me API with parent token:', error.message);
+        console.warn('Falling back to basic child account data without resource object');
+        // Continue with fallback to basic child data
       }
     }
 

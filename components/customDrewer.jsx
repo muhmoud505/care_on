@@ -6,12 +6,12 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useWindowDimensions,
-  View,
+  View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import images from '../constants2/images';
 import { useAuth } from '../contexts/authContext';
+import { hp, wp } from '../utils/responsive';
 import { Icons } from './Icons';
 import LanguageSwitch from './switchlng';
 
@@ -20,25 +20,38 @@ const CustomDrawerContent = (props) => {
   const { navigation } = props;
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
-  const { width, height } = useWindowDimensions();
-  const { user, logout } = useAuth();
+
+  const { user, logout, isImpersonating } = useAuth();
+  if (user && user.user && user.user.resource) {
+    console.log('user ' + JSON.stringify(user.user.resource.age));
+  }
+  
+console.log(user);
 
   const age = useMemo(() => {
-    const nationalId = user?.user?.resource?.national_number;
-    if (!nationalId || nationalId.length !== 14) {
+    // Add null check for user and user.user to prevent errors during account switching
+    if (!user || !user.user || !user.user.resource) {
+      return null;
+    }
+    
+    const birthdate = user.user.resource.birthdate;
+    console.log('birthdate ' + birthdate);
+    if (!birthdate) {
       return null; // Cannot determine age
     }
     try {
-      const century = nationalId.substring(0, 1) === '2' ? '19' : '20';
-      const year = parseInt(century + nationalId.substring(1, 3), 10);
-      const month = parseInt(nationalId.substring(3, 5), 10) - 1; // Month is 0-indexed
-      const day = parseInt(nationalId.substring(5, 7), 10);
-
-      const birthDate = new Date(year, month, day);
+      const birthDateObj = new Date(birthdate);
+      
+      // Validate the created date is valid
+      if (isNaN(birthDateObj.getTime())) {
+        console.warn('Invalid birthdate from resource:', birthdate);
+        return null; // Invalid date
+      }
+      
       const today = new Date();
-      let calculatedAge = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      let calculatedAge = today.getFullYear() - birthDateObj.getFullYear();
+      const m = today.getMonth() - birthDateObj.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
         calculatedAge--;
       }
       return calculatedAge;
@@ -46,9 +59,23 @@ const CustomDrawerContent = (props) => {
       return null;
     }
   }, [user]);
-  const isChild = age !== null && age < 18;
+  console.log('AGEDDD       '+age);
+  
+  const isChild = isImpersonating || (age !== null && age < 18);
 
-  // Get the parent navigator (AppStack)
+  // Debug: Check values
+  if (user && user.user) {
+    console.log('CustomDrawer Debug:', { 
+      user: user?.user?.name, 
+      birthDate: user?.user?.resource?.birthdate,
+      age, 
+      isChild, 
+      isImpersonating,
+      nationalId: user?.user?.resource?.national_number 
+    });
+  }
+
+  // Get the parent navigator (AppStack)....
   const parentNavigation = navigation.getParent();
 
   const handleNavigate = (screenName) => {
@@ -130,9 +157,28 @@ const CustomDrawerContent = (props) => {
       height: 60,
       borderRadius: 30,
     },
+    btn: {
+      backgroundColor: '#014CC4',
+      paddingHorizontal: wp(5),
+      paddingVertical: hp(1.5),
+      borderRadius: wp(3),
+      alignItems: 'center',
+      marginVertical: hp(2),
+      // marginHorizontal: wp(2.5),
+      color: '#fff',
+      width: wp(35),
+      height: hp(6),
+
+    },
+    btnText: {
+      fontWeight: '700',
+      fontSize: Math.min(wp(3), 20),
+      // marginBottom: hp(2),
+      color: '#fff',
+    },
     profileName: {
-      fontSize: 18,
-      fontWeight: 'bold',
+      fontSize: 14,
+      fontWeight: '400',
       color: '#000',
       textAlign: isRTL ? 'right' : 'left',
       flex: 1,
@@ -211,11 +257,11 @@ const CustomDrawerContent = (props) => {
           <View style={[styles.profileInfo, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <TouchableOpacity onPress={() => handleNavigate('ProfileStack')}>
               {
-                        user?.user?.avatar ? (
-                         <Image source={{uri:user.user.avatar}} style={styles.profileImage} />
-                        ) : (
-                         <Icons.Profilea width={40} height={40} imageUrl={user.user.avatar} />
-                        )
+                user?.user?.avatar ? (
+                           <Image source={{uri:user.user.avatar}} style={styles.avatar} />
+                           ) : (
+                           <Icons.Profilea width={40} height={40} />
+                           )
                       }
             </TouchableOpacity>
             <Text style={styles.profileName} numberOfLines={1}>
@@ -225,9 +271,12 @@ const CustomDrawerContent = (props) => {
 
           {/* Linked Accounts Button (only for parents) */}
           {!isChild && (
-            <TouchableOpacity style={styles.editButton} onPress={() => handleNavigate('accounts')}>
-              <Text style={styles.editText}>{t('drawer.linked_accounts', { defaultValue: 'الحسابات المرتبطة' })}</Text>
+            <>
+            
+            <TouchableOpacity style={styles.btn} onPress={() => handleNavigate('accounts')}>
+              <Text style={styles.btnText}>{t('drawer.linked_accounts', { defaultValue: 'الحسابات المرتبطة' })}</Text>
             </TouchableOpacity>
+            </>
           )}
         </View>
       </View>

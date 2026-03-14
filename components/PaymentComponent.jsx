@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Icons } from './Icons';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -27,12 +28,12 @@ const PaymentComponent = () => {
             <TouchableOpacity 
               onPress={()=>navigation.navigate('payment_status')}
             >
-                <Text style={[styles.navButtonText, isRTL && { transform: [{ scaleX: -1 }] }]}>‹</Text>
+                <Icons.arrleft style={{transform: [{rotate: isRTL ? '180deg' : '0deg'}],top:hp(1.2)}} width={wp(4)} height={wp(4)} />
             </TouchableOpacity>
         </View>
       </View>
       <View style={[styles.v2, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <Image source={require('../assets2/images/pay.png')}/>
+        <Icons.Payb width={wp(8)} height={wp(8)} />
         <View style={{rowGap:hp(1.2),top:-hp(1), alignItems: isRTL ? 'flex-end' : 'flex-start'}}>
             <Text style={styles.txt2}>{t('payment.masked_name')}</Text>
             <Text style={[styles.txt2,{color:'black'}]}>{t('payment.masked_phone')}</Text>

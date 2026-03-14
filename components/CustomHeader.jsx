@@ -1,7 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
-import { Dimensions, I18nManager, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, I18nManager, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/authContext';
+import { Icons } from './Icons';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -60,10 +61,7 @@ const CustomHeader = ({ text }) => {
           style={[styles.touchable, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
           onPress={handleBackPress}
         >
-          <Image 
-            source={require('../assets2/images/Vector.png')}
-            style={[styles.icon, isRTL && { transform: [{ scaleX: -1 }] }]}
-          />
+          <Icons.arrleft width={wp(6)} height={hp(3)}   style={{ transform: [{ rotate: isRTL ? '180deg' : '0deg' }] }}/>
           <Text style={styles.text}>
             {text}
           </Text>
@@ -86,6 +84,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: hp(12),
     justifyContent: 'center',
+    marginBottom: hp(2),
   },
   touchable: {
     alignItems: 'center',

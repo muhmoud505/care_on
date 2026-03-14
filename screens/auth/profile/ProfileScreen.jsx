@@ -7,7 +7,12 @@ const ProfileScreen = () => {
   const { user, isImpersonating } = useAuth();
 
   const age = useMemo(() => {
-    const birthdate = user?.user?.resource?.birthdate; // YYYY-MM-DD format
+    // Add null check for user and user.user to prevent errors during account switching
+    if (!user || !user.user || !user.user.resource) {
+      return null;
+    }
+    
+    const birthdate = user.user.resource.birthdate; // YYYY-MM-DD format
     if (!birthdate) {
       return null; // Cannot determine age
     }
@@ -27,6 +32,7 @@ const ProfileScreen = () => {
       return null;
     }
   }, [user]);
+  console.log('ProfileScreen Debug:', { age, isImpersonating });
 
   // A user is considered a child if they are impersonated or their age is less than 18.
   const isChild = isImpersonating || (age !== null && age < 18);

@@ -48,8 +48,8 @@ const styles = StyleSheet.create({
    container:{
       direction:'rtl',
       flexDirection:'row',
-      columnGap:15,
-      margin:20,
+      columnGap:20,
+      margin:230,
       backgroundColor:'#fff',
       justifyContent:'center',
       alignItems:'center',
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     fontSize:10
   },
   txt1:{
-    fontSize:12,
+    fontSize:15,
     fontWeight:700,
     
   },

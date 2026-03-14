@@ -1,15 +1,15 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
 import Eshaa from '../../components/eshaaComponent';
+import { Icons } from '../../components/Icons';
 import ListContainer from '../../components/ListContainer';
 import Medicine from '../../components/medicineComponent';
 import Report from '../../components/reportCoponent';
 import Result from '../../components/resultComponents';
-import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
@@ -137,18 +137,17 @@ const LastReports = () => {
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         emptyListMessage={t('home.no_reports_found')}
       />
-      {isToggleButtonVisible && (
-        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
-          <Image source={areAllExpanded ? Images.shrink : Images.r6} />
-        </TouchableOpacity>
-      )}
-      {/* Add record button */}
-      <TouchableOpacity
-        style={finalAddButtonStyle} // Apply the determined style
-        onPress={() => navigation.navigate('AddRecordSelector')}
-      >
-        <Image source={Images.add} />
-      </TouchableOpacity>
+     {isToggleButtonVisible && (
+             <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
+               <Icons.CloseAll width={wp(13)} height={wp(13)} />
+             </TouchableOpacity>
+           )}
+           <TouchableOpacity
+             style={finalAddButtonStyle}
+             onPress={() => navigation.navigate('addResult')}
+           >
+             <Icons.Add width={wp(18)} height={wp(18)} />
+           </TouchableOpacity>
     </SafeAreaView>
   );
 };

@@ -1,12 +1,12 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
+import { Icons } from '../../components/Icons';
 import ListContainer from '../../components/ListContainer';
 import Report from '../../components/reportCoponent';
-import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
@@ -81,18 +81,17 @@ const Reports = () => {
         contentContainerStyle={styles.listContent}
         emptyListMessage={t('home.no_doctor_reports_found')}
       />
-      {isToggleButtonVisible && (
-        <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
-          <Image source={areAllExpanded ? Images.shrink : Images.r6} />
-        </TouchableOpacity>
-      )}
-      {/* Add report button */}
-      <TouchableOpacity
-        style={finalAddButtonStyle}
-        onPress={() => navigation.navigate('addReport')}
-      >
-        <Image source={Images.add} />
-      </TouchableOpacity>
+     {isToggleButtonVisible && (
+             <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
+               <Icons.CloseAll width={wp(13)} height={wp(13)} />
+             </TouchableOpacity>
+           )}
+           <TouchableOpacity
+             style={finalAddButtonStyle}
+             onPress={() => navigation.navigate('addResult')}
+           >
+             <Icons.Add width={wp(18)} height={wp(18)} />
+           </TouchableOpacity>
     </SafeAreaView>
   );
 };

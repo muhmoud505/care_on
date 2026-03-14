@@ -4,6 +4,7 @@ import Analysis from '../assets2/svgImages/analysis.svg';
 import analysisA from '../assets2/svgImages/analysisA.svg';
 import Arrd from '../assets2/svgImages/arrD.svg';
 import Arrl from '../assets2/svgImages/arrL.svg';
+import arrleft from '../assets2/svgImages/arrleft.svg';
 import ArrowLeft from '../assets2/svgImages/arrow-left.svg';
 import Arrr from '../assets2/svgImages/arrR.svg';
 import Asks from '../assets2/svgImages/asks.svg';
@@ -13,6 +14,7 @@ import Calendarb from '../assets2/svgImages/calendarB.svg';
 import Call from '../assets2/svgImages/call.svg';
 import Cancel from '../assets2/svgImages/cancel.svg';
 import Close from '../assets2/svgImages/close.svg';
+import CloseAll from '../assets2/svgImages/closeall.svg';
 import Closeb from '../assets2/svgImages/closeB.svg';
 import Code from '../assets2/svgImages/code.svg';
 import Codea from '../assets2/svgImages/codeA.svg';
@@ -121,4 +123,6 @@ export const Icons = {
   Wallet,
   Warning,
   Wave,
+  arrleft,
+  CloseAll,
 };

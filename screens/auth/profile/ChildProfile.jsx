@@ -9,6 +9,7 @@ import { Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import CustomHeader from '../../../components/CustomHeader';
+import { Icons } from '../../../components/Icons';
 import Images from '../../../constants2/images';
 import { useAuth } from '../../../contexts/authContext';
 import { hp, profileStyles as styles, wp } from './profileStyles';
@@ -267,9 +268,25 @@ const ChildProfile = () => {
                   style={styles.profileImg}
                   resizeMode="cover"
                 />
-                <TouchableOpacity style={styles.ele1} onPress={() => setModalVisible(true)}>
-                  <Image source={Images.edit} />
-                </TouchableOpacity>
+                 <TouchableOpacity style={styles.ele1} onPress={() => setModalVisible(true)}>
+                           <View style={{ position: 'relative', width: wp(10), height: wp(10) }}>
+                              <Icons.Edita width={wp(10)} height={wp(10)} />
+                            <Icons.Editb
+                                style={{
+                                  position: 'absolute',
+                                  top: '50%',
+                                  
+                                  transform: [
+                                    { translateX: -wp(2) },
+                                    { translateY: -wp(3) },
+                                  ],
+                                  zIndex: 1000,
+                                }}
+                                width={wp(6)}
+                                height={wp(6)}
+                              />
+                            </View>
+                          </TouchableOpacity>
               </View>
               <View style={styles.info}>
                 <Text style={styles.txt1} numberOfLines={1}>{fullName}</Text>
@@ -310,7 +327,7 @@ const ChildProfile = () => {
                   resizeMode='cover'
                 >
                   <View style={styles.overlay}>
-                    <Image source={Images.download} />
+                    <Icons.Download width={wp(6)} height={wp(6)} />
                     <Text style={[styles.txt4, { color: '#fff' }]}>{t('common.download', { defaultValue: 'تنزيل' })}</Text>
                   </View>
                 </ImageBackground>
@@ -325,7 +342,7 @@ const ChildProfile = () => {
               resizeMode='cover'
             >
               <View style={styles.overlay}>
-                <Image source={Images.download} />
+                <Icons.Download width={wp(6)} height={wp(6)} />
                 <Text style={[styles.txt4, { color: '#fff' }]}>{t('common.download', { defaultValue: 'تنزيل' })}</Text>
               </View>
             </ImageBackground>

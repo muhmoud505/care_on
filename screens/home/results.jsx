@@ -1,12 +1,12 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
+import { Icons } from '../../components/Icons';
 import ListContainer from '../../components/ListContainer';
 import Result from '../../components/resultComponents';
-import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
@@ -88,14 +88,14 @@ const Results = () => {
       />
       {isToggleButtonVisible && (
         <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
-          <Image source={areAllExpanded ? Images.shrink : Images.r6} />
+          <Icons.CloseAll width={wp(13)} height={wp(13)} />
         </TouchableOpacity>
       )}
       <TouchableOpacity
         style={finalAddButtonStyle}
         onPress={() => navigation.navigate('addResult')}
       >
-        <Image source={Images.add} />
+        <Icons.Add width={wp(18)} height={wp(18)} />
       </TouchableOpacity>
     </SafeAreaView>
   );
