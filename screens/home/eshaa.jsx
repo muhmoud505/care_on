@@ -3,9 +3,9 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Icons } from 'react-toastify/unstyled';
 import CustomHeader from '../../components/CustomHeader';
 import Eshaa from '../../components/eshaaComponent';
+import { Icons } from '../../components/Icons';
 import ListContainer from '../../components/ListContainer';
 import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
@@ -88,7 +88,7 @@ const Eshaas = () => {
       />
    {isToggleButtonVisible && (
            <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
-             <iocns.CloseAll width={wp(13)} height={wp(13)} />
+             <Icons.CloseAll width={wp(13)} height={wp(13)} />
            </TouchableOpacity>
          )}
          <TouchableOpacity

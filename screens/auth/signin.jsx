@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: wp(90),
     marginTop: hp(5),
+    marginBottom: hp(2),
   },
   nextButtonText: {
     color: '#fff',

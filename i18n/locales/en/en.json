@@ -3,25 +3,12 @@
     "registered_successfully": "Registered Successfully",
     "welcome_to": "Welcome to"
   },
-  "intro": "This is a complete example of how to implement localization in Expo apps. You can switch between English and Arabic with full RTL support.",
-  "features": {
-    "title": "Key Features:",
-    "list": [
-      "Real-time language switching",
-      "Right-to-left (RTL) support",
-      "Dynamic text direction",
-      "Formatted numbers and dates"
-    ]
-  },
   "Care": "Care",
   "On": "On",
-  "more": "This is additional",
-  "switch_language": "Switch to Arabic",
 
   "common": {
     "save": "Save",
-    "continue": "Continue"
-    ,
+    "continue": "Continue",
     "skip": "Skip",
     "send": "Send",
     "next": "Next",
@@ -45,94 +32,145 @@
     "no": "No",
     "lets_go": "Let's go!",
     "later": "Later!",
+    "success": "Success",
+    "enter": "Enter",
     "unauthorized": "Authentication token not found.",
     "error_fetching_data": "Failed to load {{stateKey}}.",
     "masked_national_id": "xxxxxxxxxxxxxx",
-    "no_items_found": "No items found"
+    "no_items_found": "No items found",
+    "no_file_to_download": "No file available to download",
+    "unknown_error": "Something went wrong",
+    "file_saved": "File saved successfully",
+    "download_failed": "Download failed",
+    "user_name_placeholder": "User Name"
   },
- "add_selector": {
+
+  "create_code": {
+    "title": "Create Code",
+    "code_description": "A code valid for one hour will be generated",
+    "create_new_code": "Create New Code",
+    "creating": "Creating...",
+    "your_code": "Your Code",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "code_copied": "Code copied to clipboard",
+    "code_created": "Code created successfully",
+    "failed_to_create": "Failed to create code",
+    "copy_failed": "Failed to copy code",
+    "no_code_returned": "No code returned from server"
+  },
+
+  "add_selector": {
     "title": "Add New Record",
     "prompt": "What would you like to add?",
-    "placeholder": "Select a record type...",
+    "placeholder": "Choose record type...",
     "add_result": "Add Lab Result",
-    "add_xray": "Add X-ray",
-    "add_report": "Add Doctor Report",
+    "add_xray": "Add X-Ray",
+    "add_report": "Add Medical Report",
     "add_medicine": "Add Medicine"
   },
+
   "add_result": {
     "title": "Add Lab Result",
     "test_name": "Test Name",
-    "test_name_placeholder": "e.g., Blood Sugar Test",
+    "test_name_placeholder": "e.g. Blood Sugar Test",
     "result_value": "Result Value",
-    "result_value_placeholder": "e.g., 120 mg/dL",
+    "result_value_placeholder": "e.g. 120 mg/dL",
     "notes": "Notes",
     "notes_placeholder": "Notes (optional)",
-    "upload_file": "Upload Result File"
+    "upload_file": "Upload Result File",
+    "lab_name": "Lab Name",
+    "lab_name_placeholder": "Enter lab name",
+    "date": "Test Date",
+    "date_placeholder": "Select test date"
   },
+
   "add_eshaa": {
-    "title": "Add X-ray",
-    "xray_name": "X-ray Name",
-    "xray_name_placeholder": "e.g., Chest X-ray",
+    "title": "Add X-Ray",
+    "xray_name": "X-Ray Name",
+    "xray_name_placeholder": "e.g. Chest X-Ray",
     "date": "Date",
     "date_placeholder": "Select date",
     "lab_name": "Lab Name",
     "lab_name_placeholder": "Enter lab or hospital name",
     "doctor_name": "Doctor Name",
-    "doctor_name_placeholder": "Enter doctor's name",
+    "doctor_name_placeholder": "Enter doctor name",
     "notes": "Notes",
     "notes_placeholder": "Notes (optional)",
-    "upload_file": "Upload X-ray Image"
+    "upload_file": "Upload X-Ray Image"
   },
+
   "add_report": {
-    "title": "Add Doctor Report",
+    "title": "Add Medical Report",
     "report_title": "Report Title",
-    "report_title_placeholder": "e.g., Cardiology Consultation",
+    "report_title_placeholder": "e.g. Cardiology Consultation",
     "doctor_name": "Doctor Name",
-    "doctor_name_placeholder": "Enter doctor's name",
+    "doctor_name_placeholder": "Enter doctor name",
     "specialty": "Specialty",
-    "specialty_placeholder": "e.g., Cardiology",
+    "specialty_placeholder": "e.g. Cardiology",
     "date": "Date",
     "date_placeholder": "Select date",
     "notes": "Notes",
     "notes_placeholder": "Notes (optional)",
     "upload_file": "Upload Report File"
   },
+
   "add_medicine": {
     "title": "Add Medicine",
     "enter_following_data": "Please enter the following data",
     "medicine_name": "Medicine Name",
     "medicine_name_placeholder": "Enter medicine name",
     "dosage": "Dosage",
-    "dosage_placeholder": "e.g., 500mg, 1 tablet",
+    "dosage_placeholder": "e.g. 500mg, one tablet",
     "start_date": "Start Date",
     "start_date_placeholder": "Select start date",
     "end_date": "End Date",
     "end_date_placeholder": "Select end date"
   },
+
+  "form": {
+    "add_hint": "You can only submit this request once to add the item. Approval is subject to administration.",
+    "add_new": "Add New",
+    "name_in_arabic": "Name in Arabic",
+    "name_in_english": "Name in English",
+    "enter_name_in_arabic": "Enter name in Arabic",
+    "enter_name_in_english": "Enter name in English"
+  },
+
   "auth": {
-    
-    "signin": "Sign in",
-    "signup": "Sign up",
-    "login": "Log in",
+    "signin": "Sign In",
+    "signup": "Sign Up",
+    "create_account": "Create Account",
+    "reset_password": "Reset Password",
+    "set_password": "Set Password",
+    "logout": "Logout",
+    "enter_passwords": "Please enter the passwords",
+    "current_password": "Current Password",
+    "enter_current_password": "Enter current password",
+    "new_password": "New Password",
+    "enter_new_password": "Enter new password",
+    "confirm_new_password": "Confirm New Password",
+    "reenter_new_password": "Re-enter new password",
+    "passwords_do_not_match": "Passwords do not match",
+    "password_rules": "Must include: at least 8 characters, English letters, symbols (@, #, $ ...)",
+    "password_reset_success": "Password reset successfully.",
+    "id": "National ID",
+    "create_account_prompt": "To create your account, please fill in the following data..",
+    "your_account": "your account",
     "national_id": "National ID",
-    "national_id_placeholder": "Enter your national ID",
-    "enter_national_id": "Enter your national ID",
+    "national_id_placeholder": "Enter national ID",
+    "final_step_password": "Final step, password",
     "password": "Password",
-    "enter_password": "Enter your password",
-    "forgot_password_q": "Forgot password?",
+    "forgot_password_q": "Forgot your password?",
     "password_placeholder": "Enter your password",
-    
+    "confirm_password": "Confirm Password",
     "confirm_password_placeholder": "Re-enter password",
     "email_placeholder": "Enter your email",
     "enter_email_send_code": "Enter your email, a code will be sent",
     "send_code": "Send code",
     "enter_code": "Please enter the code",
     "resend_code": "Resend code",
-    "enter_passwords": "Please enter the passwords",
-    "create_account": "Create Account",
     "create_your_account_prompt": "To create your account, please fill in the following data..",
-    "your_account": "your account",
-    "create_child_account_prompt": "To create your child's account, please fill in the following data..",
     "linked_accounts": "Linked accounts",
     "choose_account_type": "Choose account type",
     "personal_account": "Personal account",
@@ -142,53 +180,45 @@
     "enter_child_data": "Enter child's data",
     "add_another_account": "Add another account",
     "impersonate_user": "Impersonate user",
-    "reset_password": "Reset password",
     "email": "Email",
     "enter_email": "Enter your email",
     "code": "Code",
-    "current_password": "Current password",
-    "new_password": "New password",
-    "confirm_password": "Confirm password",
-    "reenter_password": "Re-enter password",
-    "password_rules": "Must include: at least 8 characters, English letters, symbols (@, #, $ ...)",
-    "enter_email_to_reset": "Please enter your email to reset your password",
     "under_18_error": "Users must be 18 or older to create a personal account.",
     "over_18_error": "For users 18 and over, please create a personal account.",
-    "logout":"Logout",
-     "your_child_account": "your child's account"
-     , "child_name": "Child's Name",
- "create_account_prompt": "To create your account, please fill in the following data..",
+    "your_child_account": "your child's account",
+    "child_name": "Child's Name",
     "child_name_placeholder": "Enter child's name",
     "child_email": "Child's Email",
     "child_email_placeholder": "Enter child's email",
     "child_national_id": "Child's National ID",
     "child_national_id_placeholder": "Enter child's national ID",
     "child_birth_certificate": "Child's Birth Certificate",
-   "final_step_password": "Final step, ",
-    "agree_prefix":"Agree to ",
-    "agree":"Agree",
-    "terms_only":"Terms and Conditions",
+    "agree_prefix": "Agree to ",
+    "agree": "Agree",
+    "terms_only": "Terms and Conditions",
     "terms_full_text": "Please read the terms and conditions carefully before using the application. By using this application, you agree to be bound by these terms. If you do not agree to these terms, do not use this application.",
-
-    "create_account_button": "Create Account"
-
+    "create_account_button": "Create Account",
+    "child_account_created": "Child account created successfully."
   },
+
   "errors": {
     "add_medicine_failed": "Could not save medicine. Please try again.",
     "add_record_failed": "Could not save record. Please try again.",
     "image_processing_failed": "Failed to process image. Please try another one."
   },
+
   "account": {
     "linked_accounts": "Linked Accounts",
     "primary_user": "Primary User",
     "no_phone_number": "No phone number",
     "current_account": "Current Account",
     "linked_accounts_mother": "Linked Accounts to Mother's Account",
-    "impersonate_user": "Impersonate User",
+    "impersonate_user": "Switch to Child",
     "add_another_account": "Add Another Account",
     "switch_to_parent": "Switch to Parent Account",
     "logout": "Logout"
   },
+
   "survey": {
     "title": "Survey",
     "notes_prompt": "If you would like to share any notes",
@@ -216,11 +246,11 @@
     "get_started": "Get started",
     "enter_following_data": "Please enter the following data",
     "account": "Account",
-    "results_title": "Lab results",
-    "xray_title": "X-rays",
-    "reports_title": "Doctors' reports",
+    "results_title": "Lab Results",
+    "xray_title": "X-Rays",
+    "reports_title": "Doctors' Reports",
     "medicines_title": "Medicines",
-    "last_reports_title": "Previous reports",
+    "last_reports_title": "Previous Reports",
     "hello": "Hello,",
     "results": {
       "analysis_name": "Test name:",
@@ -244,7 +274,12 @@
       "start_date": "Start Date:",
       "end_date": "End Date:",
       "frequency_twice_daily": "Twice daily"
-    }
+    },
+    "no_results_found": "No lab results found.",
+    "no_medicines_found": "No medicines found.",
+    "no_doctor_reports_found": "No doctor reports found.",
+    "no_xrays_found": "No X-rays found.",
+    "no_reports_found": "No previous reports found."
   },
 
   "profile": {
@@ -254,21 +289,28 @@
     "dob": "Date of Birth",
     "gender": "Gender",
     "reset_password": "Reset Password",
-    "birth_certificate": "Birth certificate",
-    "uploaded_file":"uploaded file",
+    "birth_certificate": "Birth Certificate",
+    "uploaded_file": "Previously Uploaded File",
     "dob_placeholder": "Select date of birth",
     "gender_placeholder": "Select gender",
-     "male": "Male",
-    "female": "Female"
+    "male": "Male",
+    "female": "Female",
+    "delete_photo": "Delete Photo",
+    "camera_photo": "Take a Photo",
+    "gallery_photo": "Choose from Gallery",
+    "photo_deleted": "Profile photo deleted successfully",
+    "photo_updated": "Profile photo updated successfully"
   },
 
   "marketing": {
+    "health_in_pocket": "Your health in your pocket",
     "health_in_pocket_part1": "Your health",
     "health_in_pocket_part2": "in your pocket",
     "anytime_anywhere": "Anytime - Anywhere",
     "login": "Log in",
     "register": "Register"
   },
+
   "services": {
     "nearest_service": "Nearest medical service",
     "share_location_prompt": "Share your location to find the nearest medical service",
@@ -279,34 +321,48 @@
     "address": "Address",
     "enter_detailed_address": "Enter detailed address"
   },
+
   "permissions": {
-    "allow_location_q": "Allow access to location?"
+    "allow_location_q": "Allow access to location?",
+    "storage_title": "Storage Permission",
+    "storage_message": "The app needs storage access to download files",
+    "location_title": "Location Permission",
+    "location_message": "The app needs access to your location",
+    "location_denied_title": "Location Permission Denied",
+    "location_denied_message": "Location permission is required to use this feature.",
+    "open_settings": "Open Settings",
+    "location_access_title": "Location Access",
+    "location_access_description": "We need access to your location to find nearby services."
   },
+
   "uploader": {
-    "pick_failed": "Image selection failed",
-    "upload": "Upload"
+    "upload": "Upload",
+    "pick_failed": "Image selection failed. Please try again."
   },
+
   "payment": {
-    "details": "Transaction details",
-    "records": "Payment records",
-    "recent_transactions": "Your recent transactions",
+    "details": "Transaction Details",
+    "records": "Payment Records",
+    "recent_transactions": "Your Recent Transactions",
     "to": "To",
-    "reference_number": "Reference number",
+    "reference_number": "Reference Number",
     "date": "Date",
     "currency": "EGP",
     "masked_name": "Jilan A*** G***",
     "masked_phone": "0123456789"
   },
+
   "drawer": {
     "user_name_placeholder": "User Name",
     "profile": "Profile",
     "billing": "Billing & Payments",
     "find_service": "Find Nearest Service",
     "contact_us": "Contact Us",
-    "linked_accounts":"Linked Accounts",
-    "doctors_used_codes": "Doctors who used your codes",
-    "your_created_codes": "Your created codes"
+    "linked_accounts": "Linked Accounts",
+    "doctors_used_codes": "Doctors Who Used Your Codes",
+    "your_created_codes": "Your Created Codes"
   },
+
   "notifications": {
     "title": "Notifications",
     "all": "All",
@@ -317,5 +373,47 @@
       "upload_result": "Lab result uploaded.",
       "system_announcement": "Announcement from the system."
     }
+  },
+
+  "doctors_used_codes": { "title": "Doctors Who Used Your Codes" },
+  "your_created_codes":  { "title": "Your Created Codes" },
+
+  "result": {
+    "analysis_name": "Test Name",
+    "lab_name": "Lab Name",
+    "analysis_date": "Test Date",
+    "description": "Description"
+  },
+
+  "eshaa": {
+    "xray_name": "X-Ray Name",
+    "lab_name": "Lab Name",
+    "xray_date": "X-Ray Date",
+    "description": "Description"
+  },
+
+  "report": {
+    "doctor_name": "Doctor Name",
+    "report_date": "Examination Date",
+    "required_tests": "Required Tests",
+    "required_scans": "Required Scans",
+    "diagnosis": "Diagnosis",
+    "notes": "Medical Notes"
+  },
+
+  "medicine": {
+    "from": "From",
+    "to": "To",
+    "dosage": "Dosage",
+    "start_date": "Start Date:",
+    "end_date": "End Date:"
+  },
+
+  "record_type": {
+    "checkup": "Checkup",
+    "prescription": "Prescription",
+    "lab_test": "Lab Test",
+    "xray": "X-Ray",
+    "unknown": "Record"
   }
 }

@@ -6,12 +6,12 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  useWindowDimensions,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import images from '../constants2/images';
 import { useAuth } from '../contexts/authContext';
-import { hp, wp } from '../utils/responsive';
 import { Icons } from './Icons';
 import LanguageSwitch from './switchlng';
 
@@ -20,117 +20,55 @@ const CustomDrawerContent = (props) => {
   const { navigation } = props;
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
-
-  const { user, logout, isImpersonating } = useAuth();
-  if (user && user.user && user.user.resource) {
-    console.log('user ' + JSON.stringify(user.user.resource.age));
-  }
-  
-console.log(user);
+  const { width, height } = useWindowDimensions();
+  const { user, logout } = useAuth();
 
   const age = useMemo(() => {
-    // Add null check for user and user.user to prevent errors during account switching
-    if (!user || !user.user || !user.user.resource) {
-      return null;
-    }
-    
-    const birthdate = user.user.resource.birthdate;
-    console.log('birthdate ' + birthdate);
-    if (!birthdate) {
-      return null; // Cannot determine age
-    }
+    const nationalId = user?.user?.resource?.national_number;
+    if (!nationalId || nationalId.length !== 14) return null;
     try {
-      const birthDateObj = new Date(birthdate);
-      
-      // Validate the created date is valid
-      if (isNaN(birthDateObj.getTime())) {
-        console.warn('Invalid birthdate from resource:', birthdate);
-        return null; // Invalid date
-      }
-      
+      const firstDigit = nationalId.substring(0, 1);
+      if (firstDigit !== '2' && firstDigit !== '3') return null;
+      const century = firstDigit === '3' ? '20' : '19';
+      const year  = parseInt(century + nationalId.substring(1, 3), 10);
+      const month = parseInt(nationalId.substring(3, 5), 10) - 1;
+      const day   = parseInt(nationalId.substring(5, 7), 10);
+      const birthDate = new Date(year, month, day);
+      if (isNaN(birthDate.getTime())) return null;
       const today = new Date();
-      let calculatedAge = today.getFullYear() - birthDateObj.getFullYear();
-      const m = today.getMonth() - birthDateObj.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
-        calculatedAge--;
-      }
+      let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) calculatedAge--;
       return calculatedAge;
     } catch (e) {
       return null;
     }
   }, [user]);
-  console.log('AGEDDD       '+age);
-  
-  const isChild = isImpersonating || (age !== null && age < 18);
 
-  // Debug: Check values
-  if (user && user.user) {
-    console.log('CustomDrawer Debug:', { 
-      user: user?.user?.name, 
-      birthDate: user?.user?.resource?.birthdate,
-      age, 
-      isChild, 
-      isImpersonating,
-      nationalId: user?.user?.resource?.national_number 
-    });
-  }
+  const isChild = age !== null && age < 18;
 
-  // Get the parent navigator (AppStack)....
+  if (!user?.user) return null;
+
   const parentNavigation = navigation.getParent();
 
   const handleNavigate = (screenName) => {
-    // Close the drawer
     navigation.closeDrawer();
-    // Navigate using the parent Stack navigator
     parentNavigation?.navigate(screenName);
   };
 
-  // Menu items
   const menuItems = [
-    {
-      id: 1, 
-      title: t('drawer.profile'),
-      icon: Icons.Profilec,
-      onPress: () => handleNavigate('ProfileStack'),
-    },
-    { 
-      id: 2, 
-      title: t('drawer.billing'),
-      icon: Icons.Wallet,
-      onPress: () => handleNavigate('PaymentStack'),
-    },
-    {
-      id: 3, 
-      title: t('drawer.find_service'),
-      icon: Icons.Gps,
-      onPress: () => handleNavigate('ServiceStack'),
-      disabled: true,
-    },
-    {
-      id: 4, 
-      title: t('drawer.doctors_used_codes'),
-      icon: Icons.Codea,
-      onPress: () => handleNavigate('DoctorsUsedCodes'),
-    },
-    {
-      id: 5, 
-      title: t('drawer.your_created_codes'),
-      icon: Icons.Codea,
-      onPress: () => handleNavigate('YourCreatedCodes'),
-    },
-    {
-      id: 6, 
-      title: t('drawer.contact_us'),
-      icon: Icons.Call,
-      onPress: () => handleNavigate('ContactUs'),
-      disabled: true,
-    },
+    { id: 1, title: t('drawer.profile'),           icon: Icons.Profilec, onPress: () => handleNavigate('ProfileStack') },
+    { id: 2, title: t('drawer.billing'),            icon: Icons.Wallet,   onPress: () => handleNavigate('PaymentStack') },
+    { id: 3, title: t('drawer.find_service'),       icon: Icons.Gps,      onPress: () => handleNavigate('ServiceStack'), disabled: true },
+    { id: 4, title: t('drawer.doctors_used_codes'), icon: Icons.Codea,    onPress: () => handleNavigate('DoctorsUsedCodes') },
+    { id: 5, title: t('drawer.your_created_codes'), icon: Icons.Codea,    onPress: () => handleNavigate('YourCreatedCodes') },
+    { id: 6, title: t('drawer.contact_us'),         icon: Icons.Call,     onPress: () => handleNavigate('ContactUs'), disabled: true },
   ];
 
   const styles = StyleSheet.create({
     container: {
-      width:'100%',
-      height:'100%',
+      width: '100%',
+      height: '100%',
       backgroundColor: '#fff',
       paddingTop: insets.top,
       paddingBottom: insets.bottom,
@@ -148,51 +86,47 @@ console.log(user);
     profileInfo: {
       alignItems: 'center',
       gap: 10,
-      flex: 1,
-      // justifyContent is now on profileHeader
-
+      // ✅ flex: 1 removed — let it size to content so button has room
+      flexShrink: 1,
     },
     avatar: {
       width: 60,
       height: 60,
       borderRadius: 30,
     },
-    btn: {
-      backgroundColor: '#014CC4',
-      paddingHorizontal: wp(5),
-      paddingVertical: hp(1.5),
-      borderRadius: wp(3),
-      alignItems: 'center',
-      marginVertical: hp(2),
-      // marginHorizontal: wp(2.5),
-      color: '#fff',
-      width: wp(35),
-      height: hp(6),
-
-    },
-    btnText: {
-      fontWeight: '700',
-      fontSize: Math.min(wp(3), 20),
-      // marginBottom: hp(2),
-      color: '#fff',
+    profileImage: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
     },
     profileName: {
-      fontSize: 14,
-      fontWeight: '400',
+      fontSize: 16,
+      fontWeight: 'bold',
       color: '#000',
       textAlign: isRTL ? 'right' : 'left',
-      flex: 1,
+      // ✅ shrink name text if needed so button doesn't overflow
+      flexShrink: 1,
     },
+    // ✅ FIX: removed fixed paddingHorizontal, use auto width + minWidth
     editButton: {
       backgroundColor: '#014CC4',
-      paddingHorizontal: 10,
+      paddingHorizontal: 12,
       paddingVertical: 8,
       borderRadius: 12,
+      // ✅ never shrink — the button always shows fully
+      flexShrink: 0,
+      // ✅ allow text to wrap only if truly necessary
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     editText: {
       color: '#fff',
-      fontSize: 14,
+      // ✅ slightly smaller font so "Linked Accounts" fits in one line
+      fontSize: 12,
       fontWeight: '600',
+      // ✅ prevent text from wrapping inside the button
+      numberOfLines: 1,
+      flexWrap: 'nowrap',
     },
     menuContainer: {
       flex: 1,
@@ -252,31 +186,31 @@ console.log(user);
     <View style={styles.container}>
       {/* Profile Section */}
       <View style={styles.profileSection}>
-        <View style={[styles.profileHeader, { flexDirection: isRTL ? 'row-reverse' : 'row', columnGap: 15 }]}>
-          {/* User Info: Avatar and Name */}
+        <View style={[styles.profileHeader, { flexDirection: isRTL ? 'row-reverse' : 'row', columnGap: 12 }]}>
+
+          {/* User Info */}
           <View style={[styles.profileInfo, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <TouchableOpacity onPress={() => handleNavigate('ProfileStack')}>
-              {
-                user?.user?.avatar ? (
-                           <Image source={{uri:user.user.avatar}} style={styles.avatar} />
-                           ) : (
-                           <Icons.Profilea width={40} height={40} />
-                           )
-                      }
+              {user?.user?.avatar ? (
+                <Image source={{ uri: user.user.avatar }} style={styles.profileImage} />
+              ) : (
+                <Icons.Profilea width={40} height={40} imageUrl={user.user.avatar} />
+              )}
             </TouchableOpacity>
+            {/* ✅ numberOfLines={1} prevents name from pushing button off screen */}
             <Text style={styles.profileName} numberOfLines={1}>
               {user?.user?.name || t('drawer.user_name_placeholder')}
             </Text>
           </View>
 
-          {/* Linked Accounts Button (only for parents) */}
+          {/* Linked Accounts Button — only for parents */}
           {!isChild && (
-            <>
-            
-            <TouchableOpacity style={styles.btn} onPress={() => handleNavigate('accounts')}>
-              <Text style={styles.btnText}>{t('drawer.linked_accounts', { defaultValue: 'الحسابات المرتبطة' })}</Text>
+            <TouchableOpacity style={styles.editButton} onPress={() => handleNavigate('accounts')}>
+              {/* ✅ numberOfLines={1} keeps button single-line */}
+              <Text style={styles.editText} numberOfLines={1}>
+                {t('drawer.linked_accounts')}
+              </Text>
             </TouchableOpacity>
-            </>
           )}
         </View>
       </View>
@@ -296,18 +230,21 @@ console.log(user);
             disabled={!!item.disabled}
           >
             <item.icon style={[styles.menuIcon, item.disabled && styles.menuIconDisabled]} />
-            <Text style={[styles.menuText, item.disabled && styles.menuTextDisabled]}>{item.title}</Text>
+            <Text style={[styles.menuText, item.disabled && styles.menuTextDisabled]}>
+              {item.title}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      {/* Logout Button */}
+      {/* Footer */}
       <View style={[styles.footer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <TouchableOpacity onPress={logout} style={[styles.logoutButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <TouchableOpacity
+          onPress={logout}
+          style={[styles.logoutButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+        >
           <Image source={images.logout} style={styles.logoutIcon} />
-          <Text style={styles.logoutText}> 
-            {t('auth.logout', { defaultValue: 'تسجيل الخروج' })}
-          </Text>
+          <Text style={styles.logoutText}>{t('auth.logout')}</Text>
         </TouchableOpacity>
         <LanguageSwitch />
       </View>

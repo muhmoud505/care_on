@@ -102,7 +102,7 @@ const Medicines = () => {
             )}
             <TouchableOpacity
               style={finalAddButtonStyle}
-              onPress={() => navigation.navigate('addResult')}
+              onPress={() => navigation.navigate('addMedicine')}
             >
               <Icons.Add width={wp(18)} height={wp(18)} />
             </TouchableOpacity>

@@ -4,24 +4,22 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../contexts/authContext';
 import { Icons } from './Icons';
 
-export const HomeHeader=({ showUserInfo = true })=>{
-  const {user}=useAuth()
-  
-  const navigation=useNavigation()
+export const HomeHeader = ({ showUserInfo = true }) => {
+  const { user } = useAuth();
+  const navigation = useNavigation();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
   const userName = user?.user?.name;
-  console.log(user?.user.avatar);
-  
-  
-  return(
+
+  return (
     <View style={[styles.headerContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-      {/* Left side: Menu button */}
+
+      {/* Menu button */}
       <TouchableOpacity onPress={() => navigation.getParent()?.toggleDrawer()}>
         <Icons.Menu width={24} height={24} color="#000" />
       </TouchableOpacity>
 
-      {/* Center: Greeting */}
+      {/* Greeting */}
       {showUserInfo && (
         <View style={[styles.greetingContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <Text style={styles.txt1} numberOfLines={1}>
@@ -33,35 +31,27 @@ export const HomeHeader=({ showUserInfo = true })=>{
         </View>
       )}
 
-      {/* Right side: Action icons */}
+      {/* Action icons */}
       <View style={[styles.actionsContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Notifications')}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
           <Icons.Notification width={24} height={24} color="#000" style={styles.actionIcon} />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('ProfileStack')}
-        >
-          {
-          user?.user?.avatar ? (
-           <Image source={{uri:user.user.avatar}} style={styles.profileImage} />
+        <TouchableOpacity onPress={() => navigation.navigate('ProfileStack')}>
+          {user?.user?.avatar ? (
+            <Image source={{ uri: user.user.avatar }} style={styles.profileImage} />
           ) : (
-           <Icons.Profilea width={40} height={40} imageUrl={user.user.avatar} />
-          )
-        }
-          
+            <Icons.Profilea width={40} height={40} imageUrl={user?.user?.avatar} />
+          )}
         </TouchableOpacity>
       </View>
+
     </View>
-  )
-}
+  );
+};
+
 const styles = StyleSheet.create({
-  container:{
-    backgroundColor:'#fff'
-  },
   headerContainer: {
-    height: 100, // Set your desired header height
+    height: 100,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -71,16 +61,12 @@ const styles = StyleSheet.create({
   txt1: {
     fontSize: 20,
     fontWeight: 'bold',
-    color:'black'
+    color: 'black',
   },
   txt2: {
     fontSize: 14,
     fontWeight: 'bold',
-    color:'#888888',
-  },
-  menuIcon: {
-    width: 24,
-    height: 24,
+    color: '#888888',
   },
   greetingContainer: {
     flex: 1,
@@ -91,7 +77,7 @@ const styles = StyleSheet.create({
   waveIcon: {
     width: 24,
     height: 24,
-    margin:5
+    margin: 5,
   },
   actionsContainer: {
     alignItems: 'center',
@@ -108,3 +94,5 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 });
+
+export default HomeHeader;

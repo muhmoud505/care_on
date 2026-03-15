@@ -16,7 +16,9 @@ const Result = ({
   icon,
   fileUrl
 }) => {
-  const { t } = useTranslation();
+  const { t,i18n } = useTranslation();
+
+  const isRTL = i18n.dir() === 'rtl';
 
   // Parse the description if it's a JSON string
   let parsedDescription = { labName: '', notes: '', date: '' };

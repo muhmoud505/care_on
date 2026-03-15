@@ -768,7 +768,7 @@ export const AuthProvider = ({ children }) => {
     setUser({ user: childWithAvatar, token: { value: tokenValue } });
   };
 
-  const switchAccount = (account) => setActiveAccount(account);
+const switchAccount = (account) => setActiveAccount(account);
 
   const setTempAvatar = async (userId, uri) => {
     setUser(prev =>

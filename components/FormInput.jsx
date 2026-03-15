@@ -82,7 +82,7 @@ const FormField = ({
   };
 
   return (
-    <View style={[styles.container, { direction:isRTL?'ltr':'ltr' }, otherStyles]}>
+    <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }, otherStyles]}>
       <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
         {title}
         {required && <Text style={styles.required}> *</Text>}

@@ -28,7 +28,7 @@ const PaymentComponent = () => {
             <TouchableOpacity 
               onPress={()=>navigation.navigate('payment_status')}
             >
-                <Icons.arrleft style={{transform: [{rotate: isRTL ? '180deg' : '0deg'}],top:hp(1.2)}} width={wp(4)} height={wp(4)} />
+                <Icons.arrleft style={{transform: [{rotate: isRTL ? '0deg' : '180deg'}],top:hp(1.2)}} width={wp(4)} height={wp(4)} />
             </TouchableOpacity>
         </View>
       </View>

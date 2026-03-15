@@ -4,335 +4,307 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import CustomHeader from '../../../components/CustomHeader';
 import { Icons } from '../../../components/Icons';
 import Images from '../../../constants2/images';
 import { useAuth } from '../../../contexts/authContext';
-import { hp, profileStyles as styles, wp } from './profileStyles';
+import { getDynamicStyles, hp, profileStyles as styles, wp } from './profileStyles';
 
 const ParentProfile = () => {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible]   = useState(false);
   const [previewAvatar, setPreviewAvatar] = useState(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+  const ds = getDynamicStyles(isRTL);          // RTL-aware dynamic styles
   const navigation = useNavigation();
   const { user, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
-  console.log('User data to get avatar:', user);
 
+  /* ── Delete photo ── */
   const handleDeletePhoto = async () => {
     setModalVisible(false);
-    setPreviewAvatar(null); // optimistic clear
-
+    setPreviewAvatar(null);
     try {
       const result = await deleteUserAvatar(user.user.id);
       if (!result.success) throw new Error(result.error || 'Unknown error');
-
-      Toast.show({
-        type: 'success',
-        text1: t('common.success'),
-        text2: t('profile.photo_deleted', { defaultValue: 'Profile photo deleted successfully' }),
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      Toast.show({ type: 'success', text1: t('common.success'), text2: t('profile.photo_deleted'), position: 'top', visibilityTime: 3000 });
     } catch (error) {
-      console.warn('deleteUserAvatar error', error);
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: error?.message || t('common.unknown_error', { defaultValue: 'Something went wrong' }),
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      Toast.show({ type: 'error', text1: t('common.error'), text2: error?.message || t('common.unknown_error'), position: 'top', visibilityTime: 3000 });
     }
   };
 
+  /* ── Download birth certificate ── */
   const handleDownloadBirthCertificate = async () => {
-    console.log('Download button pressed');
-    
     const url =
       user?.user?.resource?.birth_certificate_url ||
-      user?.user?.resource?.birth_certificate ||
-      user?.user?.resource?.certificate_url ||
-      user?.user?.resource?.birth_cert_url ||
-      user?.user?.birth_certificate_url ||
-      user?.user?.birth_certificate ||
-      user?.user?.certificate_url ||
-      user?.user?.birth_cert_url ||
+      user?.user?.resource?.birth_certificate      ||
+      user?.user?.resource?.certificate_url        ||
+      user?.user?.resource?.birth_cert_url         ||
+      user?.user?.birth_certificate_url            ||
+      user?.user?.birth_certificate                ||
+      user?.user?.certificate_url                  ||
+      user?.user?.birth_cert_url                   ||
       null;
-    
-    console.log('Download URL found:', url);
-    console.log('User resource data:', user?.user?.resource);
-    
+
     if (!url) {
-      console.log('No URL found, showing error toast');
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: t('common.no_file_to_download', { defaultValue: 'No file available to download' }),
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      Toast.show({ type: 'error', text1: t('common.error'), text2: t('common.no_file_to_download'), position: 'top', visibilityTime: 3000 });
       return;
     }
-
     try {
-      console.log('Starting download...');
       const fileUri = `${FileSystem.cacheDirectory}birth_certificate.pdf`;
-      console.log('File URI:', fileUri);
-      
-      const downloadResumable = FileSystem.createDownloadResumable(url, fileUri);
-      console.log('Download resumable created');
-      
-      const { uri } = await downloadResumable.downloadAsync();
-      console.log('Download completed, file URI:', uri);
-
+      const { uri } = await FileSystem.createDownloadResumable(url, fileUri).downloadAsync();
       if (!(await Sharing.isAvailableAsync())) {
-        console.log('Sharing not available');
-        Toast.show({
-          type: 'error',
-          text1: t('common.error'),
-          text2: t('common.sharing_not_available', { defaultValue: 'Sharing is not available on this device' }),
-          position: 'top',
-          visibilityTime: 3000,
-        });
+        Toast.show({ type: 'error', text1: t('common.error'), text2: t('common.sharing_not_available'), position: 'top', visibilityTime: 3000 });
         return;
       }
-
-      console.log('Sharing file...');
       await Sharing.shareAsync(uri);
-      console.log('Share completed');
     } catch (error) {
-      console.log('Download error:', error);
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: error.message,
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      Toast.show({ type: 'error', text1: t('common.error'), text2: error.message, position: 'top', visibilityTime: 3000 });
     }
   };
 
+  /* ── Pick image ── */
   const handleImagePick = async (type) => {
     setModalVisible(false);
     try {
-      let result;
+      let pickerResult;
       if (type === 'camera') {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
-          Toast.show({
-            type: 'error',
-            text1: t('common.error'),
-            text2: t('permissions.camera_required', { defaultValue: 'Camera permission is required' }),
-            position: 'top',
-            visibilityTime: 3000,
-          });
+          Toast.show({ type: 'error', text1: t('common.error'), text2: t('permissions.camera_required'), position: 'top', visibilityTime: 3000 });
           return;
         }
-        result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 0.5,
-        });
+        pickerResult = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [1, 1], quality: 0.5 });
       } else {
-        result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 0.5,
-        });
+        pickerResult = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [1, 1], quality: 0.5 });
       }
-
-      if (!result || result.canceled) return;
-
-      if (result.assets && result.assets.length > 0) {
-        const asset = result.assets[0];
+      if (!pickerResult || pickerResult.canceled) return;
+      if (pickerResult.assets?.length > 0) {
+        const asset = pickerResult.assets[0];
         const formData = new FormData();
-        formData.append('avatar', {
-          uri: asset.uri,
-          name: asset.fileName || `avatar_${Date.now()}.jpg`,
-          type: asset.mimeType || 'image/jpeg',
-        });
-
-        // Optimistic preview: show the selected image immediately
+        formData.append('avatar', { uri: asset.uri, name: asset.fileName || `avatar_${Date.now()}.jpg`, type: asset.mimeType || 'image/jpeg' });
         const previousAvatar = user?.user?.avatar;
         setPreviewAvatar(asset.uri);
-        try {
-          // Also set a temporary avatar in the global auth state so other UI updates (drawer) reflect immediately
-          setTempAvatar(user.user.id, asset.uri);
-        } catch (e) {
-          console.warn('setTempAvatar failed', e.message);
-        }
-
-        const result = await updateUserProfile(user.user.id, formData);
-        if (!result.success) {
-          // Roll back if the server update failed
+        try { setTempAvatar(user.user.id, asset.uri); } catch (e) { console.warn('setTempAvatar failed', e.message); }
+        const updateResult = await updateUserProfile(user.user.id, formData);
+        if (!updateResult.success) {
           setPreviewAvatar(previousAvatar);
-          try {
-            setTempAvatar(user.user.id, previousAvatar);
-          } catch (e) {
-            console.warn('reverting temp avatar failed', e.message);
-          }
-
-          Toast.show({
-            type: 'error',
-            text1: t('common.error'),
-            text2: result.error || t('common.unknown_error', { defaultValue: 'Something went wrong' }),
-            position: 'top',
-            visibilityTime: 3000,
-          });
+          try { setTempAvatar(user.user.id, previousAvatar); } catch (e) { console.warn('reverting failed', e.message); }
+          Toast.show({ type: 'error', text1: t('common.error'), text2: updateResult.error || t('common.unknown_error'), position: 'top', visibilityTime: 3000 });
           return;
         }
-
-        Toast.show({
-          type: 'success',
-          text1: t('common.success'),
-          text2: t('profile.photo_updated', { defaultValue: 'Profile photo updated successfully' }),
-          position: 'top',
-          visibilityTime: 3000,
-        });
+        Toast.show({ type: 'success', text1: t('common.success'), text2: t('profile.photo_updated'), position: 'top', visibilityTime: 3000 });
       }
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: error.message,
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      Toast.show({ type: 'error', text1: t('common.error'), text2: error.message, position: 'top', visibilityTime: 3000 });
     }
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <CustomHeader text={t('profile.parent_profile_title', { defaultValue: 'الحساب الشخصي' })}/>
-      <View>
-        <TouchableOpacity style={styles.btn}
-        onPress={() => navigation.navigate('accounts')}
-        >
-            <Text style={styles.btnText}>{t('account.linked_accounts')}</Text>
-          </TouchableOpacity>
-        <View style={styles.cont1}>
-          <View style={styles.info}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top']}>
+      <CustomHeader text={t('profile.parent_profile_title')} />
 
-          
-           <Image
-            source={previewAvatar ? { uri: previewAvatar } : (user?.user?.avatar ? { uri: user.user.avatar } : Images.profile)}
-            style={styles.profileImg}
-            resizeMode="cover"
+      <ScrollView contentContainerStyle={{ paddingBottom: hp(5) }}>
+
+        {/* ── Profile card ── */}
+        <View style={localStyles.card}>
+
+          {/* Linked Accounts button — top corner, direction-aware */}
+          <TouchableOpacity
+            style={[localStyles.linkedBtn, { [isRTL ? 'left' : 'right']: wp(4) }]}
+            onPress={() => navigation.navigate('accounts')}
+          >
+            <Text style={localStyles.linkedBtnText} numberOfLines={1}>
+              {t('account.linked_accounts')}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Avatar + edit icon */}
+          <View style={localStyles.avatarWrapper}>
+            <Image
+              source={
+                previewAvatar
+                  ? { uri: previewAvatar }
+                  : user?.user?.avatar
+                    ? { uri: user.user.avatar }
+                    : Images.profile
+              }
+              style={localStyles.avatar}
+              resizeMode="cover"
             />
-          <TouchableOpacity style={styles.ele1} onPress={() => setModalVisible(true)}>
-           <View style={{ position: 'relative', width: wp(10), height: wp(10) }}>
-              <Icons.Edita width={wp(10)} height={wp(10)} />
-            <Icons.Editb
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  
-                  transform: [
-                    { translateX: -wp(2) },
-                    { translateY: -wp(3) },
-                  ],
-                  zIndex: 1000,
-                }}
-                width={wp(6)}
-                height={wp(6)}
-              />
-            </View>
+            {/* ✅ Edit icon: absolutely positioned at bottom-right of avatar */}
+            <TouchableOpacity
+              style={localStyles.editIconBtn}
+              onPress={() => setModalVisible(true)}
+            >
+              <View style={localStyles.editIconInner}>
+                <Icons.Edita width={wp(10)} height={wp(10)} />
+                <Icons.Editb
+                  style={localStyles.editbOverlay}
+                  width={wp(5)}
+                  height={wp(5)}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* Name & national ID */}
+          <Text style={localStyles.nameText} numberOfLines={1}>
+            {user?.user?.name || t('common.user_name_placeholder')}
+          </Text>
+          <Text style={localStyles.idText}>
+            {user?.user?.resource?.national_number || t('common.masked_national_id')}
+          </Text>
+        </View>
+
+        {/* ── Birth certificate ── */}
+        <View style={[localStyles.section, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+          <Text style={localStyles.sectionLabel}>{t('profile.birth_certificate')}</Text>
+          <TouchableOpacity onPress={handleDownloadBirthCertificate} style={{ width: '100%' }}>
+            <ImageBackground
+              source={Images.id}
+              style={[styles.background, { width: wp(90) }]}
+              imageStyle={{ width: wp(90), height: hp(8), borderRadius: 8 }}
+              resizeMode="cover"
+            >
+              <View style={[styles.overlay, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                <Icons.Download width={wp(6)} height={wp(6)} />
+                <Text style={[styles.txt4, { color: '#fff' }]}>{t('common.download')}</Text>
+              </View>
+            </ImageBackground>
           </TouchableOpacity>
         </View>
-        <View style={styles.info} >
-        <Text style={styles.txt1} numberOfLines={1}>
-          {user?.user?.name || t('drawer.user_name_placeholder', { defaultValue: 'User Name' })}
-        </Text>
-        <Text style={styles.txt2}>
-          {user?.user?.resource?.national_number || t('common.masked_national_id', { defaultValue: 'xxxxxxxxxxxxxx' })}
-        </Text> 
-        </View>
-      </View>
-      
-      <View style={styles.cont3}>
-        <Text>{t('profile.birth_certificate')}</Text>
-        <TouchableOpacity onPress={handleDownloadBirthCertificate}>
-          <ImageBackground 
-             source={Images.id}
-             style={[styles.background, {width: wp(90)}]}
-             imageStyle={{width:wp(90), height:hp(8),borderRadius:8}}
-             resizeMode='cover'
-          >
-            <View style={styles.overlay}>
-               <Image source={Images.download} />
-                 <Text style={[styles.txt4,{color:'#fff'}]}>{t('common.download')}</Text>
-              </View>
-          </ImageBackground>
+
+        {/* ── Add another account ── */}
+        <TouchableOpacity
+          style={styles.nextButton}
+          onPress={() => navigation.navigate('Auth', { screen: 's2', params: { userType: 'child', isParentAddingChild: true } })}
+        >
+          <Text style={styles.nextButtonText}>{t('account.add_another_account')}</Text>
         </TouchableOpacity>
 
-      </View>
-      <TouchableOpacity
-        style={styles.nextButton}
-        onPress={() =>
-          navigation.navigate('Auth', {
-            screen: 's2',
-            params: {
-              userType: 'child',
-              isParentAddingChild: true,
-            },
-          })
-        }
-                     
-      >
-        <Text style={styles.nextButtonText}>{t('account.add_another_account')}</Text>
-         </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('reset')}>
-        <Text style={styles.link}>{t('profile.reset_password')}</Text>
-      </TouchableOpacity>
-      </View>
+        {/* ── Reset password ── */}
+        <TouchableOpacity onPress={() => navigation.navigate('reset')}>
+          <Text style={[styles.link, { textAlign: isRTL ? 'right' : 'left' }]}>
+            {t('profile.reset_password')}
+          </Text>
+        </TouchableOpacity>
 
+      </ScrollView>
+
+      {/* ── Photo options modal ── */}
       {modalVisible && (
-        <TouchableOpacity 
-          style={localStyles.modalOverlay} 
-          activeOpacity={1} 
-          onPress={() => setModalVisible(false)}
-        >
-          <TouchableOpacity 
-            activeOpacity={1} 
-            style={localStyles.modalContent}
-            onPress={() => {}}
-          >
-            <TouchableOpacity 
-              style={localStyles.closeIconContainer} 
-              onPress={() => setModalVisible(false)}
-            >
+        <TouchableOpacity style={localStyles.modalOverlay} activeOpacity={1} onPress={() => setModalVisible(false)}>
+          <TouchableOpacity activeOpacity={1} style={localStyles.modalContent} onPress={() => {}}>
+            <TouchableOpacity style={[localStyles.closeIconContainer, { [isRTL ? 'left' : 'right']: 15 }]} onPress={() => setModalVisible(false)}>
               <Text style={localStyles.closeIcon}>✕</Text>
             </TouchableOpacity>
             <TouchableOpacity style={localStyles.option} onPress={handleDeletePhoto}>
-              <Text style={[localStyles.optionText, { color: 'red' }]}>{t('profile.delete_photo', { defaultValue: 'حذف الصورة' })}</Text>
+              <Text style={[localStyles.optionText, { color: 'red' }]}>{t('profile.delete_photo')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={localStyles.option} onPress={() => handleImagePick('camera')}>
-              <Text style={localStyles.optionText}>{t('profile.camera_photo', { defaultValue: 'التقط صورة عن طريق الكاميرا' })}</Text>
+              <Text style={localStyles.optionText}>{t('profile.camera_photo')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={localStyles.option} onPress={() => handleImagePick('gallery')}>
-              <Text style={localStyles.optionText}>{t('profile.gallery_photo', { defaultValue: 'اختر صورة من المعرض' })}</Text>
+              <Text style={localStyles.optionText}>{t('profile.gallery_photo')}</Text>
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
       )}
+
+      <Toast />
     </SafeAreaView>
-  )
-}
+  );
+};
 
 export default ParentProfile;
 
 const localStyles = StyleSheet.create({
+  /* Profile card at top */
+  card: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingTop: hp(6),
+    paddingBottom: hp(2),
+    marginHorizontal: wp(5),
+    marginTop: hp(1),
+    borderRadius: 12,
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  /* Linked Accounts button — absolutely positioned at top corner */
+  linkedBtn: {
+    position: 'absolute',
+    top: hp(1.5),
+    backgroundColor: '#014CC4',
+    paddingHorizontal: wp(3),
+    paddingVertical: hp(0.8),
+    borderRadius: 8,
+  },
+  linkedBtnText: {
+    color: '#fff',
+    fontSize: Math.min(wp(3), 12),
+    fontWeight: '600',
+  },
+  /* Avatar */
+  avatarWrapper: {
+    position: 'relative',
+    marginBottom: hp(1.5),
+  },
+  avatar: {
+    width: wp(30),
+    height: wp(30),
+    borderRadius: wp(15),
+    overflow: 'hidden',
+  },
+  /* ✅ Edit icon: sits at bottom-right of avatar circle, no overlap with name */
+  editIconBtn: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+  },
+  editIconInner: {
+    width: wp(10),
+    height: wp(10),
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  editbOverlay: {
+    position: 'absolute',
+  },
+  nameText: {
+    fontSize: wp(4.5),
+    fontWeight: '700',
+    color: '#000',
+    marginTop: hp(0.5),
+  },
+  idText: {
+    fontSize: wp(3.5),
+    color: '#999',
+    marginTop: hp(0.3),
+  },
+  /* Section */
+  section: {
+    marginHorizontal: wp(5),
+    marginTop: hp(2.5),
+    gap: hp(1),
+  },
+  sectionLabel: {
+    fontSize: wp(3.5),
+    fontWeight: '600',
+    color: '#000',
+  },
+  /* Modal */
   modalOverlay: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    top: 0, left: 0, right: 0, bottom: 0,
     zIndex: 1000,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
@@ -350,7 +322,6 @@ const localStyles = StyleSheet.create({
   closeIconContainer: {
     position: 'absolute',
     top: 15,
-    right: 15,
     width: 30,
     height: 30,
     borderRadius: 15,
@@ -360,18 +331,12 @@ const localStyles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 1,
   },
-  closeIcon: {
-    fontSize: 16,
-    color: '#000',
-  },
+  closeIcon: { fontSize: 16, color: '#000' },
   option: {
     paddingVertical: 15,
     alignItems: 'center',
-    // borderBottomWidth: 1,
-    // borderBottomColor: '#eee',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  optionText: {
-    fontSize: 18,
-    color: '#1A1D44',
-  },
+  optionText: { fontSize: 18, color: '#1A1D44' },
 });

@@ -1,9 +1,11 @@
-{ 
+{
   "welcome": {
     "registered_successfully": "تم التسجيل بنجاح",
     "welcome_to": "مرحبا بك في"
   },
-  
+  "Care": "كير",
+  "On": "أون",
+
   "common": {
     "save": "حفظ",
     "continue": "متابعة",
@@ -12,25 +14,65 @@
     "next": "التالي",
     "confirm": "تأكيد",
     "download": "تنزيل",
-    "from": "من", 
-    "to": "إلى", 
+    "from": "من",
+    "to": "إلى",
     "back": "رجوع",
     "close": "إغلاق",
     "name": "الاسم",
     "day": "يوم",
     "month": "شهر",
     "year": "سنة",
+    "date": "التاريخ",
+    "description": "الوصف",
     "name_placeholder": "ادخل اسمك",
     "success": "نجاح",
-    "masked_national_id": "xxxxxxxxxxxxxx",
+    "enter": "أدخل",
     "error": "خطأ",
+    "ok": "موافق",
+    "cancel": "إلغاء",
+    "yes": "نعم",
+    "no": "لا",
+    "lets_go": "هيا بنا!",
+    "later": "لاحقاً",
+    "masked_national_id": "xxxxxxxxxxxxxx",
     "no_items_found": "لم يتم العثور على عناصر",
+    "no_file_to_download": "لا يوجد ملف متاح للتنزيل",
+    "unknown_error": "حدث خطأ ما",
+    "file_saved": "تم حفظ الملف بنجاح",
+    "download_failed": "فشل التنزيل",
+    "user_name_placeholder": "اسم المستخدم",
+    "unauthorized": "لم يتم العثور على رمز المصادقة.",
+    "error_fetching_data": "حدث خطأ أثناء جلب البيانات",
     "ask_me_later": "ذكرني لاحقاً",
     "allow": "سماح",
-    "dont_allow": "عدم السماح",
-    "cancel": "إلغاء",
-    "ok": "موافق"
+    "dont_allow": "عدم السماح"
   },
+
+  "create_code": {
+    "title": "إنشاء كود",
+    "code_description": "سيتم إنشاء كود صالح لمدة ساعة واحدة",
+    "create_new_code": "أنشئ كود جديد",
+    "creating": "جاري الإنشاء...",
+    "your_code": "كودك الخاص",
+    "copy": "نسخ",
+    "copied": "تم النسخ!",
+    "code_copied": "تم نسخ الكود إلى الحافظة",
+    "code_created": "تم إنشاء الكود بنجاح",
+    "failed_to_create": "فشل إنشاء الكود",
+    "copy_failed": "فشل نسخ الكود",
+    "no_code_returned": "لم يُرجع الخادم أي كود"
+  },
+
+  "add_selector": {
+    "title": "إضافة سجل جديد",
+    "prompt": "ماذا تود أن تضيف؟",
+    "placeholder": "اختر نوع السجل...",
+    "add_result": "إضافة نتيجة تحليل",
+    "add_xray": "إضافة أشعة",
+    "add_report": "إضافة تقرير طبي",
+    "add_medicine": "إضافة دواء"
+  },
+
   "add_result": {
     "title": "إضافة نتيجة تحليل",
     "test_name": "اسم التحليل",
@@ -45,6 +87,7 @@
     "date": "تاريخ التحليل",
     "date_placeholder": "اختر تاريخ التحليل"
   },
+
   "add_eshaa": {
     "title": "إضافة أشعة",
     "xray_name": "اسم الأشعة",
@@ -59,6 +102,7 @@
     "notes_placeholder": "ملاحظات (اختياري)",
     "upload_file": "رفع صورة الأشعة"
   },
+
   "add_report": {
     "title": "إضافة تقرير طبي",
     "report_title": "عنوان التقرير",
@@ -73,6 +117,7 @@
     "notes_placeholder": "ملاحظات (اختياري)",
     "upload_file": "رفع ملف التقرير"
   },
+
   "add_medicine": {
     "title": "إضافة دواء",
     "enter_following_data": "يرجى إدخال البيانات التالية",
@@ -85,8 +130,99 @@
     "end_date": "تاريخ الانتهاء",
     "end_date_placeholder": "اختر تاريخ الانتهاء"
   },
-  "Care": "كير",
-  "On": "أون",
+
+  "form": {
+    "add_hint": "يمكنك إرسال الطلب مرة واحدة فقط لإضافة العنصر وذلك راجع للإدارة.",
+    "add_new": "إضافة جديد",
+    "name_in_arabic": "الاسم بالعربية",
+    "name_in_english": "الاسم بالإنجليزية",
+    "enter_name_in_arabic": "أدخل الاسم بالعربية",
+    "enter_name_in_english": "أدخل الاسم بالإنجليزية"
+  },
+
+  "auth": {
+    "signin": "تسجيل الدخول",
+    "signup": "إنشاء حساب",
+    "create_account": "إنشاء حساب",
+    "reset_password": "إعادة تعيين كلمة المرور",
+    "set_password": "كلمة السر",
+    "logout": "تسجيل الخروج",
+    "enter_passwords": "برجاء ادخال كلمات السر",
+    "current_password": "كلمة المرور الحالية",
+    "enter_current_password": "ادخل كلمة المرور الحالية",
+    "new_password": "كلمة المرور الجديدة",
+    "enter_new_password": "ادخل كلمة المرور الجديدة",
+    "confirm_new_password": "تأكيد كلمة المرور الجديدة",
+    "reenter_new_password": "اعد ادخال كلمة المرور الجديدة",
+    "passwords_do_not_match": "كلمات المرور غير متطابقة",
+    "password_rules": "يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)",
+    "password_reset_success": "تم إعادة تعيين كلمة المرور بنجاح.",
+    "id": "الرقم القومي",
+    "create_account_prompt": "لإنشاء حسابك يرجي ملئ البيانات التالية ..",
+    "your_account": "حسابك",
+    "national_id": "البطاقة الشخصية",
+    "national_id_placeholder": "ادخل الرقم القومي",
+    "final_step_password": "الخطوة الأخيرة، كلمة المرور",
+    "password": "كلمة المرور",
+    "forgot_password_q": "هل نسيت كلمة المرور؟",
+    "password_placeholder": "ادخل كلمة المرور",
+    "confirm_password": "تأكيد كلمة المرور",
+    "confirm_password_placeholder": "أعد إدخال كلمة المرور",
+    "email_placeholder": "ادخل البريد الالكتروني",
+    "enter_email_send_code": "ادخل بريدك الالكتروني وسيتم إرسال كود",
+    "send_code": "إرسال الكود",
+    "enter_code": "برجاء ادخال الكود",
+    "resend_code": "إعادة إرسال الكود",
+    "create_your_account_prompt": "لإنشاء حسابك يرجي ملئ البيانات التالية ..",
+    "linked_accounts": "الحسابات المرتبطة",
+    "choose_account_type": "اختر نوع الحساب",
+    "personal_account": "حساب شخصي",
+    "create_child_account": "إنشاء حساب طفل",
+    "child_account": "حساب طفل",
+    "enter_your_data": "ادخل بياناتك",
+    "enter_child_data": "ادخل بيانات الطفل",
+    "add_another_account": "إضافة حساب آخر",
+    "impersonate_user": "تمثيل المستخدم",
+    "email": "البريد الإلكتروني",
+    "enter_email": "ادخل البريد الالكتروني",
+    "code": "الكود",
+    "under_18_error": "يجب أن يكون عمر المستخدم 18 عامًا أو أكثر لإنشاء حساب شخصي.",
+    "over_18_error": "للمستخدمين الذين تجاوزوا 18 عامًا، يرجى إنشاء حساب شخصي.",
+    "your_child_account": "حساب طفلك",
+    "child_name": "اسم الطفل",
+    "child_name_placeholder": "ادخل اسم الطفل",
+    "child_email": "البريد الإلكتروني للطفل",
+    "child_email_placeholder": "ادخل البريد الإلكتروني للطفل",
+    "child_national_id": "الرقم القومي للطفل",
+    "child_national_id_placeholder": "ادخل الرقم القومي للطفل",
+    "child_birth_certificate": "شهادة ميلاد الطفل",
+    "agree_prefix": "الموافقة على ",
+    "agree": "موافق",
+    "terms_only": "الشروط والأحكام",
+    "terms_full_text": "يرجى قراءة الشروط والأحكام بعناية قبل استخدام التطبيق. باستخدام هذا التطبيق، فإنك توافق على الالتزام بهذه الشروط. إذا كنت لا توافق على هذه الشروط، فلا تستخدم التطبيق.",
+    "create_account_button": "إنشاء الحساب",
+    "child_account_created": "تم إنشاء حساب الطفل بنجاح."
+  },
+
+  "errors": {
+    "add_medicine_failed": "لا يمكن حفظ الدواء. يرجى المحاولة مرة أخرى.",
+    "add_record_failed": "لا يمكن حفظ السجل. يرجى المحاولة مرة أخرى.",
+    "image_processing_failed": "فشل في معالجة الصورة. يرجى تجربة صورة أخرى.",
+    "error_fetching_data": "حدث خطأ أثناء جلب البيانات"
+  },
+
+  "account": {
+    "linked_accounts": "الحسابات المرتبطة",
+    "primary_user": "المستخدم الأساسي",
+    "no_phone_number": "لا يوجد رقم هاتف",
+    "current_account": "الحساب الحالي",
+    "linked_accounts_mother": "الحسابات المرتبطة بحساب الأم",
+    "impersonate_user": "التبديل للطفل",
+    "add_another_account": "إضافة حساب آخر",
+    "switch_to_parent": "انتقال لحساب الأم",
+    "logout": "تسجيل الخروج"
+  },
+
   "survey": {
     "title": "استبيان",
     "notes_prompt": "اذا كنت ترغب في مشاركة اي ملاحظات",
@@ -109,144 +245,89 @@
     "popup_description": "يرجي عمل استبيان سريع للطفل",
     "take_survey": "هيا بنا !"
   },
-  "errors": {
-    "add_medicine_failed": "لا يمكن حفظ الدواء. يرجى المحاولة مرة أخرى.",
-    "add_record_failed": "لا يمكن حفظ السجل. يرجى المحاولة مرة أخرى.",
-    "image_processing_failed": "فشل في معالجة الصورة. يرجى تجربة صورة أخرى.",
-    "error_fetching_data": "حدث خطأ أثناء جلب البيانات"
-  },
-  "account": {
-    "linked_accounts": "الحسابات المرتبطة",
-    "primary_user": "المستخدم الأساسي",
-    "no_phone_number": "لا يوجد رقم هاتف",
-    "current_account": "الحساب الحالي",
-    "linked_accounts_mother": "الحسابات المرتبطة بحساب الأم",
-    "impersonate_user": "تمثيل المستخدم",
-    "add_another_account": "إضافة حساب آخر",
-    "switch_to_parent": "انتقال لحساب الأم",
-    "logout": "تسجيل الخروج"
-  },
-  "add_selector": {
-    "title": "إضافة سجل جديد",
-    "prompt": "ماذا تود أن تضيف؟",
-    "placeholder": "اختر نوع السجل...",
-    "add_result": "إضافة نتيجة تحليل",
-    "add_xray": "إضافة أشعة",
-    "add_report": "إضافة تقرير طبي",
-    "add_medicine": "إضافة دواء"
-  },
-  "marketing": {
-    "health_in_pocket_part1": "صحتك",
-    "health_in_pocket_part2": "في جيبك",
-    "anytime_anywhere": "أي وقت - أي مكان",
-    "error_fetching_data": "حدث خطأ أثناء جلب البيانات"
-  },
-  "auth": {
-   "reset_password":"إعادة تعيين كلمة المرور",
-   "enter_passwords": "برجاء ادخال كلمات السر",
-   "current_password": "كلمة المرور الحالية",
-   "enter_current_password": "ادخل كلمة المرور الحالية",
-   "new_password": "كلمة المرور الجديدة",
-   "enter_new_password": "ادخل كلمة المرور الجديدة",
-   "confirm_new_password": "تأكيد كلمة المرور الجديدة",
-   "reenter_new_password": "اعد ادخال كلمة المرور الجديدة",
-   "passwords_do_not_match": "كلمات المرور غير متطابقة",
-   "password_rules": "يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)",
-   "password_reset_success": "تم إعادة تعيين كلمة المرور بنجاح.",
-   "id":"الرقم القومي",
-    "create_account_prompt": "لإنشاء حسابك يرجي ملئ البيانات التالية ..",
-    "create_account": "إنشاء حساب",
-    "your_account": "حسابك",
-    "national_id": "البطاقة الشخصية",
-    "national_id_placeholder": "ادخل الرقم القومي",
-    "final_step_password": "الخطوة الأخيرة، كلمة المرور",
-    "password": "كلمة المرور",
-    "forgot_password_q": "هل نسيت كلمة المرور؟",
-    "password_placeholder": "ادخل كلمة المرور",
-    "confirm_password": "تأكيد كلمة المرور",
-    "confirm_password_placeholder": "أعد إدخال كلمة المرور",
-    "enter_email": "ادخل البريد الالكتروني",
-    "email_placeholder": "ادخل البريد الالكتروني",
-    "enter_your_data": "ادخل بياناتك",
-    "enter_child_data": "ادخل بيانات الطفل",
-    "child_account_created": "تم إنشاء حساب الطفل بنجاح.",
-    "choose_account_type": "اختر نوع الحساب",
-    "create_child_account": "إنشاء حساب لطفل",
-    "personal_account": "حساب شخصي",
-    "child_account": "حساب لطفل",
-    "create_child_account_prompt": "لإنشاء حساب طفلك يرجي ملئ البيانات التالية ..",
-    "your_child_account": "حساب طفلك",
-    "enter_email_to_reset": "برجاء إدخال بريدك الإلكتروني لإعادة تعيين كلمة السر",
-    "under_18_error": "يجب أن يكون عمر المستخدمين 18 عامًا أو أكبر لإنشاء حساب شخصي.",
-    "over_18_error": "للمستخدمين الذين تبلغ أعمارهم 18 عامًا فما فوق، يرجى إنشاء حساب شخصي.",
-    "child_name": "اسم الطفل",
-    "email":"البريد الالكتروني",
-    "child_name_placeholder": "ادخل اسم طفلك",
-    "child_email": "البريد الالكتروني للطفل",
-    "child_email_placeholder": "ادخل البريد الالكتروني للطفل",
-    "child_national_id": "الرقم القومي للطفل",
-    "child_national_id_placeholder": "ادخل الرقم القومي للطفل",
-    "child_birth_certificate": "شهادة ميلاد الطفل",
-    "auth.agree_prefix":"الموافقة علي ",
-    "auth.agree_terms":"الشروط والأحكام",
-    "terms_full_text": "يرجى قراءة الشروط والأحكام بعناية قبل استخدام التطبيق. باستخدام هذا التطبيق، فإنك توافق على الالتزام بهذه الشروط. إذا كنت لا توافق على هذه الشروط، فلا تستخدم هذا التطبيق.",
-    "signin": "تسجيل دخول",
-      "agree":"موافقة",
-    "create_account_button": "إنشاء حساب",
-    "signup": "تسجيل",
-    "logout":"تسجيل الخروج"
-  },
+
   "home": {
-    "hello": "مرحباً",
+    "get_started": "ابدأ الآن",
+    "enter_following_data": "يرجى إدخال البيانات التالية",
+    "account": "الحساب",
     "results_title": "نتائج التحاليل",
-    "xray_title": "الأشعة",
-    "reports_title": "تقارير الأطباء",
-    "medicines_title": "الأدوية",
+    "xray_title": "الاشعة",
+    "reports_title": "تقارير الدكاترة",
+    "medicines_title": "الادوية",
     "last_reports_title": "التقارير السابقة",
+    "hello": "مرحباً،",
+    "results": {
+      "analysis_name": "اسم التحليل:",
+      "lab_name": "اسم المعمل:",
+      "test_date": "تاريخ التحليل:",
+      "description": "الوصف:"
+    },
+    "reports": {
+      "doctor_name": "اسم الطبيب:",
+      "examination_date": "تاريخ الكشف:",
+      "description": "الوصف:"
+    },
+    "xray": {
+      "xray_name": "اسم الأشعة:",
+      "lab_name": "اسم المعمل:",
+      "xray_date": "تاريخ الأشعة:",
+      "description": "الوصف:"
+    },
+    "medicines": {
+      "dosage": "الجرعة:",
+      "start_date": "تاريخ البدء:",
+      "end_date": "تاريخ الانتهاء:",
+      "frequency_twice_daily": "مرتين يومياً"
+    },
     "no_results_found": "لم يتم العثور على نتائج تحاليل.",
+    "no_medicines_found": "لم يتم العثور على أدوية.",
     "no_doctor_reports_found": "لم يتم العثور على تقارير أطباء.",
     "no_xrays_found": "لم يتم العثور على أشعة.",
     "no_reports_found": "لم يتم العثور على تقارير سابقة."
   },
-  "medicine": {
-    "from": "من",
-    "to": "إلى",
-    "dosage": "الجرعة",
-    "start_date": "تاريخ البداية:",
-    "end_date": "تاريخ النهاية:"
-  },
-  "result": {
-    "analysis_name": "اسم التحليل",
-    "lab_name": "اسم المعمل",
-    "analysis_date": "تاريخ التحليل",
-    "description": "الوصف"
-  },
-  "eshaa": {
-    "xray_name": "اسم الأشعة",
-    "lab_name": "اسم المعمل",
-    "xray_date": "تاريخ الأشعة",
-    "description": "الوصف"
-  },
-  "report": {
-    "doctor_name": "اسم الدكتور",
-    "report_date": "تاريخ الكشف"
-  },
- 
+
   "profile": {
     "child_profile_title": "الحساب الشخصي للطفل",
     "parent_profile_title": "الحساب الشخصي",
     "age_today": "العمر لليوم",
     "birth_certificate": "شهادة الميلاد",
-    "uploaded_file":"الملف المرفوع سابقا",
+    "uploaded_file": "الملف المرفوع سابقاً",
     "reset_password": "إعادة تعيين كلمة السر",
     "dob": "تاريخ الميلاد",
     "dob_placeholder": "ادخل تاريخ الميلاد",
     "gender": "الجنس",
     "gender_placeholder": "اختر الجنس",
     "male": "ذكر",
-    "female": "أنثى"
+    "female": "أنثى",
+    "delete_photo": "حذف الصورة",
+    "camera_photo": "التقط صورة",
+    "gallery_photo": "اختر من المعرض",
+    "photo_deleted": "تم حذف صورة الملف الشخصي بنجاح",
+    "photo_updated": "تم تحديث صورة الملف الشخصي بنجاح"
   },
+
+  "marketing": {
+    "health_in_pocket": "صحتك في جيبك",
+    "health_in_pocket_part1": "صحتك",
+    "health_in_pocket_part2": "في جيبك",
+    "anytime_anywhere": "أي وقت - أي مكان",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب"
+  },
+
+  "services": {
+    "nearest_service": "أقرب خدمة طبية",
+    "share_location_prompt": "شارك موقعك للعثور على أقرب خدمة طبية",
+    "country": "الدولة",
+    "select_country": "اختر الدولة",
+    "governorate": "المحافظة",
+    "select_governorate": "اختر المحافظة",
+    "address": "العنوان",
+    "enter_detailed_address": "أدخل العنوان التفصيلي"
+  },
+
   "permissions": {
+    "allow_location_q": "السماح بالوصول إلى الموقع؟",
     "storage_title": "إذن التخزين",
     "storage_message": "التطبيق يحتاج إلى الوصول إلى التخزين لتحميل الملفات",
     "location_title": "إذن الموقع",
@@ -257,10 +338,12 @@
     "location_access_title": "الوصول إلى الموقع",
     "location_access_description": "نحتاج إلى الوصول إلى موقعك للعثور على الخدمات القريبة."
   },
+
   "uploader": {
     "upload": "تحميل",
     "pick_failed": "فشل اختيار الملف. يرجى المحاولة مرة أخرى."
   },
+
   "payment": {
     "details": "تفاصيل المعاملة",
     "records": "سجلات الدفع",
@@ -272,16 +355,18 @@
     "masked_name": "جيلان ا*** ج***",
     "masked_phone": "0123456789"
   },
+
   "drawer": {
     "user_name_placeholder": "اسم المستخدم",
     "profile": "الملف الشخصي",
     "billing": "الفواتير والمدفوعات",
     "find_service": "البحث عن أقرب خدمة",
     "contact_us": "تواصل معنا",
-    "linked_accounts":"الحسابات المرتبطة",
+    "linked_accounts": "الحسابات المرتبطة",
     "doctors_used_codes": "الأطباء الذين استخدموا الأكواد",
     "your_created_codes": "الأكواد التي أنشأتها"
   },
+
   "notifications": {
     "title": "الاشعارات",
     "all": "الكل",
@@ -292,5 +377,47 @@
       "upload_result": "رفع نتيجة تحليل.",
       "system_announcement": "اعلان من السيستيم."
     }
+  },
+
+  "doctors_used_codes": { "title": "الأطباء الذين استخدموا أكوادك" },
+  "your_created_codes":  { "title": "الأكواد التي أنشأتها" },
+
+  "result": {
+    "analysis_name": "اسم التحليل",
+    "lab_name": "اسم المعمل",
+    "analysis_date": "تاريخ التحليل",
+    "description": "الوصف"
+  },
+
+  "eshaa": {
+    "xray_name": "اسم الأشعة",
+    "lab_name": "اسم المعمل",
+    "xray_date": "تاريخ الأشعة",
+    "description": "الوصف"
+  },
+
+  "report": {
+    "doctor_name": "اسم الدكتور",
+    "report_date": "تاريخ الكشف",
+    "required_tests": "التحليل المطلوب",
+    "required_scans": "الاشعة المطلوبة",
+    "diagnosis": "التشخيص",
+    "notes": "الوصف الطبي"
+  },
+
+  "medicine": {
+    "from": "من",
+    "to": "إلى",
+    "dosage": "الجرعة",
+    "start_date": "تاريخ البداية:",
+    "end_date": "تاريخ النهاية:"
+  },
+
+  "record_type": {
+    "checkup": "كشف",
+    "prescription": "روشتة",
+    "lab_test": "اختبار معملي",
+    "xray": "أشعة",
+    "unknown": "سجل"
   }
 }

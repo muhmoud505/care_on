@@ -4,6 +4,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 export const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
 export const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
+// ─── Static styles (language-independent) ────────────────────────────────────
 export const profileStyles = StyleSheet.create({
   info: {
     position: 'relative',
@@ -21,19 +22,6 @@ export const profileStyles = StyleSheet.create({
     marginHorizontal: '5%',
     borderRadius: 12,
   },
-  btn: {
-    width: wp(30),
-    height: hp(4.5),
-    borderRadius: 8,
-    backgroundColor: '#80D280',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    right: wp(4),
-    top: hp(-2),
-    zIndex: 1,
-
-  },
   btnText: {
     color: '#FFFFFF',
     fontWeight: '700',
@@ -47,26 +35,11 @@ export const profileStyles = StyleSheet.create({
     marginHorizontal: wp(5),
     marginTop: hp(2),
   },
-  cont3: {
-    direction: 'rtl',
-    margin: wp(5),
-  },
   profileImg: {
     width: wp(32),
     height: wp(32),
     borderRadius: wp(16),
     overflow: 'hidden',
-  },
-  ele1: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: wp(4.25),
-    width: wp(8.5),
-    height: wp(8.5),
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
-    top: hp(9),
-    right: wp(25),
   },
   ele2: {
     backgroundColor: '#014CC4',
@@ -75,11 +48,6 @@ export const profileStyles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  background: {
-    height: hp(8),
-    marginTop: hp(1.5),
-    direction: 'rtl',
   },
   overlay: {
     backgroundColor: '#00000080',
@@ -115,6 +83,7 @@ export const profileStyles = StyleSheet.create({
     textDecorationLine: 'underline',
     color: 'black',
     marginHorizontal: wp(5),
+    marginTop: hp(2),
   },
   nextButton: {
     backgroundColor: '#80D280',
@@ -125,10 +94,63 @@ export const profileStyles = StyleSheet.create({
     width: '90%',
     marginHorizontal: '5%',
     marginBottom: hp(1.5),
+    marginTop: hp(2),
   },
   nextButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: wp(4),
+  },
+  background: {
+    height: hp(8),
+    marginTop: hp(1.5),
+  },
+});
+
+// ─── Dynamic styles (RTL-aware, call with isRTL boolean) ─────────────────────
+// Usage in component:
+//   const { i18n } = useTranslation();
+//   const isRTL = i18n.dir() === 'rtl';
+//   const ds = getDynamicStyles(isRTL);
+//   <View style={ds.btn} />
+//   <View style={ds.cont3} />
+//   <View style={ds.ele1} />
+
+export const getDynamicStyles = (isRTL) => ({
+  // "Switch to parent / Linked accounts" button — correct corner per direction
+  btn: {
+    width: wp(30),
+    height: hp(4.5),
+    borderRadius: 8,
+    backgroundColor: '#80D280',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    [isRTL ? 'right' : 'left']: wp(5),
+    top: hp(-0.6),
+    zIndex: 1,
+  },
+  // Birth certificate / cont3 section — text flows in reading direction
+  cont3: {
+    direction: isRTL ? 'rtl' : 'ltr',
+    margin: wp(5),
+  },
+  // Background banner direction
+  background: {
+    height: hp(8),
+    marginTop: hp(1.5),
+    direction: isRTL ? 'rtl' : 'ltr',
+  },
+  // Edit photo icon — bottom corner of avatar on the correct side
+  ele1: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: wp(4.25),
+    width: wp(8.5),
+    height: wp(8.5),
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    top: hp(7),
+    [isRTL ? 'right' : 'left']: wp(22),
   },
 });

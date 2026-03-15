@@ -1,116 +1,87 @@
 import { useNavigation } from '@react-navigation/native';
 import { Dimensions, I18nManager, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../contexts/authContext';
 import { Icons } from './Icons';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Responsive helper functions
 const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
 const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
-const CustomHeader = ({ text }) => {
+const CustomHeader = ({ text, onBack }) => {
   const isRTL = I18nManager.isRTL;
   const navigation = useNavigation();
-  const { user } = useAuth();
 
-  // Check if previous screen was password-related and navigate to home instead
   const handleBackPress = () => {
+    // Allow parent screen to override back behaviour
+    if (onBack) {
+      onBack();
+      return;
+    }
+
     const state = navigation.getState();
-    const prevRoute = state.routes[state.routes.length - 2]?.name;
+    const prevRoute  = state.routes[state.routes.length - 2]?.name;
     const currentRoute = state.routes[state.routes.length - 1]?.name;
-    
-    console.log('Current route:', currentRoute);
-    console.log('Previous route:', prevRoute);
-    console.log('All routes:', state.routes.map(r => r.name));
-    
-    // Check if we're in account management flow (after creating child account)
-    const isInAccountFlow = (
-      prevRoute === 'ProfileStack' && 
-      currentRoute === 'accounts'
-    ) || (
-      prevRoute === 'accounts' && 
-      currentRoute === 'ProfileStack'
-    );
-    
+
+    const isInAccountFlow =
+      (prevRoute === 'ProfileStack' && currentRoute === 'accounts') ||
+      (prevRoute === 'accounts'     && currentRoute === 'ProfileStack');
+
     if (isInAccountFlow) {
-      console.log('In account flow - navigating to home instead of back');
-      console.log('About to call navigation.navigate("App")');
       try {
-        navigation.reset({ index: 0, routes: [{ name: 'App' }] }); // Navigate to App screen (home)
-        console.log('Navigation call executed');
+        navigation.reset({ index: 0, routes: [{ name: 'App' }] });
       } catch (error) {
         console.error('Navigation error:', error);
       }
     } else {
-      console.log('Using normal goBack');
       navigation.goBack();
     }
   };
 
   return (
-    <SafeAreaView 
-      style={[
-        styles.container
-      ]}
-      edges={['top']} // Ensure proper safe area handling
-    >
-      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}> 
-        <TouchableOpacity 
+    // ✅ Plain View — no SafeAreaView here.
+    // Each screen wraps itself in SafeAreaView so we never double-pad.
+    <View style={styles.container}>
+      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <TouchableOpacity
           style={[styles.touchable, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
           onPress={handleBackPress}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Icons.arrleft width={wp(6)} height={hp(3)}   style={{ transform: [{ rotate: isRTL ? '180deg' : '0deg' }] }}/>
-          <Text style={styles.text}>
+          {/* Arrow flips: RTL keeps original direction, LTR rotates 180° */}
+          <Icons.arrleft
+            width={wp(6)}
+            height={hp(3)}
+            style={{ transform: [{ rotate: isRTL ? '0deg' : '180deg' }] }}
+          />
+          <Text style={styles.text} numberOfLines={1}>
             {text}
           </Text>
         </TouchableOpacity>
-
-        {/* <TouchableOpacity onPress={() => navigation.navigate('ProfileStack')}>
-          <Image
-            source={user?.user?.avatar ? { uri: user.user.avatar } : Images.profile}
-            style={styles.avatar}
-            resizeMode="cover"
-          />
-        </TouchableOpacity> */}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: hp(12),
+    paddingVertical: hp(2),
     justifyContent: 'center',
-    marginBottom: hp(2),
-  },
-  touchable: {
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    gap: wp(3),
-    paddingHorizontal: wp(6),
+    backgroundColor: '#fff',
   },
   row: {
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: wp(6),
+    paddingHorizontal: wp(4),
+  },
+  touchable: {
+    alignItems: 'center',
+    gap: wp(3),
   },
   text: {
     fontWeight: 'bold',
     fontSize: Math.min(wp(4.5), 18),
-  },
-  icon: {
-    width: wp(2.5),
-    height: hp(2.2),
-  },
-  avatar: {
-    width: wp(8),
-    height: wp(8),
-    borderRadius: wp(4),
-    overflow: 'hidden',
+    flexShrink: 1,
   },
 });
 
