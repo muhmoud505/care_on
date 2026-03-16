@@ -38,7 +38,7 @@ const ChildProfile = () => {
   const birthdate  = user?.user?.resource?.birthdate;
 
   useEffect(() => {
-    console.log('ChildProfile resource:', user?.user?.resource);
+    console.log('ChildProfile resource:', user);
   }, [user]);
 
   const maskedNationalId = nationalId
