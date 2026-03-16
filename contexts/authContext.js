@@ -10,10 +10,10 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [primaryUser, setPrimaryUser] = useState(null);
+  const[primaryUser, setPrimaryUser] = useState(null);
   const [childAccounts, setChildAccounts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const[isAuthLoading, setIsAuthLoading] = useState(false);
 
   // Refresh lock — prevents concurrent/cascading refresh calls
   const isRefreshing = useRef(false);
@@ -59,8 +59,8 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const storedChildren = await AsyncStorage.getItem('child_accounts');
-      const parsed = storedChildren ? JSON.parse(storedChildren) : [];
-      const updated = (parsed || []).map(child =>
+      const parsed = storedChildren ? JSON.parse(storedChildren) :[];
+      const updated = (parsed ||[]).map(child =>
         child.id === userId ? { ...child, avatar } : child
       );
       await AsyncStorage.setItem('child_accounts', JSON.stringify(updated));
@@ -79,7 +79,6 @@ export const AuthProvider = ({ children }) => {
       const now = Date.now() / 1000;
       return decoded.exp <= now + 300;
     } catch (_e) {
-      // FIX 1: changed bare `catch` to `catch (_e)` — fixes SyntaxError in older Babel/Hermes
       // If we can't decode it, treat as expired so we attempt a refresh
       return true;
     }
@@ -94,9 +93,7 @@ export const AuthProvider = ({ children }) => {
     const memToken = primaryUser?.token?.value;
     if (memToken && !isTokenExpired(memToken)) return memToken;
 
-    // 2. Fall back to AsyncStorage — covers the case where the refresh returned
-    //    non-JSON (server hiccup) and we kept the old in-memory user, but a
-    //    previous session stored a newer valid token on disk.
+    // 2. Fall back to AsyncStorage
     try {
       const stored = await AsyncStorage.getItem('primary_user');
       if (stored) {
@@ -104,10 +101,9 @@ export const AuthProvider = ({ children }) => {
         const storedToken = parsed?.token?.value || parsed?.data?.token?.value;
         if (storedToken) {
           if (!isTokenExpired(storedToken)) return storedToken;
-          // If the stored token is expired, remove it to avoid retry loops.
-          if (parsed.token) parsed.token.value = null;
-          if (parsed.data?.token) parsed.data.token.value = null;
-          await AsyncStorage.setItem('primary_user', JSON.stringify(parsed));
+          
+          // FIX: Do NOT nullify the token here! If we nullify an expired token, 
+          // we lose the ability to try refreshing it later when the network is healthy.
         }
       }
     } catch (e) {
@@ -115,7 +111,6 @@ export const AuthProvider = ({ children }) => {
     }
 
     // 3. If nothing valid is found, return null.
-    //    Returning an expired token causes repeated 401 loops.
     return null;
   };
 
@@ -204,14 +199,12 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    // FIX 3: Only clear session if we truly have no valid token left.
-    // Previously any 401 after one retry would wipe the session aggressively.
+    // FIX: Do not aggressively clear session on 401.
+    // If the token is truly invalid, refreshToken() handles the logout when /refresh explicitly returns 401.
+    // Doing it here breaks the session during temporary network issues or captive portals 
+    // where /refresh returns a 200 HTML page.
     if (response.status === 401) {
-      const lastResort = await getBestPrimaryToken();
-      if (!lastResort) {
-        console.warn('Unauthorized response after retry; clearing session.');
-        await clearSession();
-      }
+      console.warn('Unauthorized response after retry. Returning 401 response without clearing session.');
     }
 
     return response;
@@ -233,7 +226,7 @@ export const AuthProvider = ({ children }) => {
 
         const storedChildren = await AsyncStorage.getItem('child_accounts');
         let parsedChildren = [];
-        let normalizedChildren = [];
+        let normalizedChildren =[];
         if (storedChildren) {
           try {
             parsedChildren = JSON.parse(storedChildren);
@@ -247,7 +240,7 @@ export const AuthProvider = ({ children }) => {
         const storedActive = await AsyncStorage.getItem(ACTIVE_USER_KEY);
         if (storedActive) {
           const activeId = storedActive;
-          const matchedChild = (normalizedChildren || []).find(c => c.id === activeId);
+          const matchedChild = (normalizedChildren ||[]).find(c => c.id === activeId);
           if (matchedChild) {
             const childToken = matchedChild.token?.value || matchedChild.token;
             const childUser = { user: matchedChild, token: { value: childToken || normalizedUser?.token?.value } };
@@ -277,7 +270,7 @@ export const AuthProvider = ({ children }) => {
                   try {
                     const sc = await AsyncStorage.getItem('child_accounts');
                     const parsed = sc ? JSON.parse(sc) : [];
-                    const updated = (parsed || []).map(child =>
+                    const updated = (parsed ||[]).map(child =>
                       child.id === finalUser.id ? { ...child, ...finalUser } : child
                     );
                     await AsyncStorage.setItem('child_accounts', JSON.stringify(updated));
@@ -305,7 +298,7 @@ export const AuthProvider = ({ children }) => {
     Promise.all([loadUserFromStorage(), minimumDisplayTime]).finally(() => {
       setIsLoading(false);
     });
-  }, []);
+  },[]);
 
   const refreshToken = async (specificUserId = null) => {
     const targetUserId = specificUserId || primaryUser?.user?.id;
@@ -352,9 +345,6 @@ export const AuthProvider = ({ children }) => {
           },
         });
 
-        // FIX 2: Don't trust the Content-Type header — some servers (e.g. Laravel behind
-        // a proxy) return `text/html` or no content-type even when the body is valid JSON.
-        // Instead, read as text and attempt JSON.parse ourselves.
         let data;
         try {
           const text = await response.text();
@@ -365,6 +355,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         if (!response.ok) {
+          // This ensures we ONLY log out if the backend explicitly rejects the refresh token with a 401
           if (response.status === 401) {
             console.error('Refresh token is invalid or expired. Logging out.');
             if (!isRefreshingChild) await logout();
@@ -427,7 +418,7 @@ export const AuthProvider = ({ children }) => {
       });
       const data = await response.json();
       if (response.ok) {
-        const children = data.data || [];
+        const children = data.data ||[];
 
         const childrenWithFullData = await Promise.all(
           children.map(async (child) => {
@@ -744,7 +735,7 @@ export const AuthProvider = ({ children }) => {
           try {
             const sc = await AsyncStorage.getItem('child_accounts');
             const parsed = sc ? JSON.parse(sc) : [];
-            const updated = (parsed || []).map(child =>
+            const updated = (parsed ||[]).map(child =>
               child.id === finalUser.id ? { ...child, ...finalUser } : child
             );
             await AsyncStorage.setItem('child_accounts', JSON.stringify(updated));
@@ -768,7 +759,7 @@ export const AuthProvider = ({ children }) => {
     setUser({ user: childWithAvatar, token: { value: tokenValue } });
   };
 
-const switchAccount = (account) => setActiveAccount(account);
+  const switchAccount = (account) => setActiveAccount(account);
 
   const setTempAvatar = async (userId, uri) => {
     setUser(prev =>
@@ -785,6 +776,7 @@ const switchAccount = (account) => setActiveAccount(account);
         await AsyncStorage.setItem('primary_user', JSON.stringify(newPrimary));
       } else {
         const sc = await AsyncStorage.getItem('child_accounts');
+
         const parsed = sc ? JSON.parse(sc) : [];
         const updated = (parsed || []).map(child =>
           child.id === userId ? { ...child, avatar: uri } : child

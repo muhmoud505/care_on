@@ -37,14 +37,14 @@ const AddReportScreen = () => {
   });
 
   const [labItems, setLabItems] = useState([
-    { label: 'تحليل دم', value: 'تحليل دم' },
-    { label: 'تحليل بول', value: 'تحليل بول' },
-    { label: 'تحليل سكر', value: 'تحليل سكر' },
+    { label: t('lab_test.blood_test', { defaultValue: 'تحليل دم' }), value: t('lab_test.blood_test', { defaultValue: 'تحليل دم' }) },
+    { label: t('lab_test.urine_test', { defaultValue: 'تحليل بول' }), value: t('lab_test.urine_test', { defaultValue: 'تحليل بول' }) },
+    { label: t('lab_test.sugar_test', { defaultValue: 'تحليل سكر' }), value: t('lab_test.sugar_test', { defaultValue: 'تحليل سكر' }) },
   ]);
   const [scanItems, setScanItems] = useState([
-    { label: 'اشعة x ray', value: 'اشعة x ray' },
-    { label: 'اشعة مقطعية', value: 'اشعة مقطعية' },
-    { label: 'رنين مغناطيسي', value: 'رنين مغناطيسي' },
+    { label: t('scan.xray', { defaultValue: 'اشعة x ray' }), value: t('scan.xray', { defaultValue: 'اشعة x ray' }) },
+    { label: t('scan.ct_scan', { defaultValue: 'اشعة مقطعية' }), value: t('scan.ct_scan', { defaultValue: 'اشعة مقطعية' }) },
+    { label: t('scan.mri', { defaultValue: 'رنين مغناطيسي' }), value: t('scan.mri', { defaultValue: 'رنين مغناطيسي' }) },
   ]);
 
   const formIsValid = checkFormValidity();
@@ -63,11 +63,11 @@ const AddReportScreen = () => {
     // Build description as plain text — API expects a flat string, not JSON.
     // Only include fields that actually have a value.
     const descriptionParts = [];
-    if (form.date)          descriptionParts.push(`التاريخ: ${form.date}`);
-    if (form.RequiredTests) descriptionParts.push(`التحاليل المطلوبة: ${form.RequiredTests}`);
-    if (form.RequiredScans) descriptionParts.push(`الاشعة المطلوبة: ${form.RequiredScans}`);
-    if (form.diagnosis)     descriptionParts.push(`التشخيص: ${form.diagnosis}`);
-    if (form.notes)         descriptionParts.push(`الوصف الطبي: ${form.notes}`);
+    if (form.date)          descriptionParts.push(`${t('report.date', { defaultValue: 'التاريخ' })}: ${form.date}`);
+    if (form.RequiredTests) descriptionParts.push(`${t('report.required_tests', { defaultValue: 'التحاليل المطلوبة' })}: ${form.RequiredTests}`);
+    if (form.RequiredScans) descriptionParts.push(`${t('report.required_scans', { defaultValue: 'الاشعة المطلوبة' })}: ${form.RequiredScans}`);
+    if (form.diagnosis)     descriptionParts.push(`${t('report.diagnosis', { defaultValue: 'التشخيص' })}: ${form.diagnosis}`);
+    if (form.notes)         descriptionParts.push(`${t('report.medical_notes', { defaultValue: 'الوصف الطبي' })}: ${form.notes}`);
 
     const payload = {
       type:        apiType,
@@ -122,34 +122,34 @@ const AddReportScreen = () => {
 
       {/* النوع */}
       <FormField
-        title={'النوع'}
-        placeholder={'اختر نوع الكشف'}
+        title={t('add_report.type', { defaultValue: 'النوع' })}
+        placeholder={t('add_report.type_placeholder', { defaultValue: 'اختر نوع الكشف' })}
         value={form.type}
         onChangeText={(v) => handleChange('type', v)}
         error={errors.type}
         type="picker"
         pickerItems={[
-          { label: 'كشف', value: 'كشف' },
-          { label: 'روشتة', value: 'روشتة' },
+          { label: t('report_type.checkup', { defaultValue: 'كشف' }), value: t('report_type.checkup', { defaultValue: 'كشف' }) },
+          { label: t('report_type.prescription', { defaultValue: 'روشتة' }), value: t('report_type.prescription', { defaultValue: 'روشتة' }) },
         ]}
         addOthers={false}
       />
 
       {/* التحاليل المطلوبة */}
       <FormField
-        title={'التحاليل المطلوبة'}
-        placeholder={'اختر التحاليل المطلوبة'}
+        title={t('add_report.required_tests', { defaultValue: 'التحاليل المطلوبة' })}
+        placeholder={t('add_report.required_tests_placeholder', { defaultValue: 'اختر التحاليل المطلوبة' })}
         value={form.RequiredTests}
         onChangeText={(v) => handleChange('RequiredTests', v)}
         error={errors.RequiredTests}
         type="picker"
         pickerItems={labItems}
         addOthers
-        addLabel={'انشئ تحليل جديد'}
-        addModalTitle={'اضافة تحليل جديد'}
-        addArabicLabel={'اسم التحليل بالعربية'}
-        addEnglishLabel={'اسم التحليل بالانجليزية'}
-        addDescLabel={'الوصف الطبي'}
+        addLabel={t('add_report.create_new_test', { defaultValue: 'انشئ تحليل جديد' })}
+        addModalTitle={t('add_report.add_new_test', { defaultValue: 'اضافة تحليل جديد' })}
+        addArabicLabel={t('add_report.test_name_arabic', { defaultValue: 'اسم التحليل بالعربية' })}
+        addEnglishLabel={t('add_report.test_name_english', { defaultValue: 'اسم التحليل بالانجليزية' })}
+        addDescLabel={t('add_report.medical_description', { defaultValue: 'الوصف الطبي' })}
         onAddConfirm={(arabic, english, desc) => {
           const newItem = { label: arabic, value: arabic };
           setLabItems(prev => [...prev, newItem]);
@@ -159,19 +159,19 @@ const AddReportScreen = () => {
 
       {/* الاشعة المطلوبة */}
       <FormField
-        title={'الاشعة المطلوبة'}
-        placeholder={'اختر الاشعة المطلوبة'}
+        title={t('add_report.required_scans', { defaultValue: 'الاشعة المطلوبة' })}
+        placeholder={t('add_report.required_scans_placeholder', { defaultValue: 'اختر الاشعة المطلوبة' })}
         value={form.RequiredScans}
         onChangeText={(v) => handleChange('RequiredScans', v)}
         error={errors.RequiredScans}
         type="picker"
         pickerItems={scanItems}
         addOthers
-        addLabel={'انشئ اشعة جديدة'}
-        addModalTitle={'اضافة اشعة جديدة'}
-        addArabicLabel={'اسم الاشعة بالعربية'}
-        addEnglishLabel={'اسم الاشعة الانجليزية'}
-        addDescLabel={'الوصف الطبي'}
+        addLabel={t('add_report.create_new_scan', { defaultValue: 'انشئ اشعة جديدة' })}
+        addModalTitle={t('add_report.add_new_scan', { defaultValue: 'اضافة اشعة جديدة' })}
+        addArabicLabel={t('add_report.scan_name_arabic', { defaultValue: 'اسم الاشعة بالعربية' })}
+        addEnglishLabel={t('add_report.scan_name_english', { defaultValue: 'اسم الاشعة الانجليزية' })}
+        addDescLabel={t('add_report.medical_description', { defaultValue: 'الوصف الطبي' })}
         onAddConfirm={(arabic, english, desc) => {
           const newItem = { label: arabic, value: arabic };
           setScanItems(prev => [...prev, newItem]);
@@ -181,8 +181,8 @@ const AddReportScreen = () => {
 
       {/* التشخيص */}
       <FormField
-        title={'التشخيص'}
-        placeholder={'ادخل تشخيص الدكتور'}
+        title={t('add_report.diagnosis', { defaultValue: 'التشخيص' })}
+        placeholder={t('add_report.diagnosis_placeholder', { defaultValue: 'ادخل تشخيص الدكتور' })}
         value={form.diagnosis}
         onChangeText={(v) => handleChange('diagnosis', v)}
         error={errors.diagnosis}
@@ -190,8 +190,8 @@ const AddReportScreen = () => {
 
       {/* الوصف الطبي */}
       <FormField
-        title={'الوصف الطبي'}
-        placeholder={'ادخل وصف الدكتور'}
+        title={t('add_report.medical_notes', { defaultValue: 'الوصف الطبي' })}
+        placeholder={t('add_report.medical_notes_placeholder', { defaultValue: 'ادخل وصف الدكتور' })}
         value={form.notes}
         onChangeText={(v) => handleChange('notes', v)}
         error={errors.notes}
@@ -200,7 +200,7 @@ const AddReportScreen = () => {
 
       {/* الروشتة او التقرير */}
       <Uploader
-        title={'الروشتة او التقرير'}
+        title={t('add_report.prescription_or_report', { defaultValue: 'الروشتة او التقرير' })}
         onFileSelect={(file) => handleChange('documents', file)}
         error={errors.documents}
       />

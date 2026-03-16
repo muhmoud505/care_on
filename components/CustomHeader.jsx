@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { Dimensions, I18nManager, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Icons } from './Icons';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -40,7 +41,7 @@ const CustomHeader = ({ text, onBack }) => {
   return (
     // ✅ Plain View — no SafeAreaView here.
     // Each screen wraps itself in SafeAreaView so we never double-pad.
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <TouchableOpacity
           style={[styles.touchable, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
@@ -58,7 +59,7 @@ const CustomHeader = ({ text, onBack }) => {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

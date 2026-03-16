@@ -115,7 +115,27 @@
     "date_placeholder": "اختر التاريخ",
     "notes": "ملاحظات",
     "notes_placeholder": "ملاحظات (اختياري)",
-    "upload_file": "رفع ملف التقرير"
+    "upload_file": "رفع ملف التقرير",
+    "type": "النوع",
+    "type_placeholder": "اختر نوع الكشف",
+    "required_tests": "التحاليل المطلوبة",
+    "required_tests_placeholder": "اختر التحاليل المطلوبة",
+    "required_scans": "الاشعة المطلوبة",
+    "required_scans_placeholder": "اختر الاشعة المطلوبة",
+    "diagnosis": "التشخيص",
+    "diagnosis_placeholder": "ادخل تشخيص الدكتور",
+    "medical_notes": "الوصف الطبي",
+    "medical_notes_placeholder": "ادخل وصف الدكتور",
+    "prescription_or_report": "الروشتة او التقرير",
+    "create_new_test": "انشئ تحليل جديد",
+    "add_new_test": "اضافة تحليل جديد",
+    "test_name_arabic": "اسم التحليل بالعربية",
+    "test_name_english": "اسم التحليل بالانجليزية",
+    "create_new_scan": "انشئ اشعة جديدة",
+    "add_new_scan": "اضافة اشعة جديدة",
+    "scan_name_arabic": "اسم الاشعة بالعربية",
+    "scan_name_english": "اسم الاشعة الانجليزية",
+    "medical_description": "الوصف الطبي"
   },
 
   "add_medicine": {
@@ -399,10 +419,11 @@
   "report": {
     "doctor_name": "اسم الدكتور",
     "report_date": "تاريخ الكشف",
-    "required_tests": "التحليل المطلوب",
+    "required_tests": "التحاليل المطلوبة",
     "required_scans": "الاشعة المطلوبة",
     "diagnosis": "التشخيص",
-    "notes": "الوصف الطبي"
+    "medical_notes": "الوصف الطبي",
+    "date": "التاريخ"
   },
 
   "medicine": {
@@ -411,6 +432,18 @@
     "dosage": "الجرعة",
     "start_date": "تاريخ البداية:",
     "end_date": "تاريخ النهاية:"
+  },
+
+  "lab_test": {
+    "blood_test": "تحليل دم",
+    "urine_test": "تحليل بول",
+    "sugar_test": "تحليل سكر"
+  },
+
+  "scan": {
+    "xray": "اشعة x ray",
+    "ct_scan": "اشعة مقطعية",
+    "mri": "رنين مغناطيسي"
   },
 
   "record_type": {

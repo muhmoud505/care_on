@@ -101,7 +101,7 @@ const NotificationsScreen = () => {
     <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       
-     <CustomHeader text={"الاشعارات"}/>
+     <CustomHeader text={t('notifications.title', { defaultValue: 'الاشعارات' })}/>
       {/* Toggle pill */}
       <View style={styles.toggleOuter}>
         <View style={styles.toggleContainer}>

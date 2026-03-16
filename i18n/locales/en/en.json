@@ -112,7 +112,27 @@
     "date_placeholder": "Select date",
     "notes": "Notes",
     "notes_placeholder": "Notes (optional)",
-    "upload_file": "Upload Report File"
+    "upload_file": "Upload Report File",
+    "type": "Type",
+    "type_placeholder": "Choose examination type",
+    "required_tests": "Required Tests",
+    "required_tests_placeholder": "Choose required tests",
+    "required_scans": "Required Scans",
+    "required_scans_placeholder": "Choose required scans",
+    "diagnosis": "Diagnosis",
+    "diagnosis_placeholder": "Enter doctor's diagnosis",
+    "medical_notes": "Medical Notes",
+    "medical_notes_placeholder": "Enter doctor's description",
+    "prescription_or_report": "Prescription or Report",
+    "create_new_test": "Create New Test",
+    "add_new_test": "Add New Test",
+    "test_name_arabic": "Test Name (Arabic)",
+    "test_name_english": "Test Name (English)",
+    "create_new_scan": "Create New Scan",
+    "add_new_scan": "Add New Scan",
+    "scan_name_arabic": "Scan Name (Arabic)",
+    "scan_name_english": "Scan Name (English)",
+    "medical_description": "Medical Description"
   },
 
   "add_medicine": {
@@ -398,7 +418,8 @@
     "required_tests": "Required Tests",
     "required_scans": "Required Scans",
     "diagnosis": "Diagnosis",
-    "notes": "Medical Notes"
+    "medical_notes": "Medical Notes",
+    "date": "Date"
   },
 
   "medicine": {
@@ -407,6 +428,18 @@
     "dosage": "Dosage",
     "start_date": "Start Date:",
     "end_date": "End Date:"
+  },
+
+  "lab_test": {
+    "blood_test": "Blood Test",
+    "urine_test": "Urine Test",
+    "sugar_test": "Sugar Test"
+  },
+
+  "scan": {
+    "xray": "X-Ray",
+    "ct_scan": "CT Scan",
+    "mri": "MRI"
   },
 
   "record_type": {
