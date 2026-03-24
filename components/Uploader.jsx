@@ -8,9 +8,21 @@ import { Icons } from './Icons';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Responsive helper functions
-const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
-const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
+// 1. Detect if it's a tablet (common threshold is 600-768 logical pixels)
+export const isTablet = SCREEN_WIDTH >= 768;
+
+// 2. Responsive width with a "Max" cap for tablets
+export const wp = (percentage) => {
+  const value = (percentage / 100) * SCREEN_WIDTH;
+  if (isTablet) {
+    // On tablets, don't let the 85% width exceed a reasonable size (e.g., 500px)
+    const maxValue = 550; 
+    return value > maxValue ? maxValue : value;
+  }
+  return value;
+};
+
+export const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 const Uploader = ({ title, required, error, style,onFileSelect }) => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -68,7 +80,7 @@ const Uploader = ({ title, required, error, style,onFileSelect }) => {
 
   return (
     <View style={[styles.v1, style]}>
-      <Text style={[{ textAlign: isRTL ? 'right' : 'left'  }, styles.txt1]}>
+      <Text style={[{ textAlign: isRTL ? 'left' : 'right'  }, styles.txt1]}>
         {title}{required ? <Text style={{ color: 'red', fontWeight: '600' }}> *</Text> : null}
       </Text>
       <DashedBorder>
@@ -106,7 +118,7 @@ const Uploader = ({ title, required, error, style,onFileSelect }) => {
 
 const styles = StyleSheet.create({
   v1: {
-    width: wp(85),
+
     height: hp(12),
     marginHorizontal: wp(2.5),
     marginVertical: hp(0.6),
@@ -118,7 +130,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   btn1: {
-    width: wp(85),
+    width: '100%',
     height: hp(7.5),
     justifyContent: 'center',
     alignItems: 'center',

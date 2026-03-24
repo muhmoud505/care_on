@@ -15,10 +15,24 @@ import Images from '../constants2/images';
 import DatePick from "./datePicker";
 import { Icons } from "./Icons";
 
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
-const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
+// 1. Detect if it's a tablet (common threshold is 600-768 logical pixels)
+export const isTablet = SCREEN_WIDTH >= 768;
+
+// 2. Responsive width with a "Max" cap for tablets
+export const wp = (percentage) => {
+  const value = (percentage / 100) * SCREEN_WIDTH;
+  if (isTablet) {
+    // On tablets, don't let the 85% width exceed a reasonable size (e.g., 500px)
+    const maxValue = 550; 
+    return value > maxValue ? maxValue : value;
+  }
+  return value;
+};
+
+export const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 const FormField = ({
   title,
@@ -82,8 +96,8 @@ const FormField = ({
   };
 
   return (
-    <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }, otherStyles]}>
-      <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
+    <View style={[styles.container,  otherStyles,]}>
+      <Text style={[styles.title, { textAlign: isRTL ? 'left' : 'right' }]}>
         {title}
         {required && <Text style={styles.required}> *</Text>}
       </Text>
@@ -409,7 +423,7 @@ const styles = StyleSheet.create({
     height: hp(12),
   },
   inputContainer: {
-    width: wp(85),
+    width: '100%',
     position: 'relative',
     height: hp(7),
     paddingHorizontal: wp(4),

@@ -11,13 +11,24 @@ import {
 import { Icons } from "./Icons";
 import Calendar from "./Test";
 
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Responsive helper functions
-const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
-const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
+// 1. Detect if it's a tablet (common threshold is 600-768 logical pixels)
+export const isTablet = SCREEN_WIDTH >= 768;
 
+// 2. Responsive width with a "Max" cap for tablets
+export const wp = (percentage) => {
+  const value = (percentage / 100) * SCREEN_WIDTH;
+  if (isTablet) {
+    // On tablets, don't let the 85% width exceed a reasonable size (e.g., 500px)
+    const maxValue = 550; 
+    return value > maxValue ? maxValue : value;
+  }
+  return value;
+};
 
+export const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 const DatePick = ({
   title,
   value,
@@ -45,7 +56,7 @@ const DatePick = ({
   return (
     <View style={[styles.container, otherStyles]}>
       {/* Title with dynamic text alignment */}
-      <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
+      <Text style={[styles.title, { textAlign: isRTL ? 'left' : 'right' }]}>
         {title}
         {required && <Text style={styles.required}> *</Text>}
       </Text>
@@ -91,7 +102,7 @@ const styles = StyleSheet.create({
     marginTop: hp(0.6),
     // gap: hp(1.5),
     marginHorizontal: wp(2.5),
-    width: wp(85),
+   
     height: hp(10.5)
   },
   title: {

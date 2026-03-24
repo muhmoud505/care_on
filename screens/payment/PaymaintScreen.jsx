@@ -9,9 +9,9 @@ const PaymaintScreen = () => {
   const isRTL = i18n.dir() === 'rtl';
 
   return (
-    <SafeAreaView style={{ direction: isRTL ? 'rtl' : 'ltr', flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
     <CustomHeader text={t('payment.records', { defaultValue: 'سجلات الدفع' })}/>
-    <Text style={[styles.txt1, { textAlign: isRTL ? 'right' : 'left' }]}>{t('payment.recent_transactions', { defaultValue: 'معاملاتك الاخيرة' })}</Text>
+    <Text style={[styles.txt1, { textAlign: isRTL ? 'left' : 'right' }]}>{t('payment.recent_transactions', { defaultValue: 'معاملاتك الاخيرة' })}</Text>
     <ScrollView contentContainerStyle={styles.container}>
       <PaymentComponent/>
     </ScrollView>

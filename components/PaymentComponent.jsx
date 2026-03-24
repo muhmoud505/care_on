@@ -21,14 +21,14 @@ const PaymentComponent = () => {
     >
 
   <View style={styles.container}>
-      <View style={[styles.v1, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.v1, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}>
         <Text style={{marginTop:hp(1)}}>10 {t('payment.currency')}</Text>
         <View style={{flexDirection: isRTL ? 'row' : 'row-reverse', columnGap:8}}>
             <Text style={styles.txt1}>{t('common.success')}</Text>
             <TouchableOpacity 
               onPress={()=>navigation.navigate('payment_status')}
             >
-                <Icons.arrleft style={{transform: [{rotate: isRTL ? '0deg' : '180deg'}],top:hp(1.2)}} width={wp(4)} height={wp(4)} />
+                <Icons.arrleft style={{transform: [{rotate: isRTL ? '180deg' : '0deg'}],top:hp(1.2)}} width={wp(4)} height={wp(4)} />
             </TouchableOpacity>
         </View>
       </View>

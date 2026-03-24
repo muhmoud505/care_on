@@ -360,7 +360,12 @@ export const MedicalRecordsProvider = ({ children }) => {
     });
 
     try {
+      console.log(user);
+      
       const nationalNumber = user?.user?.resource?.national_number;
+
+      console.log(nationalNumber);
+      
       formData.append('user_national_number', nationalNumber);
 
       const response = await authFetch(`${BASE_URL}/api/v1/medical-records`, {

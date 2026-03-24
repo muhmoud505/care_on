@@ -26,20 +26,47 @@ const AgeDisplay = ({ value, label }) => (
 const ChildProfile = () => {
   const [modalVisible, setModalVisible]   = useState(false);
   const [previewAvatar, setPreviewAvatar] = useState(null);
+  const [meData, setMeData] = useState(null);
 
   const navigation = useNavigation();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
   const ds = getDynamicStyles(isRTL);
-  const { user, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
+  const { user, fetchCurrentUser, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
 
-  const fullName   = user?.user?.name || t('common.user_name_placeholder');
-  const nationalId = user?.user?.resource?.national_number || '';
-  const birthdate  = user?.user?.resource?.birthdate;
+  const profileUser = meData || user?.user || {};
+  const fullName   = profileUser?.name || t('common.user_name_placeholder');
+  const nationalId = profileUser?.resource?.national_number || '';
+  const birthdate  = profileUser?.resource?.birthdate;
 
   useEffect(() => {
     console.log('ChildProfile resource:', user);
   }, [user]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCurrentUser = async () => {
+      try {
+        console.log('test 100');
+        
+        const data = await fetchCurrentUser();
+        console.log('test 101 ',data);
+        
+        if (isMounted && data) {
+          setMeData(data);
+        }
+      } catch (error) {
+        console.warn('ChildProfile fetchCurrentUser failed', error?.message || error);
+      }
+    };
+
+    loadCurrentUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchCurrentUser]);
 
   const maskedNationalId = nationalId
     ? `${nationalId.substring(0, 4)}${'x'.repeat(nationalId.length - 4)}`
@@ -145,7 +172,7 @@ const ChildProfile = () => {
 
           {/* Switch to parent button — top corner, direction-aware */}
           <TouchableOpacity
-            style={[localStyles.switchBtn, { [isRTL ? 'left' : 'right']: wp(4) }]}
+            style={[localStyles.switchBtn, { [isRTL ? 'right' : 'left']: wp(4) }]}
             onPress={() => navigation.navigate('accounts')}
           >
             <Text style={localStyles.switchBtnText} numberOfLines={1}>

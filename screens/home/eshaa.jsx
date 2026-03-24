@@ -1,8 +1,9 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
 import Eshaa from '../../components/eshaaComponent';
 import { Icons } from '../../components/Icons';
@@ -26,6 +27,23 @@ const Eshaas = () => {
       }
     }, [user?.token?.value, fetchEshaas])
   );
+
+   useEffect(() => {
+      // We only show the toast if loading has finished AND it's not the very first app boot
+      if (loading.eshaa === false && eshaa.length === 0 && !error.eshaa && !loading.eshaa) {
+        console.log("Triggering Toast..."); // If you see this in LOG, the logic is working
+        
+        Toast.show({
+          type: 'info',
+          text1: t('common.info'),
+          text2: t('home.no_xrays_found'),
+          position: 'top', // Changed to top to ensure it's not under the tab bar
+          visibilityTime: 3000,
+          autoHide: true,
+          topOffset: 60, // Gives it some space from the header
+        });
+      }
+    }, [loading.eshaa, eshaa.length, error.eshaa, t]);
 
   const onRefresh = useCallback(() => {
     fetchEshaas({ force: true });
@@ -73,7 +91,7 @@ const Eshaas = () => {
   );
   };
   return (
-    <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
+    <SafeAreaView style={[styles.container,]}>
       <CustomHeader text={t('home.xray_title')}/>
       <ListContainer
         loading={loading.eshaa}
@@ -97,6 +115,7 @@ const Eshaas = () => {
          >
            <Icons.Add width={wp(18)} height={wp(18)} />
          </TouchableOpacity>
+         <Toast />
     </SafeAreaView>
   );
 };

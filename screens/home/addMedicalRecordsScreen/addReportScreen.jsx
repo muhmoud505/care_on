@@ -49,51 +49,56 @@ const AddReportScreen = () => {
 
   const formIsValid = checkFormValidity();
 
-  const handleSave = async () => {
-    if (!formIsValid) return;
-    setIsSubmitting(true);
+ const handleSave = async () => {
+  if (!formIsValid) return;
+  setIsSubmitting(true);
 
-    // Map Arabic UI labels to API type strings
-    const typeMap = {
+  // 1. Map UI types to API types
+  // 'diagnosis' maps to the "Report" view in your context
+  // 'prescription' maps to the "Medicine" view in your context
+  const typeMap = {
       'كشف':   'diagnosis',
       'روشتة': 'prescription',
     };
-    const apiType = typeMap[form.type] || 'diagnosis';
+  
+  const apiType = typeMap[form.type] || 'diagnosis';
 
-    // Build description as plain text — API expects a flat string, not JSON.
-    // Only include fields that actually have a value.
-    const descriptionParts = [];
-    if (form.date)          descriptionParts.push(`${t('report.date', { defaultValue: 'التاريخ' })}: ${form.date}`);
-    if (form.RequiredTests) descriptionParts.push(`${t('report.required_tests', { defaultValue: 'التحاليل المطلوبة' })}: ${form.RequiredTests}`);
-    if (form.RequiredScans) descriptionParts.push(`${t('report.required_scans', { defaultValue: 'الاشعة المطلوبة' })}: ${form.RequiredScans}`);
-    if (form.diagnosis)     descriptionParts.push(`${t('report.diagnosis', { defaultValue: 'التشخيص' })}: ${form.diagnosis}`);
-    if (form.notes)         descriptionParts.push(`${t('report.medical_notes', { defaultValue: 'الوصف الطبي' })}: ${form.notes}`);
-
-    const payload = {
-      type:        apiType,
-      title:       form.doctorName,
-      description: descriptionParts.join('\n') || form.doctorName,
-    };
-
-    if (form.documents) {
-      payload.documents = [form.documents];
-    }
-
-    const result = await addRecord(payload);
-    setIsSubmitting(false);
-
-    if (result.success) {
-      navigation.goBack();
-    } else {
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: result.error,
-        position: 'top',
-        visibilityTime: 3000,
-      });
-    }
+  // 2. Build description as a JSON OBJECT (Crucial for your Context parser)
+  const descriptionObj = {
+    date: form.date,
+    RequiredTests: form.RequiredTests,
+    RequiredScans: form.RequiredScans,
+    diagnosis: form.diagnosis,
+    notes: form.notes,
   };
+
+  const payload = {
+    type: apiType,
+    title: form.doctorName,
+    // Stringify the object so parseDescriptionToProps in context can read it
+    description: JSON.stringify(descriptionObj),
+  };
+
+  // 3. Handle Documents
+  if (form.documents) {
+    // Ensure this matches the field name expected by your API
+    payload.documents = [form.documents]; 
+  }
+
+  const result = await addRecord(payload);
+  setIsSubmitting(false);
+
+  if (result.success) {
+    navigation.goBack();
+  } else {
+    Toast.show({
+      type: 'error',
+      text1: t('common.error'),
+      text2: result.error,
+      position: 'top',
+    });
+  }
+};
 
   const renderForm = () => (
     <View style={styles.formContainer}>
@@ -221,7 +226,7 @@ const AddReportScreen = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
+    <SafeAreaView style={[styles.container, ]}>
       <CustomHeader text={t('add_report.title', { defaultValue: 'تقارير الدكاترة' })} />
       <FlatList
         data={[]}

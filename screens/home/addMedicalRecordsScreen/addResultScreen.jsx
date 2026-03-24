@@ -66,7 +66,7 @@ const AddResultScreen = () => {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
+    <SafeAreaView style={[styles.container, ]}>
       <CustomHeader text={t('add_result.title')} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>

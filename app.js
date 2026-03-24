@@ -3,10 +3,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useCallback } from 'react';
 import { View } from 'react-native';
 import 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 import { AuthProvider } from './contexts/authContext';
 import './i18n/i18n';
 import RootNavigator from './navigation/RootNavigator';
-
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -27,6 +27,7 @@ export default function App() {
       <View style={{ flex: 1 }} onLayout={OnLayoutRootView}>
         <RootNavigator />
       </View>
+      <Toast />
     </AuthProvider>
   );
 }

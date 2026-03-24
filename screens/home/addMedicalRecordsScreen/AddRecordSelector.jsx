@@ -49,7 +49,7 @@ const AddRecordSelector = () => {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { direction: i18n.dir() }]}>
+    <SafeAreaView style={[styles.container, ]}>
       <CustomHeader text={t('add_selector.title')} />
       <View style={styles.content}>
         <FormField

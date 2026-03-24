@@ -1,8 +1,9 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
 import Eshaa from '../../components/eshaaComponent';
 import { Icons } from '../../components/Icons';
@@ -56,6 +57,28 @@ const LastReports = () => {
       fetchReports({ per_page: 1 });
     }, [user?.token?.value, fetchMedicines, fetchResults, fetchEshaas, fetchReports])
   );
+   useEffect(() => {
+      // We only show the toast if loading has finished AND it's not the very first app boot
+      if (loading.results === false && results.length === 0 && !error.results && !loading.results
+        && 
+        loading.medicines === false && medicines.length === 0 && !error.medicines && !loading.medicines &&
+        loading.eshaa === false && eshaa.length === 0 && !error.eshaa && !loading.eshaa &&
+        loading.reports === false && reports.length === 0 && !error.reports && !loading.reports
+      ) {
+        console.log("Triggering Toast..."); // If you see this in LOG, the logic is working
+        
+        Toast.show({
+          type: 'info',
+          text1: t('common.info'),
+          text2: t('home.no_reports_found'),
+          position: 'top', // Changed to top to ensure it's not under the tab bar
+          visibilityTime: 3000,
+          autoHide: true,
+          topOffset: 60, // Gives it some space from the header
+        });
+      }
+    }, [loading.results, results.length, error.results, loading.medicines, medicines.length, error.medicines, loading.eshaa, eshaa.length, error.eshaa, loading.reports, reports.length, error.reports, t]);
+  
 
   const onRefresh = useCallback(() => {
     // When refreshing, force a refetch of the latest record for each category.
@@ -119,7 +142,7 @@ const LastReports = () => {
     ? styles.addButtonHigh // When toggle is visible, add button is higher
     : styles.addButtonLow;  // When toggle is NOT visible, add button is lower (takes toggle's place)
   return (
-    <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
+    <SafeAreaView style={[styles.container,]}>
       <CustomHeader text={t('home.last_reports_title')}/>
       <ListContainer
         // Combine loading and error states from all categories
@@ -148,6 +171,7 @@ const LastReports = () => {
            >
              <Icons.Add width={wp(18)} height={wp(18)} />
            </TouchableOpacity>
+           <Toast />
     </SafeAreaView>
   );
 };

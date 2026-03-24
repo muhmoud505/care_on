@@ -1,7 +1,21 @@
-import { Dimensions, StyleSheet } from 'react-native';
+import { Dimensions } from 'react-native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-export const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
+
+// 1. Detect if it's a tablet (common threshold is 600-768 logical pixels)
+export const isTablet = SCREEN_WIDTH >= 768;
+
+// 2. Responsive width with a "Max" cap for tablets
+export const wp = (percentage) => {
+  const value = (percentage / 100) * SCREEN_WIDTH;
+  if (isTablet) {
+    // On tablets, don't let the 85% width exceed a reasonable size (e.g., 500px)
+    const maxValue = 550; 
+    return value > maxValue ? maxValue : value;
+  }
+  return value;
+};
+
 export const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
 // ─── Static styles (language-independent) ────────────────────────────────────

@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,11 +16,14 @@ import { getDynamicStyles, hp, profileStyles as styles, wp } from './profileStyl
 const ParentProfile = () => {
   const [modalVisible, setModalVisible]   = useState(false);
   const [previewAvatar, setPreviewAvatar] = useState(null);
+  const [meData, setMeData] = useState(null);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
   const ds = getDynamicStyles(isRTL);          // RTL-aware dynamic styles
   const navigation = useNavigation();
-  const { user, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
+  const { user, fetchCurrentUser,refreshToken, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
+
+  const profileUser = meData || user?.user || {};
 
   /* ── Delete photo ── */
   const handleDeletePhoto = async () => {
@@ -102,6 +105,28 @@ const ParentProfile = () => {
     }
   };
 
+  useEffect(() => {
+    refreshToken(); // Ensure token is fresh when profile loads
+    let isMounted = true;
+
+    const loadCurrentUser = async () => {
+      try {
+        const data = await fetchCurrentUser();
+        if (isMounted && data) {
+          setMeData(data);
+        }
+      } catch (error) {
+        console.warn('ParentProfile fetchCurrentUser failed', error?.message || error);
+      }
+    };
+
+    loadCurrentUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchCurrentUser]);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top']}>
       <CustomHeader text={t('profile.parent_profile_title')} />
@@ -113,7 +138,7 @@ const ParentProfile = () => {
 
           {/* Linked Accounts button — top corner, direction-aware */}
           <TouchableOpacity
-            style={[localStyles.linkedBtn, { [isRTL ? 'left' : 'right']: wp(4) }]}
+            style={[localStyles.linkedBtn, { [isRTL ? 'right' : 'left']: wp(4) }]}
             onPress={() => navigation.navigate('accounts')}
           >
             <Text style={localStyles.linkedBtnText} numberOfLines={1}>
@@ -152,20 +177,20 @@ const ParentProfile = () => {
 
           {/* Name & national ID */}
           <Text style={localStyles.nameText} numberOfLines={1}>
-            {user?.user?.name || t('common.user_name_placeholder')}
+            {profileUser?.name || t('common.user_name_placeholder')}
           </Text>
           <Text style={localStyles.idText}>
-            {user?.user?.resource?.national_number || t('common.masked_national_id')}
+            {profileUser?.resource?.national_number || t('common.masked_national_id')}
           </Text>
         </View>
 
         {/* ── Birth certificate ── */}
-        <View style={[localStyles.section, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
-          <Text style={localStyles.sectionLabel}>{t('profile.birth_certificate')}</Text>
+        <View style={[localStyles.section, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+          <Text style={[localStyles.sectionLabel,{textAlign:isRTL ? 'left' : 'right'}]}>{t('profile.birth_certificate')}</Text>
           <TouchableOpacity onPress={handleDownloadBirthCertificate} style={{ width: '100%' }}>
             <ImageBackground
               source={Images.id}
-              style={[styles.background, { width: wp(90) }]}
+              style={[styles.background, { width: '100%' }]}
               imageStyle={{ width: wp(90), height: hp(8), borderRadius: 8 }}
               resizeMode="cover"
             >
@@ -179,7 +204,7 @@ const ParentProfile = () => {
 
         {/* ── Add another account ── */}
         <TouchableOpacity
-          style={styles.nextButton}
+          style={[styles.nextButton]}
           onPress={() => navigation.navigate('Auth', { screen: 's2', params: { userType: 'child', isParentAddingChild: true } })}
         >
           <Text style={styles.nextButtonText}>{t('account.add_another_account')}</Text>
@@ -269,7 +294,10 @@ const localStyles = StyleSheet.create({
     bottom: 0,
     right: 0,
   },
-  editIconInner: {
+  nextButton:{
+    width: '100%'
+  }
+  ,editIconInner: {
     width: wp(10),
     height: wp(10),
     position: 'relative',

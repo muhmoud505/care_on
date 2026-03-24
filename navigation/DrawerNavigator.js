@@ -7,37 +7,26 @@ import BottomTabs from './BottomTabs';
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigator = () => {
-  const { width } = useWindowDimensions();
+   const { width } = useWindowDimensions();
   const { i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
+
+  // Determine if it's a tablet
+  const isTablet = width > 768;
   return (
     <Drawer.Navigator
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
+       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
         drawerPosition: isRTL ? 'right' : 'left',
-        drawerType: 'front',
+        drawerType: isTablet ? 'slide' : 'front', // Slide works better on tablets
         drawerStyle: {
-          width: width * 1,
-          margin: 0,
-          padding: 0,
-          // Remove shadow/elevation
-          shadowColor: 'transparent',
-          shadowOpacity: 0,
-          shadowOffset: { width: 0, height: 0 },
-          shadowRadius: 0,
-          elevation: 0,
-          borderRightWidth: 0,
-          borderLeftWidth: 0,
+          // TABLET FIX: Don't use width * 1. Use a fixed max width.
+          width: isTablet ? 450 : width * 0.85, 
+          backgroundColor: '#fff',
         },
-        drawerContentContainerStyle: {
-          paddingTop: 0,      // Remove default top padding
-          paddingBottom: 0,   // Remove default bottom padding
-          paddingLeft: 0,     // Remove default left padding
-          paddingRight: 0,    // Remove default right padding
-        },
-        overlayColor: 'rgba(0, 0, 0, 0.5)', // Use a semi-transparent black color to dim the background
-        swipeEnabled: true, // Disable swipe gesture to open drawer
+        overlayColor: 'rgba(0, 0, 0, 0.5)',
+        swipeEnabled: true,
       }}
     >
       <Drawer.Screen 

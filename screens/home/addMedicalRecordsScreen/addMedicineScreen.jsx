@@ -1,7 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import CustomHeader from '../../../components/CustomHeader';
 
@@ -62,10 +63,10 @@ const AddMedicineScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
+    <SafeAreaView edges={['top']} style={[styles.container,]} >
       <CustomHeader text={t('add_medicine.title')}/>
       <View style={styles.formContainer}>
-        <Text style={[styles.txt,{textAlign:'right'}]}>{t('add_medicine.enter_following_data')} </Text>
+        <Text style={[styles.txt,{textAlign: i18n.dir() === 'rtl' ? 'left' : 'right'}]}>{t('add_medicine.enter_following_data')} </Text>
         <FormField
           title={t('add_medicine.medicine_name')}
           placeholder={t('add_medicine.medicine_name_placeholder')}
@@ -122,6 +123,7 @@ const styles = StyleSheet.create({
         flex:1,
         backgroundColor: '#F8F8F8',
         textAlign:'right'
+        
     },
     formContainer:{
       paddingHorizontal: wp(5),

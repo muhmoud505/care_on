@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StatusBar, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
 import { Icons } from '../../components/Icons';
 import ListContainer from '../../components/ListContainer';
@@ -27,6 +28,22 @@ const Medicines = () => {
       }
     }, [user?.token?.value, fetchMedicines])
   );
+   useEffect(() => {
+      // We only show the toast if loading has finished AND it's not the very first app boot
+      if (loading.medicines === false && medicines.length === 0 && !error.medicines && !loading.medicines) {
+        console.log("Triggering Toast..."); // If you see this in LOG, the logic is working
+        
+        Toast.show({
+          type: 'info',
+          text1: t('common.info'),
+          text2: t('home.no_medicines_found'),
+          position: 'top', // Changed to top to ensure it's not under the tab bar
+          visibilityTime: 3000,
+          autoHide: true,
+          topOffset: 60, // Gives it some space from the header
+        });
+      }
+    }, [loading.medicines, medicines.length, error.medicines, t]);
 
   useEffect(() => {
     if (route.params?.newMedicine) {
@@ -108,6 +125,7 @@ const Medicines = () => {
             </TouchableOpacity>
      
       <StatusBar barStyle={'dark-content'}  backgroundColor="transparent"  />
+      <Toast />
     </SafeAreaView>
   );
 };
@@ -116,7 +134,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F9FF',
-    paddingTop: hp(1.2),
   },
   listContent: {
     paddingHorizontal: wp(4),
