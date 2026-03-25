@@ -77,12 +77,13 @@ const styles = StyleSheet.create({
     backgroundColor:'#014CC4',
     padding:5,
     borderRadius:5,
-    width:50,
+    minWidth:50,
+    maxWidth:80,
     height:30,
     justifyContent:"center",
     alignItems:"center",
     color:"#fff",
-    fontSize:12,
+    fontSize:10,
     fontWeight:"bold"
   }
 });

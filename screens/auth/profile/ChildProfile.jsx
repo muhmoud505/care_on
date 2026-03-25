@@ -172,7 +172,7 @@ const ChildProfile = () => {
 
           {/* Switch to parent button — top corner, direction-aware */}
           <TouchableOpacity
-            style={[localStyles.switchBtn, { [isRTL ? 'right' : 'left']: wp(4) }]}
+            style={[localStyles.switchBtn, { [isRTL ? 'left' : 'right']: wp(4) }]}
             onPress={() => navigation.navigate('accounts')}
           >
             <Text style={localStyles.switchBtnText} numberOfLines={1}>
@@ -208,8 +208,8 @@ const ChildProfile = () => {
         </View>
 
         {/* ── Age today ── */}
-        <View style={[styles.cont2, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <Text style={styles.txt1}>{t('profile.age_today')}</Text>
+        <View style={[styles.cont2, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}>
+          <Text style={[styles.txt1, { textAlign: isRTL ? 'left' : 'right' }]}>{t('profile.age_today')}</Text>
           <AgeDisplay value={age.days}   label={t('common.day')}   />
           <AgeDisplay value={age.months} label={t('common.month')} />
           <AgeDisplay value={age.years}  label={t('common.year')}  />
@@ -217,7 +217,7 @@ const ChildProfile = () => {
 
         {/* ── Birth certificate ── */}
         <View style={[ds.cont3, { gap: hp(1) }]}>
-          <Text style={[styles.txt1, { textAlign: isRTL ? 'right' : 'left' }]}>
+          <Text style={[styles.txt1, { textAlign: isRTL ? 'left' : 'right' }]}>
             {t('profile.birth_certificate')}
           </Text>
           <TouchableOpacity
@@ -246,7 +246,7 @@ const ChildProfile = () => {
             </ImageBackground>
           </TouchableOpacity>
 
-          <Text style={[styles.txt1, { textAlign: isRTL ? 'right' : 'left' }]}>
+          <Text style={[styles.txt1, { textAlign: isRTL ? 'left' : 'right' }]}>
             {t('profile.uploaded_file')}
           </Text>
           <ImageBackground
@@ -264,7 +264,7 @@ const ChildProfile = () => {
 
         {/* ── Reset password ── */}
         <TouchableOpacity onPress={() => navigation.navigate('reset')}>
-          <Text style={[styles.link, { textAlign: isRTL ? 'right' : 'left' }]}>
+          <Text style={[styles.link, { textAlign: isRTL ? 'left' : 'right' }]}>
             {t('profile.reset_password')}
           </Text>
         </TouchableOpacity>

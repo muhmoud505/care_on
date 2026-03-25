@@ -97,7 +97,7 @@ const FormField = ({
 
   return (
     <View style={[styles.container,  otherStyles,]}>
-      <Text style={[styles.title, { textAlign: isRTL ? 'left' : 'right' }]}>
+      <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
         {title}
         {required && <Text style={styles.required}> *</Text>}
       </Text>

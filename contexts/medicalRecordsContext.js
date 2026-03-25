@@ -1,7 +1,6 @@
 import Constants from 'expo-constants';
 import { createContext, useCallback, useContext, useState } from 'react';
 
-import { useTranslation } from 'react-i18next';
 
 import Images from '../constants2/images';
 
@@ -39,6 +38,7 @@ const API_TYPE_MAP = {
   'lab_test':     'result',
   'radiology':    'eshaa',
   'prescription': 'medicine',
+  'Prescription': 'medicine',  // Handle uppercase from server
   'diagnosis':    'report',
   'consultation': 'report',
 };
@@ -51,12 +51,14 @@ const API_TYPE_MAP = {
 const API_TYPE_LABEL_MAP = {
   // Arabic API values
   'تشخيص':       'كشف',
-  'استشارة':      'كشف',
+  'استشارة':      'استشارة',  // Show as استشارة, not كشف
   'وصفة طبية':   'روشتة',
   // English API values
   'diagnosis':    'كشف',
-  'consultation': 'كشف',
+  'Diagnosis':    'كشف',  // Handle uppercase from server
+  'consultation': 'استشارة',  // Show as استشارة
   'prescription': 'روشتة',
+  'Prescription': 'روشتة',  // Handle uppercase from server
   'lab_test':     'اختبار معملي',
   'radiology':    'أشعة',
 };
@@ -106,7 +108,7 @@ const parseDescriptionToProps = (description) => {
 };
 
 
-const mapApiDataToComponentProps = (item, componentType) => {
+const mapApiDataToComponentProps = (item, componentType, originalTypeSent = null) => {
   let type;
   // Raw API type string (Arabic or English)
   const rawApiType = item.type || item.record_type || item.recordType;
@@ -117,12 +119,19 @@ const mapApiDataToComponentProps = (item, componentType) => {
     type = componentType;
   }
 
-  // Arabic display label — e.g. "كشف", "روشتة", "اختبار معملي"
-  const subType = API_TYPE_LABEL_MAP[rawApiType] || rawApiType || '';
+  // Use original type sent for subType if server ignores it and returns Diagnosis
+  let subType;
+  if (originalTypeSent && rawApiType === 'Diagnosis') {
+    // Server ignored our type, use what we originally sent
+    subType = API_TYPE_LABEL_MAP[originalTypeSent] || rawApiType || '';
+  } else {
+    // Normal case - use what server returned
+    subType = API_TYPE_LABEL_MAP[rawApiType] || rawApiType || '';
+  }
 
   const commonProps = {
     id:        item.id,
-    type,
+    type,       // Use the mapped type, not raw type
     subType,
     icon:      item.imageUrl ? { uri: item.imageUrl } : (Images.r5 ?? null),
     date:      item.dates?.created_at?.full,
@@ -206,8 +215,7 @@ export const MedicalRecordsProvider = ({ children }) => {
     all: null, medicines: null, results: null, eshaa: null, reports: null,
   });
 
-  const { t }               = useTranslation();
-  const { user, authFetch } = useAuth();
+  const { t, user, authFetch, fetchCurrentUser } = useAuth();
 
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
@@ -227,7 +235,21 @@ export const MedicalRecordsProvider = ({ children }) => {
       const pageToFetch = loadMore ? currentPagination.page + 1 : 1;
 
       try {
-        const nationalNumber = user?.user?.resource?.national_number;
+        let nationalNumber = user?.user?.resource?.national_number;
+
+        // If national number is not available, fetch current user to get it
+        if (!nationalNumber) {
+          console.log('National number not found in fetch, fetching current user...');
+          const currentUser = await fetchCurrentUser();
+          console.log('Current user fetched:', currentUser);
+          
+          if (currentUser?.resource?.national_number) {
+            nationalNumber = currentUser.resource.national_number;
+            console.log('Updated national number:', nationalNumber);
+          } else {
+            throw new Error('National number could not be retrieved');
+          }
+        }
 
         const settledResults = await Promise.allSettled(
           types.map(async ({ apiType, componentType }) => {
@@ -287,7 +309,7 @@ export const MedicalRecordsProvider = ({ children }) => {
       } finally {
         setLoading(prev => ({ ...prev, [stateKey]: false }));
       }
-    }, [t, stateKey, types, sort, pagination, loading, user, authFetch]);
+    }, [t, stateKey, types, sort, pagination, loading, user, authFetch, fetchCurrentUser]);
   };
 
   const fetchAllRecords = createFetcher({
@@ -321,6 +343,7 @@ export const MedicalRecordsProvider = ({ children }) => {
     types: [
       { apiType: 'diagnosis',    componentType: 'report' },
       { apiType: 'consultation', componentType: 'report' },
+      // Removed prescription - should only be in medicines screen
     ],
     sort: true,
   });
@@ -338,7 +361,7 @@ export const MedicalRecordsProvider = ({ children }) => {
     if (newMedicineData.endDate)    descriptionParts.push(`إلى: ${newMedicineData.endDate}`);
 
     const payload = {
-      type:        'prescription',
+      type:        'Prescription',  // Send what server expects for medicines
       title:       newMedicineData.medicineName,
       description: descriptionParts.join(' | ') || newMedicineData.medicineName,
     };
@@ -348,6 +371,9 @@ export const MedicalRecordsProvider = ({ children }) => {
 
   const addRecord = useCallback(async (newRecordData) => {
     const formData = new FormData();
+
+    // Capture the original type before processing
+    const originalType = newRecordData.type;
 
     Object.keys(newRecordData).forEach(key => {
       if (key === 'documents' && Array.isArray(newRecordData[key])) {
@@ -360,11 +386,23 @@ export const MedicalRecordsProvider = ({ children }) => {
     });
 
     try {
-      console.log(user);
-      
-      const nationalNumber = user?.user?.resource?.national_number;
+      let nationalNumber = user?.user?.resource?.national_number;
 
-      console.log(nationalNumber);
+      console.log('Initial national number:', nationalNumber);
+      
+      // If national number is not available, fetch current user to get it
+      if (!nationalNumber) {
+        console.log('National number not found, fetching current user...');
+        const currentUser = await fetchCurrentUser();
+        console.log('Current user fetched:', currentUser);
+        
+        if (currentUser?.resource?.national_number) {
+          nationalNumber = currentUser.resource.national_number;
+          console.log('Updated national number:', nationalNumber);
+        } else {
+          throw new Error('National number could not be retrieved');
+        }
+      }
       
       formData.append('user_national_number', nationalNumber);
 
@@ -393,13 +431,30 @@ export const MedicalRecordsProvider = ({ children }) => {
       }
 
       if (responseData?.data) {
-        const newRecord = mapApiDataToComponentProps(responseData.data, 'all');
-
+        const newRecord = mapApiDataToComponentProps(responseData.data, 'all', originalType);
+        
+        // Use the original API type we sent, not what server returns
+        const mappedType = API_TYPE_MAP[originalType] || newRecord.type;
+        
+        console.log('=== Add Record Debug ===');
+        console.log('Original type sent:', originalType);
+        console.log('Server returned type:', responseData.data.type);
+        console.log('Mapped type:', mappedType);
+        console.log('New record component type:', newRecord.type);
+        console.log('New record subType:', newRecord.subType);
+        
         fetchAllRecords({ force: true });
-        if (newRecord.type === 'medicine') fetchMedicines({ force: true });
-        if (newRecord.type === 'result')   fetchResults({ force: true });
-        if (newRecord.type === 'report')   fetchReports({ force: true });
-        if (newRecord.type === 'eshaa')    fetchEshaas({ force: true });
+        
+        // Handle both lowercase and uppercase types for medicines
+        if (originalType === 'prescription' || originalType === 'Prescription') {
+          fetchMedicines({ force: true });
+        } else if (mappedType === 'result' || originalType === 'lab_test') {
+          fetchResults({ force: true });
+        } else if (mappedType === 'report' || originalType === 'diagnosis' || originalType === 'consultation') {
+          fetchReports({ force: true });
+        } else if (mappedType === 'eshaa' || originalType === 'radiology') {
+          fetchEshaas({ force: true });
+        }
       }
 
       return { success: true, data: responseData };
@@ -409,7 +464,7 @@ export const MedicalRecordsProvider = ({ children }) => {
       setError(prev => ({ ...prev, all: addRecordFailedError }));
       return { success: false, error: addRecordFailedError };
     }
-  }, [t, user, authFetch]);
+}, [t, user, authFetch, fetchCurrentUser]);
 
   const value = {
     allRecords,

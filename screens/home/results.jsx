@@ -18,7 +18,7 @@ const Results = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
   const { results, loading, error, fetchResults } = useMedicalRecords();
-
+console.log(results[0])
   // This effect runs every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {

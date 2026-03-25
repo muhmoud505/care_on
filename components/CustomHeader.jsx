@@ -47,11 +47,11 @@ const CustomHeader = ({ text, onBack }) => {
         { 
           // English: Aligns everything to the Left
           // Arabic: Aligns everything to the Right
-          justifyContent: isRTL ? 'flex-end' : 'flex-start'
+          justifyContent: isRTL ? 'flex-start' : 'flex-end'
         }
       ]}>
         <TouchableOpacity
-          style={styles.touchable}
+          style={[styles.touchable, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
           onPress={handleBackPress}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >

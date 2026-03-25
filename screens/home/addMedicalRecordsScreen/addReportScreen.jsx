@@ -22,7 +22,7 @@ import { hp, wp } from '../../../utils/responsive';
 const AddReportScreen = () => {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
-  const { addRecord } = useMedicalRecords();
+  const { addRecord, fetchReports } = useMedicalRecords();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { form, errors, handleChange, checkFormValidity } = useForm({
@@ -58,7 +58,7 @@ const AddReportScreen = () => {
   // 'prescription' maps to the "Medicine" view in your context
   const typeMap = {
       'كشف':   'diagnosis',
-      'روشتة': 'prescription',
+      'روشتة': 'consultation',  // Handle what the picker actually sends
     };
   
   const apiType = typeMap[form.type] || 'diagnosis';
@@ -79,6 +79,11 @@ const AddReportScreen = () => {
     description: JSON.stringify(descriptionObj),
   };
 
+  console.log('=== Payload being sent ===');
+  console.log('Form type selected:', form.type);
+  console.log('Mapped API type:', apiType);
+  console.log('Full payload:', payload);
+
   // 3. Handle Documents
   if (form.documents) {
     // Ensure this matches the field name expected by your API
@@ -89,6 +94,11 @@ const AddReportScreen = () => {
   setIsSubmitting(false);
 
   if (result.success) {
+
+    
+    // Wait for reports to be refreshed before navigating back
+    await fetchReports({ force: true });
+    
     navigation.goBack();
   } else {
     Toast.show({

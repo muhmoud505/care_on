@@ -24,7 +24,7 @@ const Reports = () => {
     useCallback(() => {
       if (user?.token?.value) {
         fetchReports();
-        console.log("the reports are:", reports[0]?.subType);
+        console.log("the reports are:", reports[0]);
       }
     }, [user?.token?.value, fetchReports])
   );
