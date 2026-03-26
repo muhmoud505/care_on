@@ -52,7 +52,14 @@
   },
   "contact_us": {
     "title": "Contact Us",
+    "subtitle": "Get in touch with the Rayaa 360 support team",
     "get_in_touch": "Get in Touch",
+    "location_desc": "Visit us for direct communication",
+    "email_desc": "We respond to all messages within 24 hours",
+    "chat_desc": "Get immediate help from our support team",
+    "phone_desc": "Available Monday to Friday, 9 AM - 5 PM",
+    "chat_button": "Start Chat",
+    "live_chat": "Live Chat",
     "description": "We're here to help and answer any questions you might have.",
     "contact_info": "Contact Information",
     "phone": "Phone",
@@ -203,7 +210,7 @@
     "add_new_scan": "Add New Scan",
     "scan_name_arabic": "Scan Name (Arabic)",
     "scan_name_english": "Scan Name (English)",
-    "medical_description": "Medical Description"
+    "medical_description": "Medical Description" 
   },
 
   "add_medicine": {

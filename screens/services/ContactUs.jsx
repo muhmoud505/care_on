@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
+import Images from '../../constants2/images';
 import useRTL from '../../hooks/useRTL';
 import { hp, wp } from '../../utils/responsive';
 
 const ContactUs = ({ navigation }) => {
   const { t, i18n } = useTranslation();
-  const { isRTL, rowDirection } = useRTL(); // Use reactive useRTL hook
+  const rtl = useRTL();
 
   const handleCallPress = (phoneNumber) => {
     Alert.alert(
@@ -25,106 +26,105 @@ const ContactUs = ({ navigation }) => {
   };
 
   const handleLocationPress = (address) => {
-    // Open in maps (you can customize this based on your preference)
     Linking.openURL(`https://maps.google.com/?q=${encodeURIComponent(address)}`);
   };
 
   return (
-    <SafeAreaView style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+    <SafeAreaView style={[styles.container, { direction: rtl.dir }]}>
       <CustomHeader text={t('contact_us.title')} />
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
-            {t('contact_us.get_in_touch')}
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          <Text style={[styles.headerTitle, { textAlign: rtl.textAlign }]}>
+            {t('contact_us.title')}
           </Text>
-          <Text style={[styles.description, { textAlign: isRTL ? 'right' : 'left' }]}>
-            {t('contact_us.description')}
+          <Text style={[styles.headerSubtitle, { textAlign: rtl.textAlign }]}>
+            {t('contact_us.subtitle')}
           </Text>
         </View>
-
-        <View style={styles.contactSection}>
-          <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
-            {t('contact_us.contact_info')}
-          </Text>
-          
-          {/* Phone */}
-          <TouchableOpacity 
-            style={[styles.contactItem, { flexDirection: rowDirection }]}
-            onPress={() => handleCallPress('+966501234567')}
-          >
-            {/* <Icons.Call width={wp(6)} height={wp(6)} style={styles.contactIcon} /> */}
-            <View style={styles.contactTextContainer}>
-              <Text style={[styles.contactLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
-                {t('contact_us.phone')}
-              </Text>
-              <Text style={[styles.contactValue, { textAlign: isRTL ? 'right' : 'left' }]}>
-                +966 50 123 4567
-              </Text>
+        <View style={styles.cardsContainer}>
+          {/* Location Card */}
+          <View style={styles.card}>
+            <View style={styles.iconCircle}>
+              <Image source={Images.location} style={styles.gridIcon} />
             </View>
-          </TouchableOpacity>
+            <Text style={[styles.cardTitle, { textAlign: rtl.textAlign }]}>
+              {t('contact_us.location')}
+            </Text>
+            <Text style={[styles.cardDesc, { textAlign: rtl.textAlign }]}>
+              {t('contact_us.location_desc')}
+            </Text>
+            <TouchableOpacity 
+              style={styles.blueButton}
+              onPress={() => handleLocationPress('Eagle St, Brisbane, QLD, 4000')}
+            >
+              <Text style={styles.buttonText}>Eagle St, Brisbane, QLD, 4000 1</Text>
+            </TouchableOpacity>
+          </View>
 
-          {/* Email */}
-          <TouchableOpacity 
-            style={[styles.contactItem, { flexDirection: rowDirection }]}
-            onPress={() => handleEmailPress('support@care_on.com')}
-          >
-            {/* <Icons.Mail width={wp(6)} height={wp(6)} style={styles.contactIcon} /> */}
-            <View style={styles.contactTextContainer}>
-              <Text style={[styles.contactLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
-                {t('contact_us.email')}
-              </Text>
-              <Text style={[styles.contactValue, { textAlign: isRTL ? 'right' : 'left' }]}>
-                support@care_on.com
-              </Text>
+          {/* Email Card */}
+          <View style={styles.card}>
+            <View style={[styles.iconCircle, styles.emailIconBg]}>
+              <Image source={Images.email} style={styles.gridIcon} />
             </View>
-          </TouchableOpacity>
+            <Text style={[styles.cardTitle, { textAlign: rtl.textAlign }]}>
+              {t('contact_us.email')}
+            </Text>
+            <Text style={[styles.cardDesc, { textAlign: rtl.textAlign }]}>
+              {t('contact_us.email_desc')}
+            </Text>
+            <TouchableOpacity 
+              style={styles.greenButton}
+              onPress={() => handleEmailPress('example@Raya360.com')}
+            >
+              <Text style={styles.buttonText}>example@Raya360.com</Text>
+            </TouchableOpacity>
+          </View>
 
-          {/* Location */}
-          <TouchableOpacity 
-            style={[styles.contactItem, { flexDirection: rowDirection }]}
-            onPress={() => handleLocationPress('Riyadh, Saudi Arabia')}
-          >
-            {/* <Icons.Location width={wp(6)} height={wp(6)} style={styles.contactIcon} /> */}
-            <View style={styles.contactTextContainer}>
-              <Text style={[styles.contactLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
-                {t('contact_us.location')}
-              </Text>
-              <Text style={[styles.contactValue, { textAlign: isRTL ? 'right' : 'left' }]}>
-                {t('contact_us.address')}
-              </Text>
+          {/* Live Chat Card */}
+          <View style={styles.card}>
+            <View style={styles.iconCircle}>
+              <Image source={Images.verify} style={styles.gridIcon} />
             </View>
-          </TouchableOpacity>
+            <Text style={[styles.cardTitle, { textAlign: rtl.textAlign }]}>
+              {t('contact_us.live_chat')}
+            </Text>
+            <Text style={[styles.cardDesc, { textAlign: rtl.textAlign }]}>
+              {t('contact_us.chat_desc')}
+            </Text>
+            <TouchableOpacity style={styles.blueButton}>
+              <Text style={styles.buttonText}>{t('contact_us.chat_button')}</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Phone Card */}
+          <View style={styles.card}>
+            <View style={styles.iconCircle}>
+              <Image source={Images.call} style={styles.gridIcon} />
+            </View>
+            <Text style={[styles.cardTitle, { textAlign: rtl.textAlign }]}>
+              {t('contact_us.phone')}
+            </Text>
+            <Text style={[styles.cardDesc, { textAlign: rtl.textAlign }]}>
+              {t('contact_us.phone_desc')}
+            </Text>
+            <TouchableOpacity 
+              style={styles.blueButton}
+              onPress={() => handleCallPress('+1234567890')}
+            >
+              <Text style={styles.buttonText}>+123 456 7890</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <View style={styles.hoursSection}>
-          <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
-            {t('contact_us.working_hours')}
-          </Text>
-          <View style={[styles.hoursContainer, { flexDirection: rowDirection }]}>
-            <Text style={[styles.dayText, { textAlign: isRTL ? 'right' : 'left' }]}>
-              {t('contact_us.saturday')}
-            </Text>
-            <Text style={[styles.hoursText, { textAlign: isRTL ? 'right' : 'left' }]}>
-              9:00 AM - 5:00 PM
-            </Text>
-          </View>
-          <View style={[styles.hoursContainer, { flexDirection: rowDirection }]}>
-            <Text style={[styles.dayText, { textAlign: isRTL ? 'right' : 'left' }]}>
-              {t('contact_us.sunday_to_thursday')}
-            </Text>
-            <Text style={[styles.hoursText, { textAlign: isRTL ? 'right' : 'left' }]}>
-              8:00 AM - 6:00 PM
-            </Text>
-          </View>
-          <View style={[styles.hoursContainer, { flexDirection: rowDirection }]}>
-            <Text style={[styles.dayText, { textAlign: isRTL ? 'right' : 'left' }]}>
-              {t('contact_us.friday')}
-            </Text>
-            <Text style={[styles.hoursText, { textAlign: isRTL ? 'right' : 'left' }]}>
-              8:00 AM - 12:00 PM
-            </Text>
-          </View>
+        {/* Bottom Illustration */}
+        <View style={styles.illustrationContainer}>
+          <Image 
+            source={Images.contactIllustration} 
+            style={styles.illustration}
+            resizeMode="contain"
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -134,50 +134,150 @@ const ContactUs = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F9FF',
+    backgroundColor: '#F8FAFF',
   },
   scrollContent: {
-    padding: wp(4),
+    padding: wp(2),
+    paddingBottom: hp(8),
   },
-  section: {
-    marginBottom: hp(3),
+  headerSection: {
     paddingHorizontal: wp(4),
+    paddingVertical: hp(3),
+    marginBottom: hp(2),
   },
-  sectionTitle: {
-    fontSize: Math.min(wp(5), 20),
+  headerTitle: {
+    fontSize: Math.min(wp(7), 28),
     fontWeight: 'bold',
     color: '#1A1D44',
-    marginBottom: hp(2),
+    marginBottom: hp(1),
   },
-  description: {
+  headerSubtitle: {
     fontSize: Math.min(wp(4), 16),
     color: '#666',
-    lineHeight: hp(3),
+    lineHeight: hp(2.5),
   },
-  contactSection: {
-    marginBottom: hp(4),
+  cardsContainer: {
+    padding: wp(3),
+    gap: hp(2),
   },
-  contactItem: {
+  card: {
     backgroundColor: '#fff',
+    borderRadius: wp(4),
     padding: wp(4),
-    marginBottom: hp(2),
-    borderRadius: wp(3),
+    width: '100%',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
     elevation: 3,
   },
-  contactIcon: {
+  iconCircle: {
+    width: wp(12),
+    height: wp(12),
+    borderRadius: wp(6),
+    backgroundColor: '#E8F4FD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: hp(1.5),
+  },
+  emailIconBg: {
+    backgroundColor: '#E8F8F5',
+  },
+  gridIcon: {
+    width: wp(5),
+    height: wp(5),
     tintColor: '#014CC4',
   },
-  contactTextContainer: {
+  cardTitle: {
+    fontSize: Math.min(wp(4), 16),
+    fontWeight: 'bold',
+    color: '#1A1D44',
+    marginBottom: hp(0.5),
+  },
+  cardDesc: {
+    fontSize: Math.min(wp(3.2), 13),
+    color: '#666',
+    marginBottom: hp(1.5),
+    lineHeight: hp(2.2),
+  },
+  blueButton: {
+    backgroundColor: '#2563EB',
+    borderRadius: wp(2),
+    paddingVertical: hp(1.2),
+    paddingHorizontal: wp(3),
+    width: '100%',
+    alignItems: 'center',
+  },
+  greenButton: {
+    backgroundColor: '#059669',
+    borderRadius: wp(2),
+    paddingVertical: hp(1.2),
+    paddingHorizontal: wp(3),
+    width: '100%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: Math.min(wp(3), 12),
+    fontWeight: '600',
+  },
+  mainCard: {
+    backgroundColor: '#fff',
+    borderRadius: wp(6),
+    padding: wp(5),
+    marginBottom: hp(3),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  title: {
+    fontSize: Math.min(wp(6), 24),
+    fontWeight: 'bold',
+    color: '#1A1D44',
+    marginBottom: hp(1.5),
+  },
+  description: {
+    fontSize: Math.min(wp(4), 16),
+    color: '#666',
+    lineHeight: hp(3),
+    marginBottom: hp(3),
+  },
+  contactOptions: {
+    gap: hp(2),
+  },
+  contactOption: {
+    backgroundColor: '#F8FAFF',
+    borderRadius: wp(4),
+    padding: wp(4),
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E8F0FE',
+  },
+  iconContainer: {
+    width: wp(12),
+    height: wp(12),
+    borderRadius: wp(6),
+    backgroundColor: '#E8F0FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: hp(1.5),
+  },
+  contactIcon: {
+    width: wp(6),
+    height: wp(6),
+    tintColor: '#014CC4',
+  },
+  contactInfo: {
     flex: 1,
-    marginLeft: wp(3),
   },
   contactLabel: {
     fontSize: Math.min(wp(3.5), 14),
@@ -190,24 +290,34 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#1A1D44',
   },
-  hoursSection: {
-    marginBottom: hp(4),
-    paddingHorizontal: wp(4),
-  },
-  hoursContainer: {
+  hoursCard: {
     backgroundColor: '#fff',
-    padding: wp(4),
-    marginBottom: hp(1.5),
-    borderRadius: wp(3),
-    alignItems: 'center',
+    borderRadius: wp(6),
+    padding: wp(5),
+    marginBottom: hp(3),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 4,
     },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  sectionTitle: {
+    fontSize: Math.min(wp(5), 20),
+    fontWeight: 'bold',
+    color: '#1A1D44',
+    marginBottom: hp(2),
+  },
+  hoursContainer: {
+    backgroundColor: '#F8FAFF',
+    borderRadius: wp(3),
+    padding: wp(4),
+    marginBottom: hp(1.5),
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E8F0FE',
   },
   dayText: {
     fontSize: Math.min(wp(3.5), 14),
@@ -220,6 +330,14 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#1A1D44',
     flex: 2,
+  },
+  illustrationContainer: {
+    alignItems: 'center',
+    marginTop: hp(2),
+  },
+  illustration: {
+    width: wp(80),
+    height: hp(30),
   },
 });
 
