@@ -14,14 +14,14 @@ import { useAuth } from '../../../contexts/authContext';
 import { getDynamicStyles, hp, profileStyles as styles, wp } from './profileStyles';
 
 const ParentProfile = () => {
-  const [modalVisible, setModalVisible]   = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [previewAvatar, setPreviewAvatar] = useState(null);
   const [meData, setMeData] = useState(null);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
   const ds = getDynamicStyles(isRTL);          // RTL-aware dynamic styles
   const navigation = useNavigation();
-  const { user, fetchCurrentUser,refreshToken, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
+  const { user, fetchCurrentUser, refreshToken, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
 
   const profileUser = meData || user?.user || {};
 
@@ -42,13 +42,13 @@ const ParentProfile = () => {
   const handleDownloadBirthCertificate = async () => {
     const url =
       user?.user?.resource?.birth_certificate_url ||
-      user?.user?.resource?.birth_certificate      ||
-      user?.user?.resource?.certificate_url        ||
-      user?.user?.resource?.birth_cert_url         ||
-      user?.user?.birth_certificate_url            ||
-      user?.user?.birth_certificate                ||
-      user?.user?.certificate_url                  ||
-      user?.user?.birth_cert_url                   ||
+      user?.user?.resource?.birth_certificate ||
+      user?.user?.resource?.certificate_url ||
+      user?.user?.resource?.birth_cert_url ||
+      user?.user?.birth_certificate_url ||
+      user?.user?.birth_certificate ||
+      user?.user?.certificate_url ||
+      user?.user?.birth_cert_url ||
       null;
 
     if (!url) {
@@ -180,13 +180,16 @@ const ParentProfile = () => {
             {profileUser?.name || t('common.user_name_placeholder')}
           </Text>
           <Text style={localStyles.idText}>
-            {profileUser?.resource?.national_number || t('common.masked_national_id')}
+            {profileUser?.resource?.national_number
+              ? profileUser.resource.national_number.toString().slice(0, 4) +
+                'x'.repeat(Math.max(0, profileUser.resource.national_number.toString().length - 4))
+              : t('common.masked_national_id')}
           </Text>
         </View>
 
         {/* ── Birth certificate ── */}
         <View style={[localStyles.section, { direction: isRTL ? 'rtl' : 'ltr' }]}>
-          <Text style={[localStyles.sectionLabel,{textAlign:isRTL ? 'left' : 'right'}]}>{t('profile.birth_certificate')}</Text>
+          <Text style={[localStyles.sectionLabel, { textAlign: isRTL ? 'right' : 'left' }]}>{t('profile.birth_certificate')}</Text>
           <TouchableOpacity onPress={handleDownloadBirthCertificate} style={{ width: '100%' }}>
             <ImageBackground
               source={Images.id}
@@ -222,7 +225,7 @@ const ParentProfile = () => {
       {/* ── Photo options modal ── */}
       {modalVisible && (
         <TouchableOpacity style={localStyles.modalOverlay} activeOpacity={1} onPress={() => setModalVisible(false)}>
-          <TouchableOpacity activeOpacity={1} style={localStyles.modalContent} onPress={() => {}}>
+          <TouchableOpacity activeOpacity={1} style={localStyles.modalContent} onPress={() => { }}>
             <TouchableOpacity style={[localStyles.closeIconContainer, { [isRTL ? 'left' : 'right']: 15 }]} onPress={() => setModalVisible(false)}>
               <Text style={localStyles.closeIcon}>✕</Text>
             </TouchableOpacity>
@@ -294,10 +297,10 @@ const localStyles = StyleSheet.create({
     bottom: 0,
     right: 0,
   },
-  nextButton:{
+  nextButton: {
     width: '100%'
   }
-  ,editIconInner: {
+  , editIconInner: {
     width: wp(10),
     height: wp(10),
     position: 'relative',

@@ -19,7 +19,8 @@ const SignIn = () => {
     password: '',
   });
   const [isPasswordSecure, setIsPasswordSecure] = useState(true);
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
 
   const formIsValid = checkFormValidity();
 
@@ -69,8 +70,8 @@ const SignIn = () => {
         required 
         placeholder={t('auth.password_placeholder')}
         /> 
-        <TouchableOpacity style={styles.link} onPress={() => navigation.navigate('forget')}> 
-          <Text style={styles.txt1} >{t('auth.forgot_password_q')}</Text>
+        <TouchableOpacity style={[styles.link, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]} onPress={() => navigation.navigate('forget')}> 
+          <Text style={[styles.txt1, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.forgot_password_q')}</Text>
         </TouchableOpacity>
         </View>
           <TouchableOpacity style={[styles.nextButton, (!formIsValid || isAuthLoading) && styles.disabledButton]} onPress={handleSignIn} disabled={!formIsValid || isAuthLoading} activeOpacity={0.7}>
@@ -106,14 +107,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   link: {
-    color: 'black',
     width: wp(85),
     marginTop: hp(1),
   },
   txt1: {
     fontWeight: '600',
     fontSize: Math.min(wp(3.5), 14),
-    textAlign: 'right',
+    // textAlign is set inline per language direction
     textDecorationLine: 'underline',
   },
   nextButton: {

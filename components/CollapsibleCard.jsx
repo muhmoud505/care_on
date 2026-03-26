@@ -1,6 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Shadow } from 'react-native-shadow-2';
 import { useCollapsible } from '../hooks/useCollapsible';
+import useRTL from '../hooks/useRTL';
 import { wp } from '../utils/responsive';
 import { Icons } from './Icons';
 
@@ -14,8 +15,7 @@ const CollapsibleCard = ({
   showType = false,
 }) => {
   const { isExpanded, toggle } = useCollapsible(controlledExpanded, onToggle);
- 
-  
+  const { rowDirection } = useRTL(); // Use reactive useRTL hook
 
   return (
     <Shadow
@@ -29,7 +29,7 @@ const CollapsibleCard = ({
       <TouchableOpacity activeOpacity={0.8} onPress={toggle}>
         <View style={styles.smcontainer}>
           {/* Header - always visible */}
-          <View style={styles.mincontainer}>
+          <View style={[styles.mincontainer, { flexDirection: rowDirection }]}>
             {icon && <Icons.Medicine width={wp(6)} height={wp(6)} />}
             <Text style={styles.txt1}>{title}</Text>
             {showType && (

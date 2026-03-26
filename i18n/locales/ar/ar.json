@@ -48,6 +48,27 @@
     "allow": "سماح",
     "dont_allow": "عدم السماح"
   },
+  "contact_us": {
+    "title": "اتصل بنا",
+    "get_in_touch": "تواصل معنا",
+    "description": "نحن هنا لمساعدتك والإجابة على أي أسئلة قد تكون لديك.",
+    "contact_info": "معلومات الاتصال",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "location": "الموقع",
+    "address": "الرياض، المملكة العربية السعودية",
+    "working_hours": "ساعات العمل",
+    "saturday": "السبت",
+    "sunday_to_thursday": "الأحد - الخميس",
+    "friday": "الجمعة",
+    "call_title": "إجراء مكالمة",
+    "call_message": "هل تريد الاتصال بـ {{phoneNumber}}؟",
+    "call": "اتصل"
+  },
+  "drawer": {
+    "profile": "الملف الشخصي",
+    "contact_us": "اتصل بنا"
+  },
 
   "create_code": {
     "title": "إنشاء كود",
@@ -375,17 +396,6 @@
     "currency": "ج.م",
     "masked_name": "جيلان ا*** ج***",
     "masked_phone": "0123456789"
-  },
-
-  "drawer": {
-    "user_name_placeholder": "اسم المستخدم",
-    "profile": "الملف الشخصي",
-    "billing": "الفواتير والمدفوعات",
-    "find_service": "البحث عن أقرب خدمة",
-    "contact_us": "تواصل معنا",
-    "linked_accounts": "الحسابات المرتبطة",
-    "doctors_used_codes": "الأطباء الذين استخدموا الأكواد",
-    "your_created_codes": "الأكواد التي أنشأتها"
   },
 
   "notifications": {

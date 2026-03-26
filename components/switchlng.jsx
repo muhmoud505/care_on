@@ -1,30 +1,28 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'; // ✅ added import
-import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { I18nManager, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import RNRestart from 'react-native-restart';
 
 const LanguageSwitch = () => {
   const { i18n } = useTranslation();
-  const navigation = useNavigation();
   const currentLanguage = i18n.language;
   const newLanguage = currentLanguage.startsWith('ar') ? 'en' : 'ar';
 
-  const toggleLanguage = () => {
-    try {
-      navigation.closeDrawer();
-    } catch (error) {
-      console.log('Could not close drawer:', error);
-    }
+  const toggleLanguage = async () => {
+    const isRTL = newLanguage.startsWith('ar');
 
-    setTimeout(() => {
-      i18n.changeLanguage(newLanguage).then(async () => { // ✅ async moved here inside .then()
-        const isRTL = newLanguage.startsWith('ar');
-        I18nManager.forceRTL(isRTL);
-        await AsyncStorage.setItem('app_language', newLanguage); // ✅ now valid async/await
-        RNRestart.Restart();
-      });
-    }, 300);
+    // Persist the choice so it survives cold starts
+    await AsyncStorage.setItem('app_language', newLanguage);
+
+    // Set native RTL hint for next cold start (TextInput cursor direction etc.)
+    // Note: this does NOT require a restart in JS-driven apps — all direction
+    // logic in this app reads i18n.dir() which updates instantly below.
+    I18nManager.forceRTL(isRTL);
+    I18nManager.allowRTL(isRTL);
+
+    // THIS is the key call — react-i18next broadcasts the change to every
+    // useTranslation() subscriber in the tree, so all components re-render
+    // instantly with the correct isRTL value. No restart needed.
+    await i18n.changeLanguage(newLanguage);
   };
 
   return (

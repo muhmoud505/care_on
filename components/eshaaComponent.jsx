@@ -19,6 +19,7 @@ const Eshaa = ({
   const { t,i18n } = useTranslation();
 
 const isRTL = i18n.dir() === 'rtl';
+const rowDirection = isRTL ? 'row-reverse' : 'row';
 
   // Parse the description if it's a JSON string
   let parsedDescription = { labName: '', notes: '', date: '' };
@@ -102,22 +103,22 @@ const isRTL = i18n.dir() === 'rtl';
       onToggle={onExpandedChange}
     >
       <>
-        <View style={styles.miccontianer}>
+        <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
           <Icons.Union width={20} height={20} />
           <Text style={styles.txt2}>{t('eshaa.xray_name')}:</Text>
           <Text style={styles.txt3}>{title}</Text>
         </View>
-        <View style={styles.miccontianer}>
+        <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
           <Icons.Buliding width={20} height={20} />
           <Text style={styles.txt2}>{t('eshaa.lab_name')}:</Text>
           <Text style={styles.txt3}>{displayLabName}</Text>
         </View>
-        <View style={styles.miccontianer}>
+        <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
           <Icons.Calendara width={20} height={20} />
           <Text style={styles.txt2}>{t('eshaa.xray_date')}:</Text>
           <Text style={styles.txt3}>{displayDate}</Text>
         </View>
-        <View style={styles.miccontianer}>
+        <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
           <Icons.ReceiptEdit width={20} height={20} />
           <Text style={styles.txt2}>{t('eshaa.description')}:</Text>
           <Text style={styles.txt3}>{displayNotes}</Text>
@@ -131,7 +132,7 @@ const isRTL = i18n.dir() === 'rtl';
               imageStyle={{width:319, height:61}}
               resizeMode='cover'
             >
-              <View style={styles.overlay}>
+              <View style={[styles.overlay, { flexDirection: rowDirection }]}>
                 <Icons.Download width={20} height={20} />
                 <Text style={styles.txt4}>{t('common.download')}</Text>
               </View>

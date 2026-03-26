@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import images from '../constants2/images';
 import { useAuth } from '../contexts/authContext';
+import useRTL from '../hooks/useRTL';
 import { Icons } from './Icons';
 import LanguageSwitch from './switchlng';
 
@@ -19,11 +20,7 @@ const CustomDrawerContent = (props) => {
   const insets = useSafeAreaInsets();
   const { navigation } = props;
   const { t, i18n } = useTranslation();
-  
-  // RTL Detection
-  const isRTL = i18n.dir() === 'rtl';
-  const rowDirection = isRTL ? 'row-reverse' : 'row';
-  const textAlign = isRTL ? 'right' : 'left';
+  const { isRTL, rowDirection, textAlign } = useRTL(); // Use reactive useRTL hook
 
   const { width, height } = useWindowDimensions();
   const { user, logout } = useAuth();
@@ -35,9 +32,9 @@ const CustomDrawerContent = (props) => {
       const firstDigit = nationalId.substring(0, 1);
       if (firstDigit !== '2' && firstDigit !== '3') return null;
       const century = firstDigit === '3' ? '20' : '19';
-      const year  = parseInt(century + nationalId.substring(1, 3), 10);
+      const year = parseInt(century + nationalId.substring(1, 3), 10);
       const month = parseInt(nationalId.substring(3, 5), 10) - 1;
-      const day   = parseInt(nationalId.substring(5, 7), 10);
+      const day = parseInt(nationalId.substring(5, 7), 10);
       const birthDate = new Date(year, month, day);
       if (isNaN(birthDate.getTime())) return null;
       const today = new Date();
@@ -56,16 +53,16 @@ const CustomDrawerContent = (props) => {
 
   const parentNavigation = navigation.getParent();
 
-  const handleNavigate = (screenName) => {
+  const handleNavigate = (screenName, params) => {
     navigation.closeDrawer();
-    parentNavigation?.navigate(screenName);
+    parentNavigation?.navigate(screenName, params);
   };
 
   const menuItems = [
-    { id: 1, title: t('drawer.profile'),           icon: Icons.Profilec, onPress: () => handleNavigate('ProfileStack') },
-    { id: 2, title: t('drawer.billing'),            icon: Icons.Wallet,   onPress: () => handleNavigate('PaymentStack') },
-    { id: 3, title: t('drawer.find_service'),       icon: Icons.Gps,      onPress: () => handleNavigate('ServiceStack'), disabled: true },
-    { id: 6, title: t('drawer.contact_us'),         icon: Icons.Call,     onPress: () => handleNavigate('ContactUs'), disabled: true },
+    { id: 1, title: t('drawer.profile'),onPress: () => handleNavigate('ProfileStack') },
+    { id: 2, title: t('privacy_policy.title'),onPress: () => handleNavigate('ServiceStack', { screen: 'PrivacyPolicy' }) },
+    { id: 3, title: t('terms_of_service.title'), onPress: () => handleNavigate('ServiceStack', { screen: 'TermsOfService' }) },
+    { id: 6, title: t('drawer.contact_us'), onPress: () => handleNavigate('ServiceStack') },
   ];
 
   const styles = StyleSheet.create({
@@ -223,7 +220,7 @@ const CustomDrawerContent = (props) => {
             activeOpacity={item.disabled ? 1 : 0.7}
             disabled={!!item.disabled}
           >
-            <item.icon style={[styles.menuIcon, item.disabled && styles.menuIconDisabled]} />
+            {/* <item.icon style={[styles.menuIcon, item.disabled && styles.menuIconDisabled]} /> */}
             <Text style={[styles.menuText, item.disabled && styles.menuTextDisabled]}>
               {item.title}
             </Text>

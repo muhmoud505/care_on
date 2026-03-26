@@ -43,7 +43,77 @@
     "unknown_error": "Something went wrong",
     "file_saved": "File saved successfully",
     "download_failed": "Download failed",
-    "user_name_placeholder": "User Name"
+    "user_name_placeholder": "User Name",
+    "retry": "Retry",
+    "loading": "Loading...",
+    "ask_me_later": "Remind me later",
+    "allow": "Allow",
+    "dont_allow": "Don't Allow"
+  },
+  "contact_us": {
+    "title": "Contact Us",
+    "get_in_touch": "Get in Touch",
+    "description": "We're here to help and answer any questions you might have.",
+    "contact_info": "Contact Information",
+    "phone": "Phone",
+    "email": "Email", 
+    "location": "Location",
+    "address": "Riyadh, Saudi Arabia",
+    "working_hours": "Working Hours",
+    "saturday": "Saturday",
+    "sunday_to_thursday": "Sunday - Thursday",
+    "friday": "Friday",
+    "call_title": "Make Call",
+    "call_message": "Do you want to call {{phoneNumber}}?",
+    "call": "Call"
+  },
+  "privacy_policy": {
+    "title": "Privacy Policy",
+    "privacy_statement": "Privacy Statement",
+    "description": "We are committed to protecting your privacy and ensuring the security of your personal information.",
+    "data_collection": "Data Collection",
+    "data_collection_text": "We collect information you provide to us directly, such as when you create an account, use our services, or contact us for support.",
+    "data_usage": "Data Usage",
+    "data_usage_text": "We use your information to provide, maintain, and improve our services. This includes processing medical records, scheduling appointments, and communicating with healthcare providers.",
+    "data_sharing": "Data Sharing",
+    "data_sharing_text": "We may share your information with healthcare providers only with your explicit consent or as required by law. We never sell your personal information to third parties.",
+    "cookies": "Cookies",
+    "cookies_text": "We use cookies and similar technologies to enhance your experience. You can control cookie settings through your device preferences.",
+    "security": "Security",
+    "security_text": "We implement appropriate security measures to protect your information against unauthorized access, alteration, disclosure, or destruction.",
+    "changes": "Changes to Policy",
+    "changes_text": "We may update this privacy policy from time to time. Any changes will be posted on this page and will be effective immediately.",
+    "contact": "Contact Us",
+    "contact_text": "If you have questions about this privacy policy, please contact us at privacy@care_on.com",
+    "contact_privacy": "Email Privacy Team"
+  },
+  "terms_of_service": {
+    "title": "Terms of Service",
+    "acceptance": "Acceptance of Terms",
+    "acceptance_description": "By using our services, you agree to be bound by these terms and conditions.",
+    "service_description": "Service Description",
+    "service_description_text": "Care On provides medical record management, appointment scheduling, and healthcare provider connectivity services.",
+    "user_responsibilities": "User Responsibilities",
+    "user_responsibilities_text": "You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.",
+    "service_availability": "Service Availability",
+    "service_availability_text": "We strive to maintain high availability but cannot guarantee 100% uptime. Services may be temporarily unavailable for maintenance.",
+    "fees_and_payments": "Fees and Payments",
+    "fees_and_payments_text": "Some services may be subject to fees. Payment processing is handled through secure channels.",
+    "cancellation": "Cancellation",
+    "cancellation_text": "You may cancel your account at any time. Refunds are subject to our refund policy.",
+    "privacy": "Privacy",
+    "privacy_text": "Your use of our services is also governed by our Privacy Policy.",
+    "intellectual_property": "Intellectual Property",
+    "intellectual_property_text": "All content and materials available through our services are owned by Care On or its licensors and are protected by intellectual property laws.",
+    "disclaimer": "Disclaimer",
+    "disclaimer_text": "Our services are provided 'as is' without warranties of any kind. Medical information should be reviewed by qualified healthcare professionals.",
+    "contact": "Contact",
+    "contact_text": "For questions about these terms, please contact our support team.",
+    "contact_support": "Contact Support"
+  },
+  "drawer": {
+    "profile": "Profile",
+    "contact_us": "Contact Us"
   },
 
   "create_code": {
@@ -371,17 +441,6 @@
     "currency": "EGP",
     "masked_name": "Jilan A*** G***",
     "masked_phone": "0123456789"
-  },
-
-  "drawer": {
-    "user_name_placeholder": "User Name",
-    "profile": "Profile",
-    "billing": "Billing & Payments",
-    "find_service": "Find Nearest Service",
-    "contact_us": "Contact Us",
-    "linked_accounts": "Linked Accounts",
-    "doctors_used_codes": "Doctors Who Used Your Codes",
-    "your_created_codes": "Your Created Codes"
   },
 
   "notifications": {

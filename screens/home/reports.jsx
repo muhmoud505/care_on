@@ -18,6 +18,7 @@ const Reports = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
   const { reports, loading, error, fetchReports, loadMoreReports } = useMedicalRecords();
+  const isRTL = i18n.dir() === 'rtl';
 
   // This effect runs every time the screen comes into focus
   useFocusEffect(
@@ -99,12 +100,12 @@ const Reports = () => {
         emptyListMessage={t('home.no_doctor_reports_found')}
       />
      {isToggleButtonVisible && (
-             <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
+             <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={[styles.toggleButton, { [isRTL ? 'left' : 'right']: wp(8) }]}>
                <Icons.CloseAll width={wp(13)} height={wp(13)} />
              </TouchableOpacity>
            )}
            <TouchableOpacity
-             style={finalAddButtonStyle}
+             style={[finalAddButtonStyle, { [isRTL ? 'left' : 'right']: wp(5) }]}
              onPress={() => navigation.navigate('addReport')}
            >
              <Icons.Add width={wp(18)} height={wp(18)} />

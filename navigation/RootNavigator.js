@@ -1,5 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/authContext';
 import { MedicalRecordsProvider } from '../contexts/medicalRecordsContext';
@@ -13,6 +14,7 @@ const Stack = createNativeStackNavigator();
 
 const RootNavigator = () => {
   const { user, isLoading } = useAuth();
+  const { i18n } = useTranslation();
 
   if (isLoading) {
     return <SplashScreen />;
@@ -21,7 +23,7 @@ const RootNavigator = () => {
   return (
     <SafeAreaProvider>
       {/* Add a navigationKey to ensure the navigation state is reset on auth change */}
-      <NavigationContainer key={user ? 'App' : 'Auth'}>
+      <NavigationContainer key={`${user ? 'App' : 'Auth'}-${i18n.language}`}>
         <Stack.Navigator>
           {user ? (
             // The MedicalRecordsProvider is now wrapped around AppStack itself,

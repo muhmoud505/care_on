@@ -19,6 +19,7 @@ const Medicines = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { medicines, loading, error, fetchMedicines, addMedicine, loadMoreMedicines } = useMedicalRecords();
+  const isRTL = i18n.dir() === 'rtl';
 
   // This effect runs every time the screen comes into focus
   useFocusEffect(
@@ -113,12 +114,12 @@ const Medicines = () => {
         contentContainerStyle={styles.listContent}
       />
       {isToggleButtonVisible && (
-              <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
+              <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={[styles.toggleButton, { [isRTL ? 'left' : 'right']: wp(8) }]}>
                 <Icons.CloseAll width={wp(13)} height={wp(13)} />
               </TouchableOpacity>
             )}
             <TouchableOpacity
-              style={finalAddButtonStyle}
+              style={[finalAddButtonStyle, { [isRTL ? 'left' : 'right']: wp(5) }]}
               onPress={() => navigation.navigate('addMedicine')}
             >
               <Icons.Add width={wp(18)} height={wp(18)} />

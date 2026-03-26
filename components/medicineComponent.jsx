@@ -15,6 +15,9 @@ const Medicine = ({
   onExpandedChange
 }) => {
   const { t, i18n } = useTranslation();
+  // Inline RTL logic
+  const isRTL = i18n.dir() === 'rtl';
+  const rowDirection = isRTL ? 'row-reverse' : 'row';
 
   let parsedDescription = { dosage: '', startDate: '', endDate: '' };
   if (description && typeof description === 'string' && description.startsWith('{')) {
@@ -41,7 +44,7 @@ const Medicine = ({
       <View style={styles.expandedContent}>
 
         {/* Date Row */}
-        <View style={styles.dateRow}>
+        <View style={[styles.dateRow, { flexDirection: rowDirection }]}>
 
           {/* Right: End Date (الى / تاريخ النهاية) */}
           <View style={styles.dateItem}>
@@ -71,7 +74,7 @@ const Medicine = ({
         </View>
 
         {/* Dosage Row */}
-        <View style={styles.dosageRow}>
+        <View style={[styles.dosageRow, { flexDirection: rowDirection }]}>
           <Icons.ReceiptEdit width={16} height={16} />
           <Text style={styles.labelTxt}>{t('medicine.dosage')}:</Text>
           <Text style={styles.dosageValue} numberOfLines={1}>

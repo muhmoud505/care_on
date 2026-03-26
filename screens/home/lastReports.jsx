@@ -18,6 +18,7 @@ import { hp, wp } from '../../utils/responsive';
 const LastReports = () => {
   const [expandedItems, setExpandedItems] = useState({});
   const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
   const navigation = useNavigation();
   const { user } = useAuth();
   const {
@@ -161,12 +162,12 @@ const LastReports = () => {
         emptyListMessage={t('home.no_reports_found')}
       />
      {isToggleButtonVisible && (
-             <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={styles.toggleButton}>
+             <TouchableOpacity activeOpacity={0.8} onPress={toggleAll} style={[styles.toggleButton, { [isRTL ? 'left' : 'right']: wp(8) }]}>
                <Icons.CloseAll width={wp(13)} height={wp(13)} />
              </TouchableOpacity>
            )}
            <TouchableOpacity
-             style={finalAddButtonStyle}
+             style={[finalAddButtonStyle, { [isRTL ? 'left' : 'right']: wp(5) }]}
              onPress={() => navigation.navigate('AddRecordSelector')}
            >
              <Icons.Add width={wp(18)} height={wp(18)} />
@@ -193,19 +194,19 @@ const styles = StyleSheet.create({
   addButtonHigh: { // Position when toggle button IS visible
     position: 'absolute',
     bottom: hp(24),
-    right: wp(5),
-    zIndex: 1, // Ensure the button is rendered on top of other elements
+    // horizontal position overridden inline (isRTL ? left : right)
+    zIndex: 1,
   },
   addButtonLow: { // Position when toggle button IS NOT visible (takes its place)
     position: 'absolute',
-    bottom: hp(16), // Lower position (when toggle is hidden)
-    right: wp(5),
+    bottom: hp(16),
+    // horizontal position overridden inline (isRTL ? left : right)
     zIndex: 1,
   },
   toggleButton: {
     position: 'absolute',
-    bottom: hp(16), // Raised to be clearly above the tab bar
-    right: wp(8), // Aligned with the add button
+    bottom: hp(16),
+    // horizontal position overridden inline (isRTL ? left : right)
     zIndex: 1,
   },
 });

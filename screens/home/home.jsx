@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import useRTL from '../../hooks/useRTL';
 
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +21,7 @@ const CHILD_AGE_LIMIT = 18; // Define the age limit for a child account
 const Home = () => {
   const navigation=useNavigation()
   const { t, i18n } = useTranslation();
+  const { rowDirection } = useRTL(); // Use reactive useRTL hook
   const [showSurveyPopup, setShowSurveyPopup] = useState(false);
   const { user } = useAuth(); // Get the current user from the auth context
   const [surveySkippedThisSession, setSurveySkippedThisSession] = useState(false);
@@ -116,7 +118,7 @@ const Home = () => {
         <View style={styles.surveyReminderWrapper}>
          
           <TouchableOpacity
-            style={styles.surveyReminderContainer}
+            style={[styles.surveyReminderContainer, { flexDirection: rowDirection }]}
             onPress={() => navigation.navigate('survey')}
           >
              <Image source={Images.alert}/>
@@ -128,7 +130,7 @@ const Home = () => {
       {menuItems.map((item) => (
         <TouchableOpacity
           key={item.key}
-          style={styles.secContainer}
+          style={[styles.secContainer, { flexDirection: rowDirection }]}
           onPress={() => navigation.navigate(item.navigateTo)}
           activeOpacity={0.7}
         >

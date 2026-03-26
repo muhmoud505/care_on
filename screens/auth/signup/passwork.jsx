@@ -24,6 +24,9 @@ const PasswordScreen = ({ route }) => {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const { signup, isAuthLoading } = useAuth();
+  // Inline RTL logic
+  const isRTL = i18n.dir() === 'rtl';
+  const rowDirection = isRTL ? 'row-reverse' : 'row';
   const { form, errors, handleChange, checkFormValidity } = useForm({
     password: '',
     password_confirmation: '',
@@ -132,7 +135,7 @@ const PasswordScreen = ({ route }) => {
         />
       </View>
 
-      <View style={styles.termsContainer}>
+      <View style={[styles.termsContainer, { flexDirection: rowDirection }]}>
         <TouchableOpacity
           style={styles.checkbox}
           onPress={() => setAgreedToTerms(!agreedToTerms)}
@@ -170,7 +173,7 @@ const PasswordScreen = ({ route }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <TouchableOpacity
-              style={styles.closeIconContainer}
+              style={[styles.closeIconContainer, { [isRTL ? 'left' : 'right']: 15 }]}
               onPress={() => setShowTermsModal(false)}
             >
               <Text style={styles.closeIcon}>✕</Text>

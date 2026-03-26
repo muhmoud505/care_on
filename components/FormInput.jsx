@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Dimensions,
-  FlatList,
-  Image,
-  Modal,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Dimensions,
+    FlatList,
+    Image,
+    Modal,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Images from '../constants2/images';
 import DatePick from "./datePicker";
@@ -171,7 +171,7 @@ const FormField = ({
           </View>
         ) : (
           <TextInput
-            style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
+            style={[styles.input, { textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }]}
             value={value}
             numberOfLines={type === 'long' ? 5 : 1}
             editable={type !== 'drop' && type !== 'date'}
@@ -258,7 +258,7 @@ const FormField = ({
               placeholderTextColor="#9CA3AF"
               value={newArabic}
               onChangeText={setNewArabic}
-              textAlign={{isRTL} ? 'right' : 'left'}
+              textAlign={isRTL ? 'right' : 'left'}
             />
 
             {/* English name */}
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: Math.min(wp(4), 16),
     paddingVertical: 0,
-    writingDirection: 'rtl',
+    // writingDirection is set inline (dynamic per language) — see TextInput above
   },
   icon: {
     position: 'absolute',

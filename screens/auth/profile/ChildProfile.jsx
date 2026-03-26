@@ -24,7 +24,7 @@ const AgeDisplay = ({ value, label }) => (
 );
 
 const ChildProfile = () => {
-  const [modalVisible, setModalVisible]   = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [previewAvatar, setPreviewAvatar] = useState(null);
   const [meData, setMeData] = useState(null);
 
@@ -35,9 +35,9 @@ const ChildProfile = () => {
   const { user, fetchCurrentUser, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
 
   const profileUser = meData || user?.user || {};
-  const fullName   = profileUser?.name || t('common.user_name_placeholder');
+  const fullName = profileUser?.name || t('common.user_name_placeholder');
   const nationalId = profileUser?.resource?.national_number || '';
-  const birthdate  = profileUser?.resource?.birthdate;
+  const birthdate = profileUser?.resource?.birthdate;
 
   useEffect(() => {
     console.log('ChildProfile resource:', user);
@@ -49,10 +49,10 @@ const ChildProfile = () => {
     const loadCurrentUser = async () => {
       try {
         console.log('test 100');
-        
+
         const data = await fetchCurrentUser();
-        console.log('test 101 ',data);
-        
+        console.log('test 101 ', data);
+
         if (isMounted && data) {
           setMeData(data);
         }
@@ -78,9 +78,9 @@ const ChildProfile = () => {
       const birthDate = new Date(birthdate);
       if (isNaN(birthDate.getTime())) throw new Error('Invalid date');
       const today = new Date();
-      let years  = today.getFullYear() - birthDate.getFullYear();
-      let months = today.getMonth()    - birthDate.getMonth();
-      let days   = today.getDate()     - birthDate.getDate();
+      let years = today.getFullYear() - birthDate.getFullYear();
+      let months = today.getMonth() - birthDate.getMonth();
+      let days = today.getDate() - birthDate.getDate();
       if (days < 0) {
         months--;
         days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
@@ -208,27 +208,27 @@ const ChildProfile = () => {
         </View>
 
         {/* ── Age today ── */}
-        <View style={[styles.cont2, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}>
+        <View style={[styles.cont2, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <Text style={[styles.txt1, { textAlign: isRTL ? 'left' : 'right' }]}>{t('profile.age_today')}</Text>
-          <AgeDisplay value={age.days}   label={t('common.day')}   />
+          <AgeDisplay value={age.days} label={t('common.day')} />
           <AgeDisplay value={age.months} label={t('common.month')} />
-          <AgeDisplay value={age.years}  label={t('common.year')}  />
+          <AgeDisplay value={age.years} label={t('common.year')} />
         </View>
 
         {/* ── Birth certificate ── */}
         <View style={[ds.cont3, { gap: hp(1) }]}>
-          <Text style={[styles.txt1, { textAlign: isRTL ? 'left' : 'right' }]}>
+          <Text style={[styles.txt1, { textAlign: isRTL ? 'right' : 'left' }]}>
             {t('profile.birth_certificate')}
           </Text>
           <TouchableOpacity
             onPress={() => {
               const url =
                 user?.user?.resource?.birth_certificate_url ||
-                user?.user?.resource?.birth_certificate      ||
-                user?.user?.resource?.certificate_url        ||
-                user?.user?.resource?.birth_cert_url         ||
-                user?.user?.birth_certificate_url            ||
-                user?.user?.birth_certificate                ||
+                user?.user?.resource?.birth_certificate ||
+                user?.user?.resource?.certificate_url ||
+                user?.user?.resource?.birth_cert_url ||
+                user?.user?.birth_certificate_url ||
+                user?.user?.birth_certificate ||
                 null;
               downloadFile(url, 'birth_certificate.pdf');
             }}
@@ -246,20 +246,7 @@ const ChildProfile = () => {
             </ImageBackground>
           </TouchableOpacity>
 
-          <Text style={[styles.txt1, { textAlign: isRTL ? 'left' : 'right' }]}>
-            {t('profile.uploaded_file')}
-          </Text>
-          <ImageBackground
-            source={Images.background}
-            style={[styles.background, { width: wp(90) }]}
-            imageStyle={{ width: wp(90), height: hp(8), borderRadius: 8 }}
-            resizeMode="cover"
-          >
-            <View style={[styles.overlay, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              <Icons.Download width={wp(6)} height={wp(6)} />
-              <Text style={[styles.txt4, { color: '#fff' }]}>{t('common.download')}</Text>
-            </View>
-          </ImageBackground>
+
         </View>
 
         {/* ── Reset password ── */}
@@ -274,7 +261,7 @@ const ChildProfile = () => {
       {/* ── Photo options modal ── */}
       {modalVisible && (
         <TouchableOpacity style={localStyles.modalOverlay} activeOpacity={1} onPress={() => setModalVisible(false)}>
-          <TouchableOpacity activeOpacity={1} style={localStyles.modalContent} onPress={() => {}}>
+          <TouchableOpacity activeOpacity={1} style={localStyles.modalContent} onPress={() => { }}>
             <TouchableOpacity
               style={[localStyles.closeIconContainer, { [isRTL ? 'left' : 'right']: 15 }]}
               onPress={() => setModalVisible(false)}
