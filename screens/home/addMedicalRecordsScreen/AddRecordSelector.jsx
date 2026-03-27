@@ -1,57 +1,60 @@
-import { useNavigation } from '@react-navigation/native'
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import CustomHeader from '../../../components/CustomHeader'
-import FormField from '../../../components/FormInput'
-import { hp, wp } from '../../../utils/responsive'
+// AddRecordSelector.jsx - Fixed Picker + RTL
+
+import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomHeader from '../../../components/CustomHeader';
+import FormField from '../../../components/FormInput';
+import { hp, wp } from '../../../utils/responsive';
 
 const AddRecordSelector = () => {
-  const { t, i18n } = useTranslation()
-  const navigation = useNavigation()
-  const [selectedValue, setSelectedValue] = useState(null)
+  const { t, i18n } = useTranslation();
+  const navigation = useNavigation();
+  const isRTL = i18n.dir() === 'rtl';
 
+  const [selectedValue, setSelectedValue] = useState(null);
 
   const recordTypes = [
-    {
-      key: 'addResult',
-      label: t('add_selector.add_result'),
-      screen: 'addResult',
+    { 
+      key: 'addResult', 
+      label: t('add_selector.add_result', { defaultValue: 'نتائج التحاليل' }), 
+      screen: 'addResult' 
     },
-    {
-      key: 'addEshaa',
-      label: t('add_selector.add_xray'),
-      screen: 'addEshaa',
+    { 
+      key: 'addEshaa', 
+      label: t('add_selector.add_xray', { defaultValue: 'الأشعة' }), 
+      screen: 'addEshaa' 
     },
-    {
-      key: 'addReport',
-      label: t('add_selector.add_report'),
-      screen: 'addReport',
+    { 
+      key: 'addReport', 
+      label: t('add_selector.add_report', { defaultValue: 'تقارير الدكاترة' }), 
+      screen: 'addReport' 
     },
-    {
-      key: 'addMedicine',
-      label: t('add_selector.add_medicine'),
-      screen: 'addMedicine',
+    { 
+      key: 'addMedicine', 
+      label: t('add_selector.add_medicine', { defaultValue: 'الأدوية' }), 
+      screen: 'addMedicine' 
     },
-  ]
+  ];
 
-  const pickerItems = recordTypes.map((item) => ({
+  const pickerItems = recordTypes.map(item => ({
     label: item.label,
     value: item.screen,
-  }))
+  }));
 
   const handleContinue = () => {
-    // Replace the current screen with the new one.
-    // This makes 'goBack()' from the add screen return to the previous screen (lastReports).
-    if (selectedValue)
-      navigation.replace(selectedValue)
-  }
+    if (selectedValue) {
+      navigation.replace(selectedValue);
+    }
+  };
 
   return (
-    <SafeAreaView style={[styles.container, ]}>
+    <SafeAreaView style={styles.container}>
       <CustomHeader text={t('add_selector.title')} />
-      <View style={styles.content}>
+
+      <View style={[styles.content, { direction: isRTL ? 'rtl' : 'ltr' }]}>
         <FormField
           title={t('add_selector.prompt')}
           placeholder={t('add_selector.placeholder')}
@@ -59,8 +62,10 @@ const AddRecordSelector = () => {
           pickerItems={pickerItems}
           value={selectedValue}
           onChangeText={setSelectedValue}
+          required
         />
       </View>
+
       <View style={styles.footer}>
         <TouchableOpacity
           style={[styles.button, !selectedValue && styles.buttonDisabled]}
@@ -70,12 +75,9 @@ const AddRecordSelector = () => {
           <Text style={styles.buttonText}>{t('common.continue')}</Text>
         </TouchableOpacity>
       </View>
-
     </SafeAreaView>
-  )
-}
-
-export default AddRecordSelector
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -108,4 +110,6 @@ const styles = StyleSheet.create({
     fontSize: wp(4.5),
     fontWeight: 'bold',
   },
-})
+});
+
+export default AddRecordSelector;

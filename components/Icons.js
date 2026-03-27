@@ -13,6 +13,7 @@ import Calendara from '../assets2/svgImages/calendarA.svg';
 import Calendarb from '../assets2/svgImages/calendarB.svg';
 import Call from '../assets2/svgImages/call.svg';
 import Cancel from '../assets2/svgImages/cancel.svg';
+import Chat from '../assets2/svgImages/chat.svg';
 import Close from '../assets2/svgImages/close.svg';
 import CloseAll from '../assets2/svgImages/closeall.svg';
 import Closeb from '../assets2/svgImages/closeB.svg';
@@ -24,6 +25,7 @@ import Doctor from '../assets2/svgImages/doctor.svg';
 import Download from '../assets2/svgImages/download.svg';
 import Edita from '../assets2/svgImages/editA.svg';
 import Editb from '../assets2/svgImages/editB.svg';
+import Email from '../assets2/svgImages/email.svg';
 import Expand from '../assets2/svgImages/expand.svg';
 import Eye from '../assets2/svgImages/eye.svg';
 import Gps from '../assets2/svgImages/gps.svg';
@@ -64,6 +66,8 @@ import Wave from '../assets2/svgImages/wave.svg';
 
 export const Icons = {
   A1,
+  Chat,
+  Email,
   Add,
   Analysis,
   analysisA,

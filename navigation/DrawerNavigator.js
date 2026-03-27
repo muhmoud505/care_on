@@ -10,7 +10,9 @@ const DrawerNavigator = () => {
   const { width } = useWindowDimensions();
   const { i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
-    const isTablet = width > 768;
+    const isTablet = width > 350;
+    console.log(isTablet,width);
+    
 
   return (
     <Drawer.Navigator
@@ -20,7 +22,7 @@ const DrawerNavigator = () => {
         drawerPosition: isRTL ? 'right' : 'left',
         drawerType: isTablet ? 'slide' : 'front',
         drawerStyle: {
-           width: isTablet ? 450 : width * 1, 
+           width: isTablet ? '100%' : width * 1, 
           margin: 0,
           padding: 0,
           // Remove shadow/elevation

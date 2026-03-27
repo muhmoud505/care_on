@@ -1,3 +1,5 @@
+// addMedicineScreen.jsx - Fixed RTL
+
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -5,7 +7,6 @@ import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import CustomHeader from '../../../components/CustomHeader';
-
 import DatePick from '../../../components/datePicker';
 import FormField from '../../../components/FormInput';
 import { useAuth } from '../../../contexts/authContext';
@@ -13,14 +14,15 @@ import { useMedicalRecords } from '../../../contexts/medicalRecordsContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 
-
-
 const AddMedicineScreen = () => {
-  const navigation=useNavigation();
+  const navigation = useNavigation();
   const { addRecord } = useMedicalRecords();
   const { user } = useAuth();
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { form, errors, handleChange, checkFormValidity } = useForm({
     medicineName: '',
     dosage: '',
@@ -57,16 +59,19 @@ const AddMedicineScreen = () => {
         text1: t('common.error'),
         text2: result.error,
         position: 'top',
-        visibilityTime: 3000,
       });
     }
   };
 
   return (
-    <SafeAreaView edges={['top']} style={[styles.container,]} >
-      <CustomHeader text={t('add_medicine.title')}/>
-      <View style={styles.formContainer}>
-        <Text style={[styles.txt,{textAlign: i18n.dir() === 'rtl' ? 'left' : 'right'}]}>{t('add_medicine.enter_following_data')} </Text>
+    <SafeAreaView style={styles.container}>
+      <CustomHeader text={t('add_medicine.title')} />
+
+      <View style={[styles.formContainer, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+        <Text style={[styles.txt, { textAlign: isRTL ? 'right' : 'left' }]}>
+          {t('add_medicine.enter_following_data')}
+        </Text>
+
         <FormField
           title={t('add_medicine.medicine_name')}
           placeholder={t('add_medicine.medicine_name_placeholder')}
@@ -75,6 +80,7 @@ const AddMedicineScreen = () => {
           error={errors.medicineName}
           required
         />
+
         <FormField
           title={t('add_medicine.dosage')}
           placeholder={t('add_medicine.dosage_placeholder')}
@@ -83,6 +89,7 @@ const AddMedicineScreen = () => {
           error={errors.dosage}
           required
         />
+
         <DatePick
           title={t('add_medicine.start_date')}
           required
@@ -91,63 +98,63 @@ const AddMedicineScreen = () => {
           onDateSelect={(date) => handleChange('startDate', date)}
           error={errors.startDate}
         />
+
         <DatePick
-           title={t('add_medicine.end_date')}
+          title={t('add_medicine.end_date')}
           required
-          value={form.endDate}
           placeholder={t('add_medicine.end_date_placeholder')}
+          value={form.endDate}
           onDateSelect={(date) => handleChange('endDate', date)}
           error={errors.endDate}
         />
+
         <TouchableOpacity
-           style={[styles.nextButton, !formIsValid && styles.disabledButton]}
-           onPress={handleSave}
-           disabled={!formIsValid || isSubmitting}
-       >
-         {isSubmitting ? (
+          style={[styles.nextButton, (!formIsValid || isSubmitting) && styles.disabledButton]}
+          onPress={handleSave}
+          disabled={!formIsValid || isSubmitting}
+        >
+          {isSubmitting ? (
             <ActivityIndicator color="#fff" />
-         ) : (
+          ) : (
             <Text style={styles.nextButtonText}>{t('common.save')}</Text>
-         )}
-       </TouchableOpacity>
+          )}
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
-  )
-}
-
-export default AddMedicineScreen
-
+  );
+};
 
 const styles = StyleSheet.create({
-    container:{
-        flex:1,
-        backgroundColor: '#F8F8F8',
-        textAlign:'right'
-        
-    },
-    formContainer:{
-      paddingHorizontal: wp(5),
-      paddingTop: hp(2),
-    },
-     nextButton: {
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F8F8',
+  },
+  formContainer: {
+    paddingHorizontal: wp(5),
+    paddingTop: hp(2),
+    flex: 1,
+  },
+  nextButton: {
     backgroundColor: '#014CC4',
     height: hp(7),
     borderRadius: wp(4),
-    justifyContent: 'center', // These properties are now handled by the container
-    alignItems: 'center', // and the button's own padding/margin
-    marginTop: hp(5)
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: hp(5),
   },
   disabledButton: {
     opacity: 0.5,
   },
-    nextButtonText: {
+  nextButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: Math.min(wp(6), 24),
   },
-  txt:{
-    fontWeight:'700',
-   fontSize: Math.min(wp(5), 20),
-   marginBottom: hp(2)
-  }
-})
+  txt: {
+    fontWeight: '700',
+    fontSize: Math.min(wp(5), 20),
+    marginBottom: hp(2),
+  },
+});
+
+export default AddMedicineScreen;

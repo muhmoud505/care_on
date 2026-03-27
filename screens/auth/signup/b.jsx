@@ -90,6 +90,7 @@ const S2 = () => {
       navigation.navigate('signupBaby', {
         title: t('auth.create_child_account', { defaultValue: 'إنشاء حساب لطفل' }),
         ...dataToPass,
+        isChild: true,
       });
     }
   };

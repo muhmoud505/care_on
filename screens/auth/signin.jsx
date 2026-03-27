@@ -1,3 +1,5 @@
+// signin.jsx - Fixed RTL Version
+
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,93 +29,96 @@ const SignIn = () => {
   const handleSignIn = async () => {
     if (formIsValid) {
       try {
-        await login({
-          email: form.email,
-          password: form.password,
-        });
-        // Navigation will be handled automatically by the AuthProvider
+        await login({ email: form.email, password: form.password });
       } catch (error) {
         Toast.show({
           type: 'error',
           text1: t('auth.login_failed'),
           text2: error.message,
           position: 'top',
-          visibilityTime: 3000,
         });
-      } 
+      }
     }
   };
+
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.safeArea}>
       <CustomHeader text={t('auth.signin')} />
-      <View style={styles.container} >
+
+      <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
         <Icons.Login width={wp(80)} height={wp(80)} />
-        <View style={styles.smcontainer}> 
- 
-        <FormField  
-        title={t('auth.email')}
-        value={form.email} 
-        onChangeText={(text) => handleChange('email', text)} 
-        error={errors.email} 
-        keyboardType="email-address" 
-        required 
-        placeholder={t('auth.email_placeholder')}
-        /> 
-        <FormField  
-        title={t('auth.password')}
-        value={form.password} 
-        onChangeText={(text) => handleChange('password', text)} 
-        error={errors.password} 
-        type="password"
-        secureTextEntry={isPasswordSecure}
-        onToggleSecureEntry={() => setIsPasswordSecure(!isPasswordSecure)}
-        required 
-        placeholder={t('auth.password_placeholder')}
-        /> 
-        <TouchableOpacity style={[styles.link, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]} onPress={() => navigation.navigate('forget')}> 
-          <Text style={[styles.txt1, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.forgot_password_q')}</Text>
-        </TouchableOpacity>
+
+        <View style={styles.formWrapper}>
+          <FormField
+            title={t('auth.email')}
+            value={form.email}
+            onChangeText={(text) => handleChange('email', text)}
+            error={errors.email}
+            keyboardType="email-address"
+            required
+            placeholder={t('auth.email_placeholder')}
+          />
+
+          <FormField
+            title={t('auth.password')}
+            value={form.password}
+            onChangeText={(text) => handleChange('password', text)}
+            error={errors.password}
+            type="password"
+            secureTextEntry={isPasswordSecure}
+            onToggleSecureEntry={() => setIsPasswordSecure(!isPasswordSecure)}
+            required
+            placeholder={t('auth.password_placeholder')}
+          />
+
+          <TouchableOpacity 
+            style={[styles.link, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]} 
+            onPress={() => navigation.navigate('forget')}
+          >
+            <Text style={styles.forgotText}>{t('auth.forgot_password_q')}</Text>
+          </TouchableOpacity>
         </View>
-          <TouchableOpacity style={[styles.nextButton, (!formIsValid || isAuthLoading) && styles.disabledButton]} onPress={handleSignIn} disabled={!formIsValid || isAuthLoading} activeOpacity={0.7}>
-            {isAuthLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.nextButtonText}>{t('auth.signin')}</Text>
-            )}
-                    </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.nextButton, (!formIsValid || isAuthLoading) && styles.disabledButton]} 
+          onPress={handleSignIn} 
+          disabled={!formIsValid || isAuthLoading}
+        >
+          {isAuthLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.nextButtonText}>{t('auth.signin')}</Text>
+          )}
+        </TouchableOpacity>
       </View>
+
       <Toast />
     </SafeAreaView>
-  )
-}
-
-export default SignIn
-
+  );
+};
 
 const styles = StyleSheet.create({
-  img: {
-    width: wp(80),
-    height: wp(80),
-    resizeMode: 'contain',
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
   },
   container: {
-    justifyContent: 'center',
+    flex: 1,
     alignItems: 'center',
+    paddingHorizontal: wp(5),
   },
-  smcontainer: {
-    marginTop: -hp(2.5),
-    gap: hp(0.5),
+  formWrapper: {
     width: '100%',
-    alignItems: 'center',
+    marginTop: hp(2),
+    gap: hp(2),
   },
   link: {
-    width: wp(85),
     marginTop: hp(1),
+    paddingHorizontal: wp(2),
   },
-  txt1: {
+  forgotText: {
     fontWeight: '600',
     fontSize: Math.min(wp(3.5), 14),
-    // textAlign is set inline per language direction
     textDecorationLine: 'underline',
   },
   nextButton: {
@@ -123,8 +128,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: wp(90),
-    marginTop: hp(5),
-    marginBottom: hp(2),
+    marginTop: 'auto',
+    marginBottom: hp(4),
   },
   nextButtonText: {
     color: '#fff',
@@ -134,4 +139,6 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.5,
   },
-})
+});
+
+export default SignIn;

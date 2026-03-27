@@ -1,31 +1,34 @@
-import { useNavigation } from '@react-navigation/native'
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+// addEshaaScreen.jsx - Fixed RTL
+
+import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
-  Toast,
   TouchableOpacity,
   View
-} from 'react-native'
-import CustomHeader from '../../../components/CustomHeader'
-import DatePick from '../../../components/datePicker'
-import FormField from '../../../components/FormInput'
-import Uploader from '../../../components/Uploader'
-import { useAuth } from '../../../contexts/authContext'
-import { useMedicalRecords } from '../../../contexts/medicalRecordsContext'
-import useForm from '../../../hooks/useForm'
-import { hp, wp } from '../../../utils/responsive'
+} from 'react-native';
+import Toast from 'react-native-toast-message';
+import CustomHeader from '../../../components/CustomHeader';
+import DatePick from '../../../components/datePicker';
+import FormField from '../../../components/FormInput';
+import Uploader from '../../../components/Uploader';
+import { useMedicalRecords } from '../../../contexts/medicalRecordsContext';
+import useForm from '../../../hooks/useForm';
+import { hp, wp } from '../../../utils/responsive';
 
 const AddEshaaScreen = () => {
-  const { t, i18n } = useTranslation()
-  const navigation = useNavigation()
+  const navigation = useNavigation();
   const { addRecord } = useMedicalRecords();
-  const { user } = useAuth();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { form, errors, handleChange, checkFormValidity } = useForm({
     xrayName: '',
     date: null,
@@ -69,16 +72,16 @@ const AddEshaaScreen = () => {
         text1: t('common.error'),
         text2: result.error,
         position: 'top',
-        visibilityTime: 3000,
       });
     }
-  }
+  };
 
   return (
-    <SafeAreaView style={[styles.container, ]}>
+    <SafeAreaView style={styles.container}>
       <CustomHeader text={t('add_eshaa.title')} />
+
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.formContainer}>
+        <View style={[styles.formContainer, { direction: isRTL ? 'rtl' : 'ltr' }]}>
           <FormField
             title={t('add_eshaa.xray_name')}
             placeholder={t('add_eshaa.xray_name_placeholder')}
@@ -87,6 +90,7 @@ const AddEshaaScreen = () => {
             error={errors.xrayName}
             required
           />
+
           <DatePick
             title={t('add_eshaa.date')}
             placeholder={t('add_eshaa.date_placeholder')}
@@ -95,6 +99,7 @@ const AddEshaaScreen = () => {
             error={errors.date}
             required
           />
+
           <FormField
             title={t('add_eshaa.lab_name')}
             placeholder={t('add_eshaa.lab_name_placeholder')}
@@ -103,6 +108,7 @@ const AddEshaaScreen = () => {
             error={errors.labName}
             required
           />
+
           <FormField
             title={t('add_eshaa.doctor_name')}
             placeholder={t('add_eshaa.doctor_name_placeholder')}
@@ -111,6 +117,7 @@ const AddEshaaScreen = () => {
             error={errors.doctorName}
             required
           />
+
           <FormField
             title={t('add_eshaa.notes')}
             placeholder={t('add_eshaa.notes_placeholder')}
@@ -119,13 +126,19 @@ const AddEshaaScreen = () => {
             error={errors.notes}
             type="long"
           />
+
           <Uploader
             title={t('add_eshaa.upload_file')}
             onFileSelect={(file) => handleChange('documents', file)}
             error={errors.documents}
             required
           />
-          <TouchableOpacity style={[styles.saveButton, (!formIsValid || isSubmitting) && styles.disabledButton]} onPress={handleSave} disabled={!formIsValid || isSubmitting}>
+
+          <TouchableOpacity
+            style={[styles.saveButton, (!formIsValid || isSubmitting) && styles.disabledButton]}
+            onPress={handleSave}
+            disabled={!formIsValid || isSubmitting}
+          >
             {isSubmitting ? (
               <ActivityIndicator color="#fff" />
             ) : (
@@ -135,10 +148,8 @@ const AddEshaaScreen = () => {
         </View>
       </ScrollView>
     </SafeAreaView>
-  )
-}
-
-export default AddEshaaScreen
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -150,13 +161,12 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     paddingTop: hp(3),
-    paddingBottom: hp(4), // Add padding to the bottom
-    paddingHorizontal: wp(5), // Add horizontal padding to center the content
+    paddingBottom: hp(4),
+    paddingHorizontal: wp(5),
   },
   saveButton: {
-    backgroundColor: '#007AFF', // Example color, change to your theme color
+    backgroundColor: '#014CC4',
     borderRadius: 8,
-    // marginHorizontal is no longer needed as padding is on the container
     paddingVertical: hp(2),
     alignItems: 'center',
     marginTop: hp(4),
@@ -169,4 +179,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-})
+});
+
+export default AddEshaaScreen;

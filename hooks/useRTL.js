@@ -1,31 +1,30 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 /**
- * useRTL — shared hook for direction-aware layout.
- *
- * Returns:
- *   isRTL       — true when current language is Arabic (or any RTL language)
- *   dir         — 'rtl' | 'ltr'
- *   textAlign   — 'right' | 'left'  (reading-start alignment)
- *   rowDir      — 'row-reverse' | 'row'
- *   writingDir  — 'rtl' | 'ltr'
- *
- * All values are reactive: they update instantly when i18n.changeLanguage() is called,
- * because this hook subscribes to react-i18next's language change events.
+ * Custom hook for RTL/LTR direction handling.
+ * Reactive — updates automatically when language changes.
  */
 const useRTL = () => {
   const { i18n } = useTranslation();
+
   const isRTL = i18n.dir() === 'rtl';
 
-  return {
-    isRTL,
-    dir: isRTL ? 'rtl' : 'ltr',
-    textAlign: isRTL ? 'right' : 'left',
-    rowDir: isRTL ? 'row-reverse' : 'row',
-    rowDirection: isRTL ? 'row-reverse' : 'row',
-    reverseRowDirection: isRTL ? 'row' : 'row-reverse',
-    writingDir: isRTL ? 'rtl' : 'ltr',
-  };
+  return useMemo(() => {
+    const direction = isRTL ? 'rtl' : 'ltr';
+
+    return {
+      isRTL,
+      dir: direction,                    // 'rtl' | 'ltr'
+      writingDirection: direction,       // for Text component: writingDirection prop
+      textAlign: isRTL ? 'right' : 'left',
+      rowDirection: isRTL ? 'row-reverse' : 'row',     // for flexDirection
+      reverseRowDirection: isRTL ? 'row' : 'row-reverse',
+      
+      // Optional: useful aliases
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+    };
+  }, [isRTL]);   // or [i18n.language] / [i18n.resolvedLanguage] if you prefer
 };
 
 export default useRTL;

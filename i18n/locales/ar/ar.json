@@ -74,7 +74,10 @@
   },
   "drawer": {
     "profile": "الملف الشخصي",
-    "contact_us": "اتصل بنا"
+    "contact_us": "اتصل بنا",
+    "linked_accounts": "الحسابات المرتبطة",
+    "privacy_policy": "سياسة الخصوصية",
+    "terms_of_service": "شروط الخدمة"
   },
 
   "create_code": {
@@ -91,7 +94,10 @@
     "copy_failed": "فشل نسخ الكود",
     "no_code_returned": "لم يُرجع الخادم أي كود"
   },
-
+  "report_type": {
+    "checkup": "كشف",
+    "prescription": "روشتة"
+  },
   "add_selector": {
     "title": "إضافة سجل جديد",
     "prompt": "ماذا تود أن تضيف؟",
@@ -192,7 +198,14 @@
   "auth": {
     "signin": "تسجيل الدخول",
     "signup": "إنشاء حساب",
-    "create_account": "إنشاء حساب",
+    "set_password_header": "لتعيين كلمة سر حسابك",
+    "password_highlight": "كلمة سر",
+    "create_account_button": "تسجيل",
+    "create_child_account": "لإنشاء حساب طفلك يرجي ملئ\nالبيانات التالية ..",
+    "create_account_subtitle": "لإنشاء حساب المستخدم يرجي ملئ\nالبيانات التالية ..",
+    "the_following_data": "البيانات التالية ..",
+    "name_placeholder": "ادخل اسمك",
+    "personal_id": "البطاقة الشخصية",
     "reset_password": "إعادة تعيين كلمة المرور",
     "set_password": "كلمة السر",
     "logout": "تسجيل الخروج",
@@ -207,8 +220,8 @@
     "password_rules": "يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)",
     "password_reset_success": "تم إعادة تعيين كلمة المرور بنجاح.",
     "id": "الرقم القومي",
-    "create_account_prompt": "لإنشاء حسابك يرجي ملئ البيانات التالية ..",
-    "your_account": "حسابك",
+    "create": "إنشاء",
+    "your_account": "حساب المستخدم",
     "national_id": "البطاقة الشخصية",
     "national_id_placeholder": "ادخل الرقم القومي",
     "final_step_password": "الخطوة الأخيرة، كلمة المرور",
@@ -226,7 +239,6 @@
     "linked_accounts": "الحسابات المرتبطة",
     "choose_account_type": "اختر نوع الحساب",
     "personal_account": "حساب شخصي",
-    "create_child_account": "إنشاء حساب طفل",
     "child_account": "حساب طفل",
     "enter_your_data": "ادخل بياناتك",
     "enter_child_data": "ادخل بيانات الطفل",
@@ -249,7 +261,6 @@
     "agree": "موافق",
     "terms_only": "الشروط والأحكام",
     "terms_full_text": "يرجى قراءة الشروط والأحكام بعناية قبل استخدام التطبيق. باستخدام هذا التطبيق، فإنك توافق على الالتزام بهذه الشروط. إذا كنت لا توافق على هذه الشروط، فلا تستخدم التطبيق.",
-    "create_account_button": "إنشاء الحساب",
     "child_account_created": "تم إنشاء حساب الطفل بنجاح."
   },
 

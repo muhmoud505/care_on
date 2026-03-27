@@ -1,3 +1,5 @@
+// addResultScreen.jsx - Fixed RTL
+
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,18 +9,18 @@ import CustomHeader from '../../../components/CustomHeader';
 import DatePick from '../../../components/datePicker';
 import FormField from '../../../components/FormInput';
 import Uploader from '../../../components/Uploader';
-import { useAuth } from '../../../contexts/authContext';
 import { useMedicalRecords } from '../../../contexts/medicalRecordsContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 
-
 const AddResultScreen = () => {
-  const { t, i18n } = useTranslation()
-  const navigation = useNavigation()
+  const navigation = useNavigation();
   const { addRecord } = useMedicalRecords();
-  const { user } = useAuth();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { form, errors, handleChange, checkFormValidity } = useForm({
     testName: '',
     labName: '',
@@ -60,16 +62,16 @@ const AddResultScreen = () => {
         text1: t('common.error'),
         text2: result.error,
         position: 'top',
-        visibilityTime: 3000,
       });
     }
-  }
+  };
 
   return (
-    <SafeAreaView style={[styles.container, ]}>
+    <SafeAreaView style={styles.container}>
       <CustomHeader text={t('add_result.title')} />
+
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.formContainer}>
+        <View style={[styles.formContainer, { direction: isRTL ? 'rtl' : 'ltr' }]}>
           <FormField
             title={t('add_result.test_name')}
             placeholder={t('add_result.test_name_placeholder')}
@@ -78,6 +80,7 @@ const AddResultScreen = () => {
             error={errors.testName}
             required
           />
+
           <FormField
             title={t('add_result.lab_name')}
             placeholder={t('add_result.lab_name_placeholder')}
@@ -86,6 +89,7 @@ const AddResultScreen = () => {
             error={errors.labName}
             required
           />
+
           <DatePick
             title={t('add_result.date')}
             placeholder={t('add_result.date_placeholder')}
@@ -94,6 +98,7 @@ const AddResultScreen = () => {
             error={errors.date}
             required
           />
+
           <FormField
             title={t('add_result.notes')}
             placeholder={t('add_result.notes_placeholder')}
@@ -102,12 +107,18 @@ const AddResultScreen = () => {
             error={errors.notes}
             type="long"
           />
+
           <Uploader
             title={t('add_result.upload_file')}
             onFileSelect={(file) => handleChange('documents', file)}
             error={errors.documents}
           />
-          <TouchableOpacity style={[styles.saveButton, (!formIsValid || isSubmitting) && styles.disabledButton]} onPress={handleSave} disabled={!formIsValid || isSubmitting}>
+
+          <TouchableOpacity
+            style={[styles.saveButton, (!formIsValid || isSubmitting) && styles.disabledButton]}
+            onPress={handleSave}
+            disabled={!formIsValid || isSubmitting}
+          >
             {isSubmitting ? (
               <ActivityIndicator color="#fff" />
             ) : (
@@ -117,11 +128,8 @@ const AddResultScreen = () => {
         </View>
       </ScrollView>
     </SafeAreaView>
-  )
-}
-
-export default AddResultScreen
-
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -137,7 +145,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(5),
   },
   saveButton: {
-    backgroundColor: '#007AFF', // Example color, change to your theme color
+    backgroundColor: '#014CC4',
     borderRadius: 8,
     paddingVertical: hp(2),
     alignItems: 'center',
@@ -151,4 +159,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-})
+});
+
+export default AddResultScreen;

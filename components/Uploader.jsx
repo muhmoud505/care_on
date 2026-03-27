@@ -1,32 +1,16 @@
+// Uploader.jsx - Fixed RTL
+
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { hp, wp } from '../utils/responsive'; // Use your responsive utils
 import DashedBorder from './dashed';
 import { Icons } from './Icons';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-// 1. Detect if it's a tablet (common threshold is 600-768 logical pixels)
-export const isTablet = SCREEN_WIDTH >= 768;
-
-// 2. Responsive width with a "Max" cap for tablets
-export const wp = (percentage) => {
-  const value = (percentage / 100) * SCREEN_WIDTH;
-  if (isTablet) {
-    // On tablets, don't let the 85% width exceed a reasonable size (e.g., 500px)
-    const maxValue = 550; 
-    return value > maxValue ? maxValue : value;
-  }
-  return value;
-};
-
-export const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
-
-const Uploader = ({ title, required, error, style,onFileSelect }) => {
+const Uploader = ({ title, required, error, style, onFileSelect }) => {
   const [selectedImage, setSelectedImage] = useState(null);
-    const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
 
   const [imageName, setImageName] = useState(t('uploader.upload'));
@@ -38,29 +22,13 @@ const Uploader = ({ title, required, error, style,onFileSelect }) => {
         copyToCacheDirectory: true,
       });
 
-      if (result.canceled) {
-        console.log('User cancelled picker');
-        return;
-      }
-
-      if (!result.assets || result.assets.length === 0) {
-        throw new Error('No assets in picker result');
-      }
+      if (result.canceled) return;
 
       const asset = result.assets[0];
-      const fileInfo = await FileSystem.getInfoAsync(asset.uri);
-
-      if (!fileInfo.exists) {
-        throw new Error('File does not exist at URI');
-      }
-
       setSelectedImage(asset.uri);
       const fileName = asset.name || asset.uri.split('/').pop();
-      setImageName(fileName.length > 15 
-        ? `${fileName.substring(0, 12)}...` 
-        : fileName);
+      setImageName(fileName.length > 15 ? `${fileName.substring(0, 12)}...` : fileName);
 
-      // Pass complete file info to parent
       if (onFileSelect) {
         onFileSelect({
           uri: asset.uri,
@@ -69,35 +37,36 @@ const Uploader = ({ title, required, error, style,onFileSelect }) => {
           size: asset.size
         });
       }
-
     } catch (err) {
-      console.error('Error in pickImage:', err);
       Alert.alert(t('common.error'), t('uploader.pick_failed'));
       setImageName(t('uploader.upload'));
       if (onFileSelect) onFileSelect(null);
-    } 
+    }
   };
 
   return (
     <View style={[styles.v1, style]}>
-      <Text style={[{ textAlign: isRTL ? 'left' : 'right'  }, styles.txt1]}>
-        {title}{required ? <Text style={{ color: 'red', fontWeight: '600' }}> *</Text> : null}
+      {/* Title - RTL Fixed */}
+      <Text style={[
+        styles.txt1, 
+        { textAlign: isRTL ? 'right' : 'left' }
+      ]}>
+        {title}
+        {required && <Text style={{ color: 'red', fontWeight: '600' }}> *</Text>}
       </Text>
+
       <DashedBorder>
         <TouchableOpacity
           activeOpacity={0.3}
-          style={styles.btn1}
+          style={[styles.btn1, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
           onPress={pickImage}
         >
           {selectedImage ? (
             <View style={styles.imageContainer}>
-              <Image
-                source={{ uri: selectedImage }}
-                style={styles.previewImage}
-                resizeMode="cover"
-                onError={(e) => console.log('Image load error:', e.nativeEvent.error)} // Debug 7
-              />
-              <Text style={styles.imageNameText}>{imageName}</Text>
+              <Image source={{ uri: selectedImage }} style={styles.previewImage} resizeMode="cover" />
+              <Text style={[styles.imageNameText, { textAlign: isRTL ? 'right' : 'left' }]}>
+                {imageName}
+              </Text>
             </View>
           ) : (
             <>
@@ -107,34 +76,32 @@ const Uploader = ({ title, required, error, style,onFileSelect }) => {
           )}
         </TouchableOpacity>
       </DashedBorder>
-        {error && (
-              <Text style={styles.errorText}>
-                {error}
-              </Text>
-            )}
+
+      {error && (
+        <Text style={[styles.errorText, { textAlign: isRTL ? 'right' : 'left' }]}>
+          {error}
+        </Text>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   v1: {
-
-    height: hp(12),
-    marginHorizontal: wp(2.5),
     marginVertical: hp(0.6),
-    justifyContent: 'space-between',
+    marginHorizontal: wp(2.5),
   },
   txt1: {
     fontSize: Math.min(wp(3.5), 14),
     color: 'black',
     fontWeight: 'bold',
+    marginBottom: hp(0.8),
   },
   btn1: {
     width: '100%',
     height: hp(7.5),
     justifyContent: 'center',
     alignItems: 'center',
-    flexDirection: 'row',
     backgroundColor: '#014CC440',
     borderRadius: wp(3),
     columnGap: wp(1.2),
@@ -152,23 +119,17 @@ const styles = StyleSheet.create({
     height: wp(10),
     borderRadius: wp(1.2),
     marginRight: wp(2.5),
-    backgroundColor: '#f0f0f0', // Helps visualize the image area
   },
   imageNameText: {
     fontSize: Math.min(wp(3.5), 14),
     color: 'black',
     fontWeight: 'bold',
     flex: 1,
-    textAlign: 'right',
   },
-   errorText: { // Added error text style
+  errorText: {
     color: 'red',
     fontSize: Math.min(wp(3), 12),
     marginTop: hp(0.5),
-    textAlign: 'right',
-  },
-  errorInput: { // Added error input style
-    borderColor: 'red',
   },
 });
 

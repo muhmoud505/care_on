@@ -1,7 +1,7 @@
+// home.jsx - Fixed for Tablet + RTL
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import useRTL from '../../hooks/useRTL';
-
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -11,19 +11,20 @@ import { Icons } from '../../components/Icons';
 import SurveyPopup from '../../components/SurveyPopup';
 import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-// Responsive helper functions
+
 const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
 const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
-const CHILD_AGE_LIMIT = 18; // Define the age limit for a child account
+const CHILD_AGE_LIMIT = 18;
 
 const Home = () => {
-  const navigation=useNavigation()
+  const navigation = useNavigation();
   const { t, i18n } = useTranslation();
-  const { rowDirection } = useRTL(); // Use reactive useRTL hook
+  const isRTL = i18n.dir() === 'rtl';
   const [showSurveyPopup, setShowSurveyPopup] = useState(false);
-  const { user } = useAuth(); // Get the current user from the auth context
+  const { user } = useAuth();
   const [surveySkippedThisSession, setSurveySkippedThisSession] = useState(false);
 
   const menuItems = [
@@ -35,153 +36,122 @@ const Home = () => {
   ];
 
   const age = useMemo(() => {
-    const birthdate = user?.user?.resource?.birthdate; // YYYY-MM-DD format
-    if (!birthdate) {
-      return null; // Cannot determine age
-    }
+    const birthdate = user?.user?.resource?.birthdate;
+    if (!birthdate) return null;
     try {
       const birthDate = new Date(birthdate);
-      if (isNaN(birthDate.getTime())) throw new Error('Invalid date');
-
+      if (isNaN(birthDate.getTime())) return null;
       const today = new Date();
       let calculatedAge = today.getFullYear() - birthDate.getFullYear();
       const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        calculatedAge--;
-      }
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) calculatedAge--;
       return calculatedAge;
-    } catch (e) {
-      console.error("Failed to calculate age from birthdate:", e);
+    } catch {
       return null;
     }
   }, [user]);
 
-  // This effect runs every time the screen comes into focus.
   useFocusEffect(
     useCallback(() => {
       const checkSurveyStatus = async () => {
-        const userId = user?.user?.id; // Get the user's ID
-        if (!userId) {
-          return; // Can't check status without a user
+        const userId = user?.user?.id;
+        if (!userId) return;
+
+        const surveyStatusKey = `hasCompletedSurvey_${userId}`;
+        const hasCompletedSurvey = await AsyncStorage.getItem(surveyStatusKey);
+
+        if (hasCompletedSurvey === 'true') {
+          setSurveySkippedThisSession(false);
+          return;
         }
 
-        try {
-          // 1. Check AsyncStorage FIRST to see if the survey has already been completed.
-          // This is more efficient as it avoids other checks if the survey is done.
-          const surveyStatusKey = `hasCompletedSurvey_${userId}`;
-          const hasCompletedSurvey = await AsyncStorage.getItem(surveyStatusKey);
-
-          // If the survey has been completed, stop here. This was the missing check.
-          if (hasCompletedSurvey === 'true') {
-            // If the survey is complete, ensure the "skipped" banner is not shown.
-            setSurveySkippedThisSession(false);
-            return;
-          }
-
-          // 2. If not completed, check if they skipped it this session.
-          if (surveySkippedThisSession) {
-            return;
-          }
-
-          // 3. If not completed and not skipped, check if the user is a child.
-          if (age !== null && age < CHILD_AGE_LIMIT) {
-            // If all checks pass, show the popup.
-            setShowSurveyPopup(true);
-          }
-
-        } catch (error) {
-          console.error('Failed to check survey status from AsyncStorage', error);
+        if (age !== null && age < CHILD_AGE_LIMIT) {
+          setShowSurveyPopup(true);
         }
       };
 
       checkSurveyStatus();
-    }, [user, surveySkippedThisSession, age]) // Dependencies for the callback
+    }, [user, age])
   );
 
   const handleTakeSurvey = async () => {
-    // Simply hide the popup and navigate to the survey screen.
-    // The survey completion status will be set on the survey screen itself after successful submission.
     setShowSurveyPopup(false);
     navigation.navigate('survey');
   };
 
   const handleSkipSurvey = () => {
     setShowSurveyPopup(false);
-    setSurveySkippedThisSession(true); // Set the flag to true for this session
+    setSurveySkippedThisSession(true);
   };
 
   return (
-    <SafeAreaView style={[styles.mainContainer, { direction: i18n.dir() }]}>
-      
-      <HomeHeader/>
+    <SafeAreaView style={styles.mainContainer}>
+      <HomeHeader />
+
       {surveySkippedThisSession && (
         <View style={styles.surveyReminderWrapper}>
-         
           <TouchableOpacity
-            style={[styles.surveyReminderContainer, { flexDirection: rowDirection }]}
+            style={[styles.surveyReminderContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
             onPress={() => navigation.navigate('survey')}
           >
-             <Image source={Images.alert}/>
-            <Text style={styles.surveyReminderText}>{t('home.complete_survey_prompt', { defaultValue: 'يرجي ملئ الاستبيان لاكمال بيانات الملف الشخصي' })}</Text>
+            <Image source={Images.alert} />
+            <Text style={styles.surveyReminderText}>
+              {t('home.complete_survey_prompt', { defaultValue: 'يرجي ملئ الاستبيان لاكمال بيانات الملف الشخصي' })}
+            </Text>
           </TouchableOpacity>
         </View>
       )}
-      
-      {menuItems.map((item) => (
-        <TouchableOpacity
-          key={item.key}
-          style={[styles.secContainer, { flexDirection: rowDirection }]}
-          onPress={() => navigation.navigate(item.navigateTo)}
-          activeOpacity={0.7}
-        >
-    
 
-          <item.icon width={wp(7)} height={wp(7)} stroke="#000" />
-          <Text style={styles.txt1}>{t(item.titleKey)}</Text>
-        </TouchableOpacity>
-      ))}
+      <View style={[styles.menuContainer,{direction: isRTL ? 'rtl' : 'ltr'}]}>
+        {menuItems.map((item) => (
+          <TouchableOpacity
+            key={item.key}
+            style={styles.secContainer}
+            onPress={() => navigation.navigate(item.navigateTo)}
+            activeOpacity={0.7}
+          >
+            <item.icon width={wp(7)} height={wp(7)} stroke="#000" />
+            <Text style={styles.txt1}>{t(item.titleKey)}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       <SurveyPopup
         visible={showSurveyPopup}
         onSkip={handleSkipSurvey}
         onTakeSurvey={handleTakeSurvey}
       />
-      
     </SafeAreaView>
-  )
-}
-
-export default Home
+  );
+};
 
 const styles = StyleSheet.create({
-  mainContainer:{
-    flex:1,
-    backgroundColor:'#F5F9FF',
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#F5F9FF',
   },
-  secContainer:{
-    flexDirection:'row',
+  menuContainer: {
+    paddingHorizontal: wp(5),
+    paddingTop: hp(2),
+  },
+  secContainer: {
+    flexDirection: 'row',
     backgroundColor: '#fff',
-    marginVertical: hp(1.5),
-    marginHorizontal: wp(5),
-    gap: wp(5),
-    alignItems: 'center',
+    marginVertical: hp(1.2),
     padding: wp(4),
     borderRadius: wp(3),
-    // Adding a subtle shadow for depth
+    alignItems: 'center',
+    gap: wp(4),
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
     elevation: 2,
   },
-  txt1:{
-    // Using a slightly bolder font weight for better readability
-    fontWeight:'500',
+  txt1: {
     fontSize: Math.min(wp(5), 20),
-    lineHeight: hp(4),
+    fontWeight: '500',
+    flex: 1,
   },
   surveyReminderWrapper: {
     paddingHorizontal: wp(5),
@@ -189,21 +159,22 @@ const styles = StyleSheet.create({
   },
   surveyReminderContainer: {
     backgroundColor: '#F8444F',
-    width: wp(87.2), // Responsive width equivalent to 327px on a standard screen
-    height: hp(4.5), // Responsive height equivalent to 36px on a standard screen
-    opacity: 0.6,// A light yellow background
-    paddingHorizontal: wp(4), // Use horizontal padding instead of all-around padding
+    width: '100%',
+    height: hp(5),
     borderRadius: wp(3),
- // An amber border
-    flexDirection: 'row', // Align icon and text
-    alignItems: 'center', // Vertically center content
+    paddingHorizontal: wp(4),
+    alignItems: 'center',
     justifyContent: 'center',
-    gap: wp(2), // Add space between the icon and the text
+    gap: wp(2),
+    opacity: 0.95,
   },
   surveyReminderText: {
-    color: '#000000', // A dark text color for readability
+    color: '#000',
     fontWeight: '700',
-    fontSize: 10,
+    fontSize: Math.min(wp(3.5), 13),
     textAlign: 'center',
+    flex: 1,
   },
-})
+});
+
+export default Home;

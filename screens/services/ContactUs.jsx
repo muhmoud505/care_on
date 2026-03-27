@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
+import { Icons } from '../../components/Icons';
 import Images from '../../constants2/images';
 import useRTL from '../../hooks/useRTL';
 import { hp, wp } from '../../utils/responsive';
@@ -47,7 +48,7 @@ const ContactUs = ({ navigation }) => {
           {/* Location Card */}
           <View style={styles.card}>
             <View style={styles.iconCircle}>
-              <Image source={Images.location} style={styles.gridIcon} />
+              <Icons.Locationa width={24} height={24} />
             </View>
             <Text style={[styles.cardTitle, { textAlign: rtl.textAlign }]}>
               {t('contact_us.location')}
@@ -66,7 +67,7 @@ const ContactUs = ({ navigation }) => {
           {/* Email Card */}
           <View style={styles.card}>
             <View style={[styles.iconCircle, styles.emailIconBg]}>
-              <Image source={Images.email} style={styles.gridIcon} />
+              <Icons.Email width={24} height={24} />
             </View>
             <Text style={[styles.cardTitle, { textAlign: rtl.textAlign }]}>
               {t('contact_us.email')}
@@ -85,7 +86,7 @@ const ContactUs = ({ navigation }) => {
           {/* Live Chat Card */}
           <View style={styles.card}>
             <View style={styles.iconCircle}>
-              <Image source={Images.verify} style={styles.gridIcon} />
+              <Icons.Chat width={24} height={24} />
             </View>
             <Text style={[styles.cardTitle, { textAlign: rtl.textAlign }]}>
               {t('contact_us.live_chat')}

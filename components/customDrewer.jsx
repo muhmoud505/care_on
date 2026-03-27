@@ -7,7 +7,7 @@ import {
   Text,
   TouchableOpacity,
   useWindowDimensions,
-  View
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import images from '../constants2/images';
@@ -20,27 +20,35 @@ const CustomDrawerContent = (props) => {
   const insets = useSafeAreaInsets();
   const { navigation } = props;
   const { t, i18n } = useTranslation();
-  const { isRTL, rowDirection, textAlign } = useRTL(); // Use reactive useRTL hook
+  const { isRTL, rowDirection, textAlign } = useRTL();
 
   const { width, height } = useWindowDimensions();
   const { user, logout } = useAuth();
 
+  // Calculate age
   const age = useMemo(() => {
     const nationalId = user?.user?.resource?.national_number;
     if (!nationalId || nationalId.length !== 14) return null;
+
     try {
       const firstDigit = nationalId.substring(0, 1);
       if (firstDigit !== '2' && firstDigit !== '3') return null;
+
       const century = firstDigit === '3' ? '20' : '19';
       const year = parseInt(century + nationalId.substring(1, 3), 10);
       const month = parseInt(nationalId.substring(3, 5), 10) - 1;
       const day = parseInt(nationalId.substring(5, 7), 10);
+
       const birthDate = new Date(year, month, day);
       if (isNaN(birthDate.getTime())) return null;
+
       const today = new Date();
       let calculatedAge = today.getFullYear() - birthDate.getFullYear();
       const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) calculatedAge--;
+
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        calculatedAge--;
+      }
       return calculatedAge;
     } catch (e) {
       return null;
@@ -53,16 +61,37 @@ const CustomDrawerContent = (props) => {
 
   const parentNavigation = navigation.getParent();
 
-  const handleNavigate = (screenName, params) => {
+  const handleNavigate = (screenName, params = {}) => {
     navigation.closeDrawer();
     parentNavigation?.navigate(screenName, params);
   };
 
   const menuItems = [
-    { id: 1, title: t('drawer.profile'),onPress: () => handleNavigate('ProfileStack') },
-    { id: 2, title: t('privacy_policy.title'),onPress: () => handleNavigate('ServiceStack', { screen: 'PrivacyPolicy' }) },
-    { id: 3, title: t('terms_of_service.title'), onPress: () => handleNavigate('ServiceStack', { screen: 'TermsOfService' }) },
-    { id: 6, title: t('drawer.contact_us'), onPress: () => handleNavigate('ServiceStack') },
+    { 
+      id: 1, 
+      title: t('drawer.profile'), 
+      onPress: () => handleNavigate('ProfileStack') ,
+      icon: Icons.Profilec
+    },
+    { 
+      id: 2, 
+      title: t('drawer.privacy_policy'), 
+      onPress: () => handleNavigate('ServiceStack', { screen: 'PrivacyPolicy' }) ,
+      icon: Icons.PrivacyPolicy
+    },
+    { 
+      id: 3, 
+      title: t('drawer.terms_of_service'), 
+      onPress: () => handleNavigate('ServiceStack', { screen: 'TermsOfService' }) ,
+      icon: Icons.TermsOfService
+    },
+    { 
+      id: 6, 
+      title: t('drawer.contact_us'), 
+      onPress: () => handleNavigate('ServiceStack') ,
+      icon: Icons.Call
+    },
+   
   ];
 
   const styles = StyleSheet.create({
@@ -74,7 +103,7 @@ const CustomDrawerContent = (props) => {
     },
     profileSection: {
       paddingHorizontal: 20,
-      paddingVertical: 15,
+      paddingVertical: 20,
       borderBottomWidth: 1,
       borderBottomColor: '#f0f0f0',
     },
@@ -86,17 +115,17 @@ const CustomDrawerContent = (props) => {
     profileInfo: {
       flexDirection: rowDirection,
       alignItems: 'center',
-      gap: 10,
+      gap: 12,
       flexShrink: 1,
     },
     profileImage: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
+      width: 52,
+      height: 52,
+      borderRadius: 26,
     },
     profileName: {
       fontSize: 16,
-      fontWeight: 'bold',
+      fontWeight: '600',
       color: '#000',
       textAlign: textAlign,
       writingDirection: isRTL ? 'rtl' : 'ltr',
@@ -104,16 +133,15 @@ const CustomDrawerContent = (props) => {
     },
     editButton: {
       backgroundColor: '#014CC4',
-      paddingHorizontal: 12,
+      paddingHorizontal: 14,
       paddingVertical: 8,
       borderRadius: 12,
       flexShrink: 0,
     },
     editText: {
       color: '#fff',
-      fontSize: 12,
+      fontSize: 13,
       fontWeight: '600',
-      textAlign: 'center',
     },
     menuContainer: {
       flex: 1,
@@ -121,16 +149,9 @@ const CustomDrawerContent = (props) => {
     menuItem: {
       flexDirection: rowDirection,
       alignItems: 'center',
-      paddingHorizontal: 25,
+      paddingHorizontal: 24,
       paddingVertical: 18,
       gap: 20,
-    },
-    menuIcon: {
-      width: 24,
-      height: 24,
-      tintColor: '#000',
-      // On some icon sets, you might want to flip the icon itself if it's directional
-      // transform: [{ scaleX: isRTL ? -1 : 1 }] 
     },
     menuText: {
       fontSize: 16,
@@ -142,7 +163,7 @@ const CustomDrawerContent = (props) => {
     },
     footer: {
       paddingHorizontal: 20,
-      paddingVertical: 15,
+      paddingVertical: 16,
       borderTopWidth: 1,
       borderTopColor: '#EEE',
       flexDirection: rowDirection,
@@ -152,54 +173,51 @@ const CustomDrawerContent = (props) => {
     logoutButton: {
       flexDirection: rowDirection,
       alignItems: 'center',
-      gap: 15,
+      gap: 12,
     },
     logoutIcon: {
       width: 24,
       height: 24,
       tintColor: '#F44336',
-      transform: [{ scaleX: isRTL ? -1 : 1 }], // Flip logout icon for RTL
+      transform: [{ scaleX: isRTL ? -1 : 1 }], // Flip arrow for RTL
     },
     logoutText: {
       fontSize: 16,
       color: '#F44336',
       fontWeight: '500',
       textAlign: textAlign,
-    },
-    menuItemDisabled: {
-      opacity: 0.5,
-    },
-    menuTextDisabled: {
-      color: '#9AA0A6',
-    },
-    menuIconDisabled: {
-      tintColor: '#9AA0A6',
+      writingDirection: isRTL ? 'rtl' : 'ltr',
     },
   });
 
   return (
     <View style={styles.container}>
       {/* Profile Section */}
-      <View style={styles.profileSection}>
-        <View style={styles.profileHeader}>
-          {/* User Info */}
-          <View style={styles.profileInfo}>
-            <TouchableOpacity onPress={() => handleNavigate('ProfileStack')}>
+      <View style={[styles.profileSection]}>
+        <View style={[styles.profileHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <View style={[styles.profileInfo, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+              <TouchableOpacity onPress={() => handleNavigate('ProfileStack')}>
               {user?.user?.avatar ? (
-                <Image source={{ uri: user.user.avatar }} style={styles.profileImage} />
+                <Image
+                  source={{ uri: user.user.avatar }}
+                  style={styles.profileImage}
+                />
               ) : (
-                <Icons.Profilea width={40} height={40} imageUrl={user.user.avatar} />
+                <Icons.Profilec width={48} height={48} />
               )}
             </TouchableOpacity>
+
             <Text style={styles.profileName} numberOfLines={1}>
               {user?.user?.name || t('drawer.user_name_placeholder')}
             </Text>
           </View>
 
-          {/* Linked Accounts Button */}
           {!isChild && (
-            <TouchableOpacity style={styles.editButton} onPress={() => handleNavigate('accounts')}>
-              <Text style={styles.editText} numberOfLines={1}>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => handleNavigate('accounts')}
+            >
+              <Text style={styles.editText}>
                 {t('drawer.linked_accounts')}
               </Text>
             </TouchableOpacity>
@@ -208,35 +226,31 @@ const CustomDrawerContent = (props) => {
       </View>
 
       {/* Menu Items */}
-      <ScrollView style={styles.menuContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={[styles.menuContainer, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingVertical: 8 }}
+      >
         {menuItems.map((item) => (
           <TouchableOpacity
             key={item.id}
-            style={[
-              styles.menuItem,
-              item.disabled && styles.menuItemDisabled,
-            ]}
-            onPress={item.disabled ? undefined : item.onPress}
-            activeOpacity={item.disabled ? 1 : 0.7}
-            disabled={!!item.disabled}
+            style={[styles.menuItem, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}
+            onPress={item.onPress}
+            activeOpacity={0.7}
           >
-            {/* <item.icon style={[styles.menuIcon, item.disabled && styles.menuIconDisabled]} /> */}
-            <Text style={[styles.menuText, item.disabled && styles.menuTextDisabled]}>
-              {item.title}
-            </Text>
+            {item.icon && <item.icon width={24} height={24} />}
+            <Text style={styles.menuText}>{item.title}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
       {/* Footer */}
       <View style={styles.footer}>
-        <TouchableOpacity
-          onPress={logout}
-          style={styles.logoutButton}
-        >
+        <TouchableOpacity onPress={logout} style={styles.logoutButton}>
           <Image source={images.logout} style={styles.logoutIcon} />
           <Text style={styles.logoutText}>{t('auth.logout')}</Text>
         </TouchableOpacity>
+
         <LanguageSwitch />
       </View>
     </View>

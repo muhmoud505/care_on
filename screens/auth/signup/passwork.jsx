@@ -20,26 +20,32 @@ import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 
+// The specific green from your image
+const THEME_GREEN = '#82D481';
+const DISABLED_GREEN = '#B9E8BD';
+
 const PasswordScreen = ({ route }) => {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const { signup, isAuthLoading } = useAuth();
-  // Inline RTL logic
   const isRTL = i18n.dir() === 'rtl';
   const rowDirection = isRTL ? 'row-reverse' : 'row';
+
   const { form, errors, handleChange, checkFormValidity } = useForm({
     password: '',
     password_confirmation: '',
   });
+
   const [isPasswordSecure, setIsPasswordSecure] = useState(true);
   const [isConfirmPasswordSecure, setIsConfirmPasswordSecure] = useState(true);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const { signupData } = route.params || {};
+  const { signupData ,isChild } = route.params || {};
+  
+  console.log(isChild);
+  
 
   if (!signupData) {
-    console.error("Critical Error: signupData is missing in PasswordScreen.");
-    Alert.alert(t('common.error'), t('errors.unexpected_signup_error'));
     return null;
   }
 
@@ -52,7 +58,7 @@ const PasswordScreen = ({ route }) => {
     }
 
     if (!agreedToTerms) {
-      Alert.alert(t('common.error'), t('auth.must_agree_terms', { defaultValue: 'يجب الموافقة علي الشروط والاحكام' }));
+      Alert.alert(t('common.error'), t('auth.must_agree_terms'));
       return;
     }
 
@@ -61,10 +67,8 @@ const PasswordScreen = ({ route }) => {
 
     try {
       const response = await signup(signupData);
-      console.log('Signup response:', response);
-
+      
       if (signupData.isParentAddingChild) {
-        // Store the new child's token
         if (response && response.token) {
           const existingChildAccounts = await AsyncStorage.getItem('child_accounts');
           const childAccounts = existingChildAccounts ? JSON.parse(existingChildAccounts) : [];
@@ -74,10 +78,6 @@ const PasswordScreen = ({ route }) => {
         navigation.navigate('accounts');
         Alert.alert(t('common.success'), t('auth.child_account_created'));
       } else {
-        // Navigate to welcome screen and pass the raw response as sessionData.
-        // setSession is intentionally NOT called here — WelcomeScreen will call it
-        // when the user presses Continue, so the root navigator doesn't flip to
-        // the home stack before the welcome screen can be shown.
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
@@ -91,104 +91,112 @@ const PasswordScreen = ({ route }) => {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { direction: 'rtl' }]}>
-      <CustomHeader text={route.params?.title || t('auth.create_account')} />
-      <View style={[styles.headerTextContainer, { direction: i18n.dir() }]}>
-        <Text numberOfLines={2} style={styles.txt1}>
-          {(() => {
-            const fullText = t('auth.final_step_password');
-            const highlightText = t('auth.password');
-            const parts = fullText.split(highlightText);
-            return (
-              <>
-                {parts[0]}
-                <Text style={{ color: '#014CC4' }}>{highlightText}</Text>
-                {parts[1]}
-              </>
-            );
-          })()}
-        </Text>
-      </View>
-
-      <View style={styles.formContainer}>
-        <FormField
-          required
-          title={t('auth.password')}
-          placeholder={t('auth.password_placeholder')}
-          value={form.password}
-          onChangeText={(text) => handleChange('password', text)}
-          error={errors.password}
-          secureTextEntry={isPasswordSecure}
-          type="password"
-          onToggleSecureEntry={() => setIsPasswordSecure(!isPasswordSecure)}
-        />
-        <FormField
-          required
-          title={t('auth.confirm_password')}
-          placeholder={t('auth.confirm_password_placeholder')}
-          value={form.password_confirmation}
-          onChangeText={(text) => handleChange('password_confirmation', text)}
-          error={errors.password_confirmation}
-          secureTextEntry={isConfirmPasswordSecure}
-          type="password"
-          onToggleSecureEntry={() => setIsConfirmPasswordSecure(!isConfirmPasswordSecure)}
-        />
-      </View>
-
-      <View style={[styles.termsContainer, { flexDirection: rowDirection }]}>
-        <TouchableOpacity
-          style={styles.checkbox}
-          onPress={() => setAgreedToTerms(!agreedToTerms)}
-          activeOpacity={0.7}
-        >
-          {agreedToTerms && <View style={styles.checkboxInner} />}
-        </TouchableOpacity>
-        <Text style={styles.termsText}>
-          {t('auth.agree_prefix', { defaultValue: 'الموافقة علي ' })}
-          <Text style={styles.termsLink} onPress={() => setShowTermsModal(true)}>
-            {t('auth.terms_only', { defaultValue: 'الشروط والاحكام' })}
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" />
+      <CustomHeader text={t('auth.create_account')} />
+      
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        {/* Header Text matching the image exactly */}
+        <View style={styles.headerTextContainer}>
+          <Text style={[styles.headerText, { textAlign: isRTL ? 'right' : 'left' }]}>
+            {(() => {
+              const fullText = t('auth.set_password_header'); // لتعيين كلمة سر حسابك
+              const highlightText = t('auth.password_highlight'); // كلمة سر
+              const parts = fullText.split(highlightText);
+              return (
+                <>
+                  <Text>{parts[0]}</Text>
+                  <Text style={[styles.headerHighlight,{color:isChild ? THEME_GREEN : '#fff'}]}>{highlightText}</Text>
+                  <Text>{parts[1]}</Text>
+                </>
+              );
+            })()}
           </Text>
-        </Text>
-      </View>
+        </View>
 
-      <TouchableOpacity
-        onPress={handleSignup}
-        activeOpacity={0.7}
-        disabled={!formIsValid || isAuthLoading || !agreedToTerms}
-        style={[styles.submitButton, (!formIsValid || isAuthLoading || !agreedToTerms) && styles.disabledButton]}
-      >
-        {isAuthLoading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.submitButtonText}>{t('auth.create_account_button')}</Text>
-        )}
-      </TouchableOpacity>
+        <View style={styles.formContainer}>
+          <FormField
+            required
+            title={t('auth.password')}
+            placeholder={t('auth.password_placeholder')}
+            value={form.password}
+            onChangeText={(text) => handleChange('password', text)}
+            error={errors.password}
+            secureTextEntry={isPasswordSecure}
+            type="password"
+            onToggleSecureEntry={() => setIsPasswordSecure(!isPasswordSecure)}
+          />
+          <FormField
+            required
+            title={t('auth.confirm_password')}
+            placeholder={t('auth.confirm_password_placeholder')}
+            value={form.password_confirmation}
+            onChangeText={(text) => handleChange('password_confirmation', text)}
+            error={errors.password_confirmation}
+            secureTextEntry={isConfirmPasswordSecure}
+            type="password"
+            onToggleSecureEntry={() => setIsConfirmPasswordSecure(!isConfirmPasswordSecure)}
+          />
+          
+          {/* Rules text below confirm field as seen in image */}
+          <Text style={[styles.rulesText, { textAlign: isRTL ? 'right' : 'left' }]}>
+            {t('auth.password_rules')}
+          </Text>
+        </View>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showTermsModal}
-        onRequestClose={() => setShowTermsModal(false)}
-      >
+        {/* Spacing to push checkbox and button down */}
+        <View style={{ flex: 1, minHeight: hp(10) }} />
+
+        {/* Terms and Conditions Checkbox */}
+        <View style={[styles.termsContainer, { flexDirection: rowDirection }]}>
+          <TouchableOpacity
+            style={[styles.checkbox, agreedToTerms && { borderColor: THEME_GREEN ,}]}
+            onPress={() => setAgreedToTerms(!agreedToTerms)}
+            activeOpacity={0.7}
+          >
+            {agreedToTerms && <View style={styles.checkboxInner} />}
+          </TouchableOpacity>
+          <Text style={styles.termsText}>
+            {t('auth.agree_prefix')}
+            <Text style={styles.termsLink} onPress={() => setShowTermsModal(true)}>
+              {t('auth.terms_only')}
+            </Text>
+          </Text>
+        </View>
+
+        {/* Submit Button matching image style */}
+        <TouchableOpacity
+          onPress={handleSignup}
+          activeOpacity={0.7}
+          disabled={!formIsValid || isAuthLoading || !agreedToTerms}
+          style={[
+            styles.submitButton, 
+            (!formIsValid || isAuthLoading || !agreedToTerms) && {backgroundColor: DISABLED_GREEN,
+    elevation: 0,},
+            {backgroundColor:isChild ? THEME_GREEN : '#ccc'}
+          ]}
+        >
+          {isAuthLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitButtonText}>{t('auth.create_account_button')}</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Terms Modal ... keeps existing code */}
+      <Modal animationType="slide" transparent visible={showTermsModal}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={[styles.closeIconContainer, { [isRTL ? 'left' : 'right']: 15 }]}
-              onPress={() => setShowTermsModal(false)}
-            >
+             <TouchableOpacity style={styles.closeIconContainer} onPress={() => setShowTermsModal(false)}>
               <Text style={styles.closeIcon}>✕</Text>
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>{t('auth.terms_title', { defaultValue: 'الشروط والأحكام' })}</Text>
+            <Text style={styles.modalTitle}>{t('auth.terms_title')}</Text>
             <ScrollView style={styles.modalScroll}>
-              <Text style={styles.modalText}>
-                {t('auth.terms_full_text', { defaultValue: 'يرجى قراءة الشروط والأحكام بعناية...' })}
-              </Text>
+              <Text style={styles.modalText}>{t('auth.terms_full_text')}</Text>
             </ScrollView>
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => { setAgreedToTerms(true); setShowTermsModal(false); }}
-            >
-              <Text style={styles.modalCloseButtonText}>{t('auth.agree', { defaultValue: 'الموافقة' })}</Text>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => { setAgreedToTerms(true); setShowTermsModal(false); }}>
+              <Text style={styles.modalCloseButtonText}>{t('auth.agree')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -200,124 +208,92 @@ const PasswordScreen = ({ route }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: StatusBar.currentHeight,
+    backgroundColor: '#F8FAFF', // Slightly tinted background like your image
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: wp(6),
+    paddingBottom: hp(4),
   },
   headerTextContainer: {
-    paddingHorizontal: wp(5),
-    paddingTop: hp(2),
+    marginTop: hp(4),
+    marginBottom: hp(2),
   },
-  txt1: {
-    fontSize: Math.min(wp(5.5), 22),
+  headerText: {
+    fontSize: wp(6),
     fontWeight: 'bold',
-    textAlign: 'center',
+    color: '#000',
+    lineHeight: wp(8),
+  },
+  headerHighlight: {
+    color: THEME_GREEN,
   },
   formContainer: {
-    marginTop: hp(4),
-    paddingHorizontal: wp(5),
+    marginTop: hp(2),
+    gap: hp(1),
+  },
+  rulesText: {
+    fontSize: wp(2.8),
+    color: '#A0A0A0',
+    lineHeight: wp(4),
+    marginTop: hp(0.5),
   },
   termsContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 'auto',
     marginBottom: hp(2),
-    paddingHorizontal: wp(5),
-    gap: wp(2),
+    gap: wp(3),
   },
   checkbox: {
-    width: wp(5),
-    height: wp(5),
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 4,
+    width: wp(5.5),
+    height: wp(5.5),
+    borderWidth: 1.5,
+    borderColor: '#D0D0D0',
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
   },
   checkboxInner: {
-    width: wp(3),
-    height: wp(3),
-    backgroundColor: '#014CC4',
-    borderRadius: 2,
+    width: wp(3.5),
+    height: wp(3.5),
+    backgroundColor: THEME_GREEN,
+    borderRadius: 4,
   },
   termsText: {
-    fontSize: Math.min(wp(4), 16),
+    fontSize: wp(3.8),
     color: '#000',
+    fontWeight: '600',
   },
   termsLink: {
-    color: '#014CC4',
+    color: '#014CC4', // Link remains blue for clarity
     textDecorationLine: 'underline',
   },
   submitButton: {
-    backgroundColor: '#014CC4',
-    height: hp(7),
-    marginHorizontal: wp(5),
-    marginBottom: hp(4),
-    borderRadius: wp(4),
+    backgroundColor: THEME_GREEN,
+    height: hp(7.5),
+    borderRadius: wp(5),
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 2,
   },
   disabledButton: {
-    opacity: 0.5,
+    backgroundColor: DISABLED_GREEN,
+    elevation: 0,
   },
   submitButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: Math.min(wp(6), 24),
+    fontSize: wp(7),
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    height: hp(60),
-    width: '100%',
-  },
-  closeIconContainer: {
-    position: 'absolute',
-    top: 15,
-    right: 15,
-    zIndex: 1,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeIcon: {
-    fontSize: 16,
-    color: '#333',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  modalScroll: {
-    marginBottom: 15,
-  },
-  modalText: {
-    fontSize: 14,
-    lineHeight: 22,
-  },
-  modalCloseButton: {
-    backgroundColor: '#014CC4',
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalCloseButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, height: hp(60) },
+  closeIconContainer: { position: 'absolute', top: 15, right: 15, zIndex: 1, width: 30, height: 30, borderRadius: 15, borderWidth: 1, justifyContent: 'center', alignItems: 'center' },
+  closeIcon: { fontSize: 16 },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 15 },
+  modalScroll: { marginBottom: 15 },
+  modalText: { fontSize: 14, lineHeight: 22 },
+  modalCloseButton: { backgroundColor: '#014CC4', paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
+  modalCloseButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 });
 
 export default PasswordScreen;

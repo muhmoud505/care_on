@@ -120,7 +120,10 @@
   },
   "drawer": {
     "profile": "Profile",
-    "contact_us": "Contact Us"
+    "contact_us": "Contact Us",
+    "linked_accounts": "Linked Accounts",
+    "privacy_policy": "Privacy Policy",
+    "terms_of_service": "Terms of Service"
   },
 
   "create_code": {
@@ -212,7 +215,10 @@
     "scan_name_english": "Scan Name (English)",
     "medical_description": "Medical Description" 
   },
-
+  "report_type": {
+  "checkup": "Checkup",
+  "prescription": "Prescription"
+},
   "add_medicine": {
     "title": "Add Medicine",
     "enter_following_data": "Please enter the following data",
@@ -238,7 +244,13 @@
   "auth": {
     "signin": "Sign In",
     "signup": "Sign Up",
+    "password_highlight": "password",
+    "set_password_header": "To set a password for your account",
     "create_account": "Create Account",
+    "create_account_subtitle": "To create user account, please fill in the following data ..",
+    "the_following_data": "the following data ..",
+    "name_placeholder": "Enter your name",
+    "personal_id": "Personal ID",
     "reset_password": "Reset Password",
     "set_password": "Set Password",
     "logout": "Logout",
@@ -254,7 +266,8 @@
     "password_reset_success": "Password reset successfully.",
     "id": "National ID",
     "create_account_prompt": "To create your account, please fill in the following data..",
-    "your_account": "your account",
+    "your_account": "user account",
+    "create_child_account": "To create your child's account, please fill in the following data ..",
     "national_id": "National ID",
     "national_id_placeholder": "Enter national ID",
     "final_step_password": "Final step, password",
@@ -272,7 +285,6 @@
     "linked_accounts": "Linked accounts",
     "choose_account_type": "Choose account type",
     "personal_account": "Personal account",
-    "create_child_account": "Create child account",
     "child_account": "Child account",
     "enter_your_data": "Enter your data",
     "enter_child_data": "Enter child's data",

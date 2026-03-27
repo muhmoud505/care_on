@@ -1,3 +1,5 @@
+// DatePick.jsx - Fixed RTL Version
+
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -11,24 +13,11 @@ import {
 import { Icons } from "./Icons";
 import Calendar from "./Test";
 
-
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// 1. Detect if it's a tablet (common threshold is 600-768 logical pixels)
-export const isTablet = SCREEN_WIDTH >= 768;
-
-// 2. Responsive width with a "Max" cap for tablets
-export const wp = (percentage) => {
-  const value = (percentage / 100) * SCREEN_WIDTH;
-  if (isTablet) {
-    // On tablets, don't let the 85% width exceed a reasonable size (e.g., 500px)
-    const maxValue = 550; 
-    return value > maxValue ? maxValue : value;
-  }
-  return value;
-};
-
+export const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
 export const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
+
 const DatePick = ({
   title,
   value,
@@ -41,32 +30,35 @@ const DatePick = ({
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
   const [showModal, setShowModal] = useState(false);
-  
+
   const handleDateSelect = (dateString) => {
-    // Format date as DD/MM/YYYY
     const dateObj = new Date(dateString);
     const formattedDate = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
-    
-    onDateSelect && onDateSelect(formattedDate);
-    //  console.log('date from datePicker: ',dateString);
-     
+    onDateSelect(formattedDate);
     setShowModal(false);
   };
 
   return (
     <View style={[styles.container, otherStyles]}>
-      {/* Title with dynamic text alignment */}
-      <Text style={[styles.title, { textAlign: isRTL ? 'left' : 'right' }]}>
+      {/* Title - RTL Fixed */}
+      <Text style={[
+        styles.title,
+        { textAlign: isRTL ? 'right' : 'left', alignSelf: isRTL ? 'flex-end' : 'flex-start' }
+      ]}>
         {title}
         {required && <Text style={styles.required}> *</Text>}
       </Text>
 
+      {/* Input Field */}
       <TouchableOpacity 
-        style={[styles.inputContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' ,direction:'ltr'}]}
+        style={[styles.inputContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
         onPress={() => setShowModal(true)}
       >
-        {/* Input text with dynamic text alignment */}
-        <Text style={[styles.inputText, value ? styles.selectedDate : styles.placeholder, { textAlign: isRTL ? 'right' : 'left' }]}>
+        <Text style={[
+          styles.inputText, 
+          value ? styles.selectedDate : styles.placeholder,
+          { textAlign: isRTL ? 'right' : 'left' }
+        ]}>
           {value || placeholder}
         </Text>
 
@@ -81,7 +73,7 @@ const DatePick = ({
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Calendar onDataSelect={handleDateSelect}/>
+            <Calendar onDataSelect={handleDateSelect} />
             
             <TouchableOpacity 
               style={styles.closeButton}
@@ -98,50 +90,39 @@ const DatePick = ({
 
 const styles = StyleSheet.create({
   container: {
-     marginVertical: hp(2),
+    marginVertical: hp(2),
     marginTop: hp(0.6),
-    // gap: hp(1.5),
     marginHorizontal: wp(2.5),
-   
-    height: hp(10.5)
   },
   title: {
     fontSize: Math.min(wp(3.5), 14),
     fontWeight: '800',
     color: '#000',
+    width: '100%',
+    marginBottom: hp(0.8),
   },
-  required: {
-    color: '#FF0000',
-  },
+  required: { color: 'red' },
   inputContainer: {
-    alignItems: 'center', // Keep items vertically centered
-    justifyContent: 'space-between',
-   
     width: '100%',
     height: hp(7),
-    marginVertical: hp(2),
+    paddingHorizontal: wp(4),
     borderRadius: wp(4),
     borderWidth: 1,
     borderColor: '#8080808C',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   inputText: {
+    flex: 1,
     fontSize: Math.min(wp(3.5), 14),
-    flex: 1, // Allow text to take up available space
     fontWeight: '700',
-    color: '#7B7B8B',
     marginHorizontal: wp(4),
   },
-  selectedDate: {
-    color: '#000',
-  },
-  placeholder: {
-    color: '#8080808C',
-  },
+  selectedDate: { color: '#000' },
+  placeholder: { color: '#8080808C' },
   icon: {
     width: wp(6),
     height: wp(6),
-    marginHorizontal: wp(2.5),
-    
   },
   modalContainer: {
     flex: 1,
@@ -150,11 +131,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-     backgroundColor: 'rgba(0,0,0,0)',
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: wp(5),
     width: wp(90),
-    maxWidth: wp(100),
   },
   closeButton: {
     marginTop: hp(2),

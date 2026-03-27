@@ -6,9 +6,9 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  // I18nManager, // Removed unsolicited import
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,12 +17,11 @@ import {
 import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
 import Uploader from '../../../components/Uploader';
-import { useAuth } from '../../../contexts/authContext'; // Using Auth context to get parent user
-import useForm from '../../../hooks/useForm'; // Import the useForm hook
+import { useAuth } from '../../../contexts/authContext';
+import useForm from '../../../hooks/useForm';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Responsive helper functions
 const wp = (percentage) => (percentage / 100) * SCREEN_WIDTH;
 const hp = (percentage) => (percentage / 100) * SCREEN_HEIGHT;
 
@@ -33,26 +32,19 @@ const Signup2 = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
 
-  // Get parent user from global state (e.g., Redux).
   const { user: parentUser } = useAuth();
-
-  
-
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  // Use the custom hook for form state management
-  const { form, errors, handleChange, checkFormValidity } = useForm({
+  let isChild=true;
+  const { form, errors, handleChange } = useForm({
     name: '',
     email: '',
     national_number: '',
     birthCertificate: null,
   });
 
-  // Check that every value in the form object is truthy (i.e., not an empty string or null).
-  // This ensures all fields must be filled before the form is considered valid.
   const isFormValid = Object.values(form).every(value => !!value);
 
-  const handleNext = async () => {
+  const handleRegister = async () => {
     if (!isFormValid) return;
 
     setIsProcessing(true);
@@ -69,18 +61,15 @@ const Signup2 = () => {
         age: age,
         gender: gender,
         isChild: true,
-        id: base64Image, // Birth certificate image
+        id: base64Image,
         type: 'patient',
-        // Add parent_id if a parent is creating this account.
-        // The backend will use this to link the accounts.
-        // Also, pass the flag along to the next screen.
         isParentAddingChild: isParentAddingChild,
         ...(isParentAddingChild && parentUser?.user?.id && { parent_id: parentUser?.user?.id }),
       };
 
-      navigation.navigate('password', { signupData });
+      navigation.navigate('password', { signupData ,isChild});
     } catch (err) {
-      console.error("Failed to process image or navigate:", err);
+      console.error("Registration error:", err);
       Alert.alert(t('common.error'), t('errors.image_processing_failed'));
     } finally {
       setIsProcessing(false);
@@ -88,30 +77,39 @@ const Signup2 = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { direction: isRTL ? 'rtl' : 'ltr' }]}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <CustomHeader text={t('auth.create_account')} />
-        
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" />
+      <CustomHeader text={t('auth.create_account')} />
+      
+      <ScrollView 
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Text Section */}
         <View style={styles.headerTextContainer}>
           <Text style={[styles.headerText, { textAlign: isRTL ? 'right' : 'left' }]}>
             {(() => {
-              const fullText = t('auth.create_child_account_prompt');
-              const highlightText = t('auth.your_child_account');
+               const fullText = t('auth.create_account_subtitle');
+      const highlightText = t('auth.your_account');
+              
+              if (!fullText.includes(highlightText)) return fullText;
               const parts = fullText.split(highlightText);
+
               return (
                 <>
-                  {parts[0]}
+                  <Text>{parts[0]}</Text>
                   <Text style={styles.headerHighlight}>{highlightText}</Text>
-                  {parts[1]}
+                  <Text>{parts[1]}</Text>
                 </>
               );
             })()}
           </Text>
         </View>
         
+        {/* Form Fields Section */}
         <View style={styles.formContainer}>
           <FormField 
-            required
+            // Note: In the image, Child Name has NO red asterisk
             title={t('auth.child_name')}
             placeholder={t('auth.child_name_placeholder')}
             value={form.name}
@@ -136,27 +134,30 @@ const Signup2 = () => {
             value={form.national_number}
             onChangeText={(text) => handleChange('national_number', text)}
             keyboardType="numeric"
+            error={errors.national_number}
           />
         </View>
         
+        {/* File Uploader Section */}
         <Uploader
           required
           title={t('auth.child_birth_certificate')}
-          color='#80D28040'
+          color='#E8F5E9' // Light green background matching image
           onFileSelect={(file) => handleChange('birthCertificate', file)}
           error={errors.birthCertificate}
         />
         
+        {/* Submit Button */}
         <TouchableOpacity
-          style={[styles.nextButton, (!isFormValid || isProcessing) && styles.disabledButton]}
-          onPress={handleNext}
-          activeOpacity={0.7}
+          style={[styles.submitButton, (!isFormValid || isProcessing) && styles.disabledButton]}
+          onPress={handleRegister}
+          activeOpacity={0.8}
           disabled={!isFormValid || isProcessing}
         >
           {isProcessing ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.nextButtonText}>{t('common.next')}</Text>
+            <Text style={styles.submitButtonText}>{t('marketing.register')}</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -167,48 +168,54 @@ const Signup2 = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8FAFF', // Light bluish background from image
   },
   container: {
+    paddingHorizontal: wp(6),
     paddingBottom: hp(5),
     flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   headerTextContainer: {
-    marginTop: hp(2),
-    marginBottom: hp(3),
-    alignSelf: 'center',
-    width: wp(90),
+    marginTop: hp(3),
+    marginBottom: hp(4),
+    width: '100%',
   },
   headerText: {
-    fontSize: Math.min(wp(5.5), 22),
+    fontSize: wp(5),
     fontWeight: 'bold',
-    textAlign: 'center',
+    color: '#000',
+    lineHeight: hp(3.8), // Matches the spacing of the 2 lines in image
   },
   headerHighlight: {
-    // Using the blue from the other screen for consistency
-    color: '#014CC4',
+    color: '#82D481', // Exact Green from image
   },
   formContainer: {
+    width: '100%',
     gap: hp(2),
+    marginBottom: hp(2),
   },
-  nextButton: {
-    backgroundColor: '#014CC4',
-    width: wp(90),
-    height: hp(6.5),
-    borderRadius: wp(3),
+  submitButton: {
+    backgroundColor: '#82D481', // Green button
+    width: '100%',
+    height: hp(7.5),
+    borderRadius: wp(5),
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: hp(4),
+    // Soft shadow for the button
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   disabledButton: {
-    opacity: 0.5,
+    opacity: 0.6,
   },
-  nextButtonText: {
+  submitButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: wp(6),
+    fontSize: wp(7), // Large bold font for "تسجيل"
   },
 });
 
