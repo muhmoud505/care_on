@@ -2,11 +2,11 @@ import { useNavigation, useRoute } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
@@ -29,6 +29,9 @@ const Code = () => {
   const [showResend, setShowResend] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const { t, i18n } = useTranslation();
+  const ISRTL = i18n.language === 'ar';
+  const textAlign = ISRTL ? 'right' : 'left';
+  const direction = ISRTL ? 'rtl' : 'ltr';
 
   useEffect(()=>{
     if(timeLeft<=0){
@@ -96,10 +99,10 @@ const Code = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <CustomHeader text={t('auth.enter_code', { defaultValue: 'يرجي ادخال الكود' })} />
-      <View style={[styles.container, { direction: i18n.dir() }]}>
-        <Text style={styles.txt1}>{t('auth.enter_code_sent_to', { defaultValue: 'يرجي ادخال الكود المرسل الي رقمك' })}</Text>
+    <SafeAreaView style={[styles.safeArea, { direction }]}>
+      <CustomHeader text={t('auth.enter_code')} />
+      <View style={[styles.container, { direction }]}>
+        <Text style={[styles.txt1, { textAlign }]}>{t('auth.enter_code_sent_to')}</Text>
         <View style={styles.minContainer}>
           <FormField
             title={t('auth.code', { defaultValue: 'الكود' })}
@@ -110,7 +113,7 @@ const Code = () => {
             required
             placeholder={t('auth.enter_code', { defaultValue: 'ادخل الكود' })}
           />
-          <View style={styles.resendContainer}>
+          <View style={[styles.resendContainer, { alignItems: ISRTL ? 'flex-start' : 'flex-end' }]}>
             {showResend ? (
               <TouchableOpacity onPress={handleResend} disabled={isResending}>
                 {isResending ? (
@@ -121,7 +124,7 @@ const Code = () => {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity>
-                <Text style={styles.txt2}>{t('auth.resend_in', { defaultValue: 'اعادة الارسال بعد' })} {formatTime(timeLeft)}</Text>
+                <Text style={[styles.txt2, { textAlign }]}>{t('auth.resend_in')} {formatTime(timeLeft)}</Text>
               </TouchableOpacity>
             )}
           </View>

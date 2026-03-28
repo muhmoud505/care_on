@@ -30,6 +30,7 @@ const SignIn = () => {
     if (formIsValid) {
       try {
         await login({ email: form.email, password: form.password });
+        navigation.replace('App');
       } catch (error) {
         Toast.show({
           type: 'error',

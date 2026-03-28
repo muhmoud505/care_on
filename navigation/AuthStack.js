@@ -11,6 +11,7 @@ import PasswordScreen from "../screens/auth/signup/passwork";
 import Signup from "../screens/auth/signup/signup";
 import Signup2 from "../screens/auth/signup/signupBaby";
 // Import the new WelcomeScreen
+import Code from "../screens/auth/password/Code";
 import WelcomeScreen from "../screens/home/welcome";
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,8 @@ export const AuthScreens = () => {
       <Stack.Screen name="signin" component={SignIn} options={{ title: t('auth.signin', { defaultValue: 'تسجيل الدخول' }) }} />
       <Stack.Screen name='forget' component={Forget} options={{ title: t('auth.reset_password', { defaultValue: 'اعادة تعيين كلمة السر' }) }} />
       <Stack.Screen name='aftercode' component={AfterCode} />
+      <Stack.Screen name='code' component={Code} />
+
     </Stack.Navigator>
   );
 };

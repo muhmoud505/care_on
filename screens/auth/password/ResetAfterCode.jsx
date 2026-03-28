@@ -2,15 +2,15 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../../components/CustomHeader';
@@ -21,9 +21,12 @@ import { hp, wp } from '../../../utils/responsive';
 
 const AfterCode = () => {
   const { t, i18n } = useTranslation();
+  const ISRTL = i18n.language === 'ar';
+  const textAlign = ISRTL ? 'right' : 'left';
+  const direction = ISRTL ? 'rtl' : 'ltr';
   const navigation = useNavigation();
   const route = useRoute();
-  const { nationalId, code } = route.params || {};
+  const { nationalId, code, email } = route.params || {};
   const { resetPasswordAfterCode, isAuthLoading } = useAuth();
   const { form, errors, handleChange, checkFormValidity } = useForm({
     password: '',
@@ -47,6 +50,7 @@ const AfterCode = () => {
     try {
       await resetPasswordAfterCode({
         national_id: nationalId,
+        email: email,
         code: code,
         password: form.password,
         password_confirmation: form.password_confirmation,
@@ -55,7 +59,7 @@ const AfterCode = () => {
       Alert.alert(
         t('common.success'),
         t('auth.password_reset_success_login'),
-        [{ text: t('common.ok'), onPress: () => navigation.navigate('signin') }]
+        [{ text: t('common.ok'), onPress: () => navigation.replace('signin') }]
       );
     } catch (error) {
       Alert.alert(t('common.error'), error.message);
@@ -69,9 +73,9 @@ const AfterCode = () => {
         style={{ flex: 1 }}
       >
         <CustomHeader text={t('auth.reset_password', { defaultValue: 'اعادة تعيين كلمة السر' })} />
-        <View style={[styles.container, { direction: i18n.dir() }]}>
+        <View style={[styles.container, { direction }]}>
           <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={styles.txt1}>{t('auth.enter_new_password', { defaultValue: 'برجاء ادخال كلمة السر الجديدة' })}</Text>
+            <Text style={[styles.txt1, { textAlign }]}>{t('auth.enter_new_password')}</Text>
             <View style={styles.minContainer}>
               <FormField
                 title={t('auth.new_password', { defaultValue: 'كلمة السر الجديدة' })}
@@ -95,8 +99,8 @@ const AfterCode = () => {
                 secureTextEntry={isConfirmPasswordSecure}
                 onToggleSecureEntry={() => setIsConfirmPasswordSecure(!isConfirmPasswordSecure)}
               />
-              <Text style={styles.txt2} numberOfLines={2}>
-                {t('auth.password_rules', { defaultValue: 'يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)' })}
+              <Text style={[styles.txt2, { textAlign }]} numberOfLines={2}>
+                {t('auth.password_rules')}
               </Text>
             </View>
           </ScrollView>

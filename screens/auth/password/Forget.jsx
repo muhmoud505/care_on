@@ -14,15 +14,20 @@ import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
 import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
+
 import { hp, wp } from '../../../utils/responsive';
 
 const Forget = () => {
-  const { t } = useTranslation();
+  
   const navigation = useNavigation();
   const { form, errors, handleChange, checkFormValidity } = useForm({
     email: '',
   });
   const { forgotPassword, isAuthLoading } = useAuth();
+  const { t, i18n } = useTranslation();
+  const ISRTL = i18n.language === 'ar';
+  const textAlign = ISRTL ? 'right' : 'left';
+  const direction = ISRTL ? 'rtl' : 'ltr';
 
   const formIsValid = checkFormValidity();
 
@@ -40,11 +45,11 @@ const Forget = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { direction }]}>
       <CustomHeader text={t('auth.reset_password')} />
       <View style={styles.container}>
-        <Text style={styles.infoText}>
-          {t('auth.enter_email_to_reset')}
+        <Text style={[styles.infoText, { textAlign }]}>
+          {t('auth.enter_email_send_code')}
         </Text>
 
         <FormField
@@ -89,7 +94,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: Math.min(wp(4.5), 18),
-    textAlign: 'center',
+   
     marginHorizontal: wp(5),
     marginBottom: hp(3),
     color: '#333',

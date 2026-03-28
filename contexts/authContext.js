@@ -365,6 +365,114 @@ export const AuthProvider = ({ children }) => {
     } catch (e) { return null; }
   };
 
+  const forgotPassword = async ({ email }) => {
+    setIsAuthLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/auth/password/email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'lang': i18next.language,
+        },
+        body: JSON.stringify({ email }),
+      });
+      const data = await safeParseJson(response);
+      if (!response.ok || !data) {
+        throw new Error(data?.message || 'Failed to send password reset email');
+      }
+      return data;
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const verifyResetCode = async ({ email, code }) => {
+    setIsAuthLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('otp', code);
+
+      const response = await fetch(`${API_URL}/api/auth/password/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'multipart/form-data',
+          'lang': i18next.language,
+        },
+        body: formData,
+      });
+      const data = await safeParseJson(response);
+      if (!response.ok || !data) {
+        throw new Error(data?.message || 'Failed to verify reset code');
+      }
+      return data;
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const resetPassword = async ({ current_password, password, password_confirmation, email }) => {
+    console.log('resetPassword function called with:', { current_password, password, password_confirmation, email });
+    setIsAuthLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('current_password', current_password);
+      formData.append('password', password);
+      formData.append('email', email);
+      formData.append('password_confirmation', password_confirmation);
+      formData.append('token', user?.token);
+      formData.append('_method', 'POST'); // Use POST method for password update
+
+      console.log('Making API call to:', `${API_URL}/api/auth/password/reset/`);
+      const response = await authFetch(`${API_URL}/api/auth/password/reset/`, {
+        method: 'POST',
+        body: formData,
+      });
+      console.log('API response status:', response.status);
+      
+      const data = await safeParseJson(response);
+      console.log('API response data:', data);
+      
+      if (!response.ok || !data) {
+        throw new Error(data?.message || 'Failed to reset password');
+      }
+      return data;
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const resetPasswordAfterCode = async ({ national_id, email, code, password, password_confirmation }) => {
+    setIsAuthLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('national_id', national_id);
+      formData.append('email', email);
+      formData.append('otp', code); // API expects 'otp' field
+      formData.append('password', password);
+      formData.append('password_confirmation', password_confirmation);
+
+      const response = await fetch(`${API_URL}/api/auth/password/reset`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'multipart/form-data',
+          'lang': i18next.language,
+        },
+        body: formData,
+      });
+      const data = await safeParseJson(response);
+      if (!response.ok || !data) {
+        throw new Error(data?.message || 'Failed to reset password');
+      }
+      return data;
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
   const switchAccount = async (account) => {
     if (!account) {
       await AsyncStorage.removeItem(ACTIVE_USER_KEY);
@@ -387,25 +495,25 @@ export const AuthProvider = ({ children }) => {
     setUser({ user: account, token: { value: token } });
   };
 
-  const setTempAvatar = async (userId, uri) => {
-    setUser(prev => prev?.user?.id === userId ? { ...prev, user: { ...prev.user, avatar: uri } } : prev);
-    await updateChildAvatar(userId, uri);
-  };
+const setTempAvatar = async (userId, uri) => {
+setUser(prev => prev?.user?.id === userId ? { ...prev, user: { ...prev.user, avatar: uri } } : prev);
+await updateChildAvatar(userId, uri);
+};
 
-  const value = {
-    user, primaryUser, children: childAccounts,
-    isImpersonating: primaryUser && user && primaryUser.user.id !== user.user.id,
-    isAuthenticated: !!primaryUser, isLoading, isAuthLoading,
-    login, logout, signup, refreshToken, authFetch, updateUserProfile, deleteUserAvatar, 
-    switchAccount, setTempAvatar, fetchCurrentUser, fetchChildren,
-    setSession: async (data) => {
-      const norm = normalizePrimaryUser(data.data || data);
-      setPrimaryUser(norm); setUser(norm);
-      await AsyncStorage.setItem('primary_user', JSON.stringify(norm));
-    }
-  };
+const value = {
+user, primaryUser, children: childAccounts,
+isImpersonating: primaryUser && user && primaryUser.user.id !== user.user.id,
+isAuthenticated: !!primaryUser, isLoading, isAuthLoading,
+login, logout, signup, refreshToken, authFetch, updateUserProfile, deleteUserAvatar, 
+switchAccount, setTempAvatar, fetchCurrentUser, fetchChildren, forgotPassword, verifyResetCode, resetPassword, resetPasswordAfterCode,
+setSession: async (data) => {
+const norm = normalizePrimaryUser(data.data || data);
+setPrimaryUser(norm); setUser(norm);
+await AsyncStorage.setItem('primary_user', JSON.stringify(norm));
+}
+};
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

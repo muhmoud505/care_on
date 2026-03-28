@@ -12,13 +12,19 @@ import { hp, wp } from '../../../utils/responsive';
 
 const Reset = () => {
   const { t, i18n } = useTranslation();
+  const ISRTL = i18n.language === 'ar';
+  const { user } = useAuth();
+  const textAlign = ISRTL ? 'right' : 'left';
+  const direction = ISRTL ? 'rtl' : 'ltr';
   const navigation = useNavigation();
   const { resetPassword, isAuthLoading } = useAuth();
   const { form, errors, handleChange, checkFormValidity } = useForm({
     current_password: '',
     password: '',
     password_confirmation: '',
+   
   });
+
 
   const [isCurrentPasswordSecure, setIsCurrentPasswordSecure] = useState(true);
   const [isNewPasswordSecure, setIsNewPasswordSecure] = useState(true);
@@ -28,6 +34,10 @@ const Reset = () => {
   const formIsValid = checkFormValidity() && passwordsMatch;
 
   const handleConfirm = async () => {
+    console.log('Reset button pressed, form:', form);
+    console.log('Form valid:', formIsValid);
+    console.log('Passwords match:', passwordsMatch);
+    
     if (!formIsValid) {
       if (!passwordsMatch) {
         Toast.show({
@@ -42,10 +52,17 @@ const Reset = () => {
     }
 
     try {
+      console.log('Calling resetPassword with:', {
+        current_password: form.current_password,
+        password: form.password,
+        password_confirmation: form.password_confirmation,
+      });
+      
       await resetPassword({
         current_password: form.current_password,
         password: form.password,
         password_confirmation: form.password_confirmation,
+        email: user?.user?.email
       });
 
       Toast.show({
@@ -58,6 +75,7 @@ const Reset = () => {
 
       navigation.goBack();
     } catch (error) {
+      console.error('Reset password error:', error);
       Toast.show({
         type: 'error',
         text1: t('common.error', { defaultValue: 'Error' }),
@@ -71,20 +89,20 @@ const Reset = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <CustomHeader text={t('auth.reset_password', { defaultValue: 'اعادة تعيين كلمة السر' })} />
-      <View style={[styles.container,{direction:'ltr'}]}>
-        <Text style={styles.txt1}>{t('auth.enter_passwords', { defaultValue: 'برجاء ادخال كلمات السر' })}</Text>
+      <View style={[styles.container, { direction }]}>
+        <Text style={[styles.txt1, { textAlign }]}>{t('auth.enter_passwords', { defaultValue: 'برجاء ادخال كلمات السر' })}</Text>
         <View style={styles.minContainer}>
           <FormField
-          required
-          title={t('auth.current_password', { defaultValue: 'كلمة المرور الحالية' })}
-          placeholder={t('auth.enter_current_password', { defaultValue: 'ادخل كلمة المرور الحالية' })}
-          value={form.current_password}
-          onChangeText={(text) => handleChange('current_password', text)}
-          error={errors.current_password}
-          secureTextEntry={isCurrentPasswordSecure}
-          type={'password'}
-          onToggleSecureEntry={() => setIsCurrentPasswordSecure(!isCurrentPasswordSecure)}
-        />
+            required
+            title={t('auth.current_password', { defaultValue: 'كلمة المرور الحالية' })}
+            placeholder={t('auth.enter_current_password', { defaultValue: 'ادخل كلمة المرور الحالية' })}
+            value={form.current_password}
+            onChangeText={(text) => handleChange('current_password', text)}
+            error={errors.current_password}
+            secureTextEntry={isCurrentPasswordSecure}
+            type={'password'}
+            onToggleSecureEntry={() => setIsCurrentPasswordSecure(!isCurrentPasswordSecure)}
+          />
           <FormField
             title={t('auth.new_password', { defaultValue: 'كلمة المرور الجديدة' })}
             value={form.password}
@@ -107,7 +125,7 @@ const Reset = () => {
             secureTextEntry={isConfirmPasswordSecure}
             onToggleSecureEntry={() => setIsConfirmPasswordSecure(!isConfirmPasswordSecure)}
           />
-          <Text style={styles.txt2} numberOfLines={2}>
+          <Text style={[styles.txt2, { textAlign }]} numberOfLines={2}>
             {t('auth.password_rules', { defaultValue: 'يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)' })}
           </Text>
         </View>
@@ -147,13 +165,11 @@ const styles = StyleSheet.create({
   txt1: {
     fontSize: Math.min(wp(5), 20),
     fontWeight: 'bold',
-    textAlign: 'right',
   },
   txt2: {
     color: '#80808099',
     fontSize: Math.min(wp(3), 12),
     fontWeight: 'bold',
-    textAlign: 'right',
     width: wp(85),
     marginTop: hp(1),
   }, 
@@ -170,9 +186,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: Math.min(wp(6), 24),
-  },
-  disabledButton: {
-    opacity: 0.5,
   },
   disabledButton: {
     opacity: 0.5,
