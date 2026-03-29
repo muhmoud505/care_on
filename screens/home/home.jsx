@@ -24,8 +24,9 @@ const Home = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
   const [showSurveyPopup, setShowSurveyPopup] = useState(false);
-  const { user } = useAuth();
+  const { user, refreshToken } = useAuth();
   const [surveySkippedThisSession, setSurveySkippedThisSession] = useState(false);
+  
 
   const menuItems = [
     { key: 'results', titleKey: 'home.results_title', icon: Icons.Analysis, navigateTo: 'results' },
@@ -53,6 +54,7 @@ const Home = () => {
 
   useFocusEffect(
     useCallback(() => {
+      refreshToken();
       const checkSurveyStatus = async () => {
         const userId = user?.user?.id;
         if (!userId) return;

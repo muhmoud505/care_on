@@ -67,7 +67,7 @@ const AddMedicineScreen = () => {
     <SafeAreaView style={styles.container}>
       <CustomHeader text={t('add_medicine.title')} />
 
-      <View style={[styles.formContainer, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+      <View style={[styles.formContainer, { direction: isRTL ? 'ltr' : 'ltr' }]}>
         <Text style={[styles.txt, { textAlign: isRTL ? 'right' : 'left' }]}>
           {t('add_medicine.enter_following_data')}
         </Text>

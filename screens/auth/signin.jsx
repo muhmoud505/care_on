@@ -3,7 +3,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
@@ -46,52 +46,58 @@ const SignIn = () => {
     <SafeAreaView style={styles.safeArea}>
       <CustomHeader text={t('auth.signin')} />
 
-      <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
-        <Icons.Login width={wp(80)} height={wp(80)} />
+      <ScrollView 
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={[styles.container, { direction: isRTL ? 'ltr' : 'ltr' }]}>
+          <Icons.Login width={wp(80)} height={wp(80)} />
 
-        <View style={styles.formWrapper}>
-          <FormField
-            title={t('auth.email')}
-            value={form.email}
-            onChangeText={(text) => handleChange('email', text)}
-            error={errors.email}
-            keyboardType="email-address"
-            required
-            placeholder={t('auth.email_placeholder')}
-          />
+          <View style={styles.formWrapper}>
+            <FormField
+              title={t('auth.email')}
+              value={form.email}
+              onChangeText={(text) => handleChange('email', text)}
+              error={errors.email}
+              keyboardType="email-address"
+              required
+              placeholder={t('auth.email_placeholder')}
+            />
 
-          <FormField
-            title={t('auth.password')}
-            value={form.password}
-            onChangeText={(text) => handleChange('password', text)}
-            error={errors.password}
-            type="password"
-            secureTextEntry={isPasswordSecure}
-            onToggleSecureEntry={() => setIsPasswordSecure(!isPasswordSecure)}
-            required
-            placeholder={t('auth.password_placeholder')}
-          />
+            <FormField
+              title={t('auth.password')}
+              value={form.password}
+              onChangeText={(text) => handleChange('password', text)}
+              error={errors.password}
+              type="password"
+              secureTextEntry={isPasswordSecure}
+              onToggleSecureEntry={() => setIsPasswordSecure(!isPasswordSecure)}
+              required
+              placeholder={t('auth.password_placeholder')}
+            />
+
+            <TouchableOpacity 
+              style={[styles.link, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]} 
+              onPress={() => navigation.navigate('forget')}
+            >
+              <Text style={styles.forgotText}>{t('auth.forgot_password_q')}</Text>
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity 
-            style={[styles.link, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]} 
-            onPress={() => navigation.navigate('forget')}
+            style={[styles.nextButton, (!formIsValid || isAuthLoading) && styles.disabledButton]} 
+            onPress={handleSignIn} 
+            disabled={!formIsValid || isAuthLoading}
           >
-            <Text style={styles.forgotText}>{t('auth.forgot_password_q')}</Text>
+            {isAuthLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.nextButtonText}>{t('auth.signin')}</Text>
+            )}
           </TouchableOpacity>
         </View>
-
-        <TouchableOpacity 
-          style={[styles.nextButton, (!formIsValid || isAuthLoading) && styles.disabledButton]} 
-          onPress={handleSignIn} 
-          disabled={!formIsValid || isAuthLoading}
-        >
-          {isAuthLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.nextButtonText}>{t('auth.signin')}</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
 
       <Toast />
     </SafeAreaView>
@@ -103,10 +109,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: hp(2),
+  },
   container: {
-    flex: 1,
     alignItems: 'center',
     paddingHorizontal: wp(5),
+    paddingTop: hp(2),
+    paddingBottom: hp(2),
   },
   formWrapper: {
     width: '100%',
@@ -129,8 +140,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: wp(90),
-    marginTop: 'auto',
-    marginBottom: hp(4),
+    marginTop: hp(4),
+    marginBottom: hp(2),
   },
   nextButtonText: {
     color: '#fff',

@@ -126,6 +126,9 @@ export const AuthProvider = ({ children }) => {
 
   const refreshToken = async () => {
     const tokenValue = user?.token?.value || user?.token;
+
+    console.log('token here');
+    
     
     if (!tokenValue) return null;
     if (!isTokenExpired(tokenValue)) return user;
@@ -142,7 +145,7 @@ export const AuthProvider = ({ children }) => {
           'Content-Type': 'application/json',
         },
       });
-
+        
       const data = await safeParseJson(response);
 
       if (response.ok && data) {
@@ -193,11 +196,6 @@ export const AuthProvider = ({ children }) => {
     const getAuthToken = async () => {
       if (overrideToken) return overrideToken;
       const currentToken = user?.token?.value || user?.token;
-      
-      if (currentToken && isTokenExpired(currentToken)) {
-        const refreshed = await refreshToken();
-        if (refreshed) return refreshed.token?.value || refreshed.token;
-      }
       return currentToken || await getBestPrimaryToken();
     };
 
@@ -220,13 +218,8 @@ export const AuthProvider = ({ children }) => {
 
     let response = await makeRequest();
 
-    if (response.status === 401 && !overrideToken && retryCount < MAX_RETRIES) {
-      const refreshed = await refreshToken();
-      const newToken = refreshed?.token?.value || refreshed?.token;
-      if (newToken) {
-        response = await makeRequest(newToken);
-      }
-    }
+    // Don't automatically refresh tokens during API calls
+    // Let the user handle authentication issues manually
 
     return response;
   };
@@ -240,7 +233,7 @@ export const AuthProvider = ({ children }) => {
         if (!storedUser) return;
 
         const parsedUser = JSON.parse(storedUser);
-        const normalizedUser = normalizePrimaryUser(parsedUser.data || parsedUser);
+        const normalizedUser = normalizePrimaryUser(parsedUser);
         setPrimaryUser(normalizedUser);
         setUser(normalizedUser);
 

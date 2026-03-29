@@ -71,7 +71,7 @@ const AddResultScreen = () => {
       <CustomHeader text={t('add_result.title')} />
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={[styles.formContainer, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+        <View style={[styles.formContainer, { direction: isRTL ? 'ltr' : 'ltr' }]}>
           <FormField
             title={t('add_result.test_name')}
             placeholder={t('add_result.test_name_placeholder')}

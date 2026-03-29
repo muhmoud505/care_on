@@ -93,9 +93,12 @@ const PasswordScreen = ({ route }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
-      <CustomHeader text={t('auth.create_account')} />
+      <CustomHeader text={t('auth.signup')} />
       
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={[styles.scrollContainer, { direction: isRTL ? 'ltr' : 'ltr' }]} 
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header Text matching the image exactly */}
         <View style={styles.headerTextContainer}>
           <Text style={[styles.headerText, { textAlign: isRTL ? 'right' : 'left' }]}>
@@ -114,7 +117,7 @@ const PasswordScreen = ({ route }) => {
           </Text>
         </View>
 
-        <View style={styles.formContainer}>
+        <View style={[styles.formContainer, { direction: isRTL ? 'ltr' : 'ltr' }]}>
           <FormField
             required
             title={t('auth.password')}

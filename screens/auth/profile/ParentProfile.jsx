@@ -138,7 +138,7 @@ const ParentProfile = () => {
 
           {/* Linked Accounts button — top corner, direction-aware */}
           <TouchableOpacity
-            style={[localStyles.linkedBtn, { [isRTL ? 'right' : 'left']: wp(4) }]}
+            style={[localStyles.linkedBtn, { [isRTL ? 'left' : 'left']: wp(4) }]}
             onPress={() => navigation.navigate('accounts')}
           >
             <Text style={localStyles.linkedBtnText} numberOfLines={1}>
@@ -188,7 +188,7 @@ const ParentProfile = () => {
         </View>
 
         {/* ── Birth certificate ── */}
-        <View style={[localStyles.section, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+        <View style={[localStyles.section, { direction: isRTL ? 'ltr' : 'ltr' }]}>
           <Text style={[localStyles.sectionLabel, { textAlign: isRTL ? 'right' : 'left' }]}>{t('profile.birth_certificate')}</Text>
           <TouchableOpacity onPress={handleDownloadBirthCertificate} style={{ width: '100%' }}>
             <ImageBackground

@@ -20,7 +20,8 @@ const S2 = () => {
   const navigation = useNavigation();
   const { userType, isParentAddingChild } = route.params || {};
      
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
   // If userType is passed (from account screen), set it, otherwise start fresh.
   const [flowType, setFlowType] = useState(userType || null); // 'adult' or 'child'
   const [formData, setFormData] = useState({
@@ -110,22 +111,22 @@ const S2 = () => {
       <CustomHeader text={t('auth.signup')} />
        
       {!flowType ? (
-        <View style={styles.container}>
-          <Text style={styles.title}>{t('auth.choose_account_type')}</Text>
+        <View style={[styles.container, { direction: isRTL ? 'ltr' : 'ltr' }]}>
+          <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.choose_account_type')}</Text>
  
-          <TouchableOpacity style={styles.card} onPress={() => setFlowType('adult')} activeOpacity={0.7}> 
-            <Image source={require('../../../assets2/images/img1.png')} style={styles.icon} />
-            <Text style={styles.cardText}>{t('auth.personal_account')}</Text>
+          <TouchableOpacity style={[styles.card, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => setFlowType('adult')} activeOpacity={0.7}> 
+            <Image source={require('../../../assets2/images/img1.png')} style={[styles.icon, { marginRight: isRTL ? 0 : wp(4), marginLeft: isRTL ? wp(4) : 0 }]} />
+            <Text style={[styles.cardText, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.personal_account')}</Text>
           </TouchableOpacity>
  
-          <TouchableOpacity style={styles.card} onPress={() => setFlowType('child')} activeOpacity={0.7}> 
-            <Image source={require('../../../assets2/images/img2.png')} style={styles.icon} />
-            <Text style={styles.cardText}>{t('auth.child_account')}</Text>
+          <TouchableOpacity style={[styles.card, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => setFlowType('child')} activeOpacity={0.7}> 
+            <Image source={require('../../../assets2/images/img2.png')} style={[styles.icon, { marginRight: isRTL ? 0 : wp(4), marginLeft: isRTL ? wp(4) : 0 }]} />
+            <Text style={[styles.cardText, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.child_account')}</Text>
           </TouchableOpacity> 
         </View>
       ) : (
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>
+        <View style={[styles.formContainer, { direction: isRTL ? 'ltr' : 'ltr' }]}>
+          <Text style={[styles.title, { textAlign: isRTL ? 'center' : 'left' }]}>
             {flowType === 'adult' ? t('auth.enter_your_data') : t('auth.enter_child_data')}
           </Text>
           <View style={{rowGap: hp(3)}}>
@@ -203,7 +204,6 @@ const styles = StyleSheet.create({
     width: wp(12),
     height: wp(12),
     resizeMode: 'contain',
-    marginRight: wp(4),
   },
   cardText: {
     fontSize: Math.min(wp(5), 20),

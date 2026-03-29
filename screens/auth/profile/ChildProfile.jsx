@@ -208,7 +208,7 @@ const ChildProfile = () => {
         </View>
 
         {/* ── Age today ── */}
-        <View style={[styles.cont2, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <View style={[styles.cont2, { flexDirection: isRTL ? 'row' : 'row' }]}>
           <Text style={[styles.txt1, { textAlign: isRTL ? 'left' : 'right' }]}>{t('profile.age_today')}</Text>
           <AgeDisplay value={age.days} label={t('common.day')} />
           <AgeDisplay value={age.months} label={t('common.month')} />
@@ -216,7 +216,7 @@ const ChildProfile = () => {
         </View>
 
         {/* ── Birth certificate ── */}
-        <View style={[ds.cont3, { gap: hp(1) }]}>
+        <View style={[ds.cont3, { gap: hp(1), direction: isRTL ? 'ltr' : 'ltr' }]}>
           <Text style={[styles.txt1, { textAlign: isRTL ? 'right' : 'left' }]}>
             {t('profile.birth_certificate')}
           </Text>

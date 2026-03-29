@@ -11,7 +11,7 @@ const useRTL = () => {
   const isRTL = i18n.dir() === 'rtl';
 
   return useMemo(() => {
-    const direction = isRTL ? 'rtl' : 'ltr';
+    const direction = isRTL ? 'ltr' : 'ltr';
 
     return {
       isRTL,

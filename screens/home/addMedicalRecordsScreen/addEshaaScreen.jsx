@@ -81,7 +81,7 @@ const AddEshaaScreen = () => {
       <CustomHeader text={t('add_eshaa.title')} />
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={[styles.formContainer, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+        <View style={[styles.formContainer, { direction: isRTL ? 'ltr' : 'ltr' }]}>
           <FormField
             title={t('add_eshaa.xray_name')}
             placeholder={t('add_eshaa.xray_name_placeholder')}

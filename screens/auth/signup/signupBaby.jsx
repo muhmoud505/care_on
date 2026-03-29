@@ -79,10 +79,10 @@ const Signup2 = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
-      <CustomHeader text={t('auth.create_account')} />
+      <CustomHeader text={t('auth.signup')} />
       
       <ScrollView 
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[styles.container, { direction: isRTL ? 'ltr' : 'ltr' }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Header Text Section */}
@@ -107,7 +107,7 @@ const Signup2 = () => {
         </View>
         
         {/* Form Fields Section */}
-        <View style={styles.formContainer}>
+        <View style={[styles.formContainer, { direction: isRTL ? 'ltr' : 'ltr' }]}>
           <FormField 
             // Note: In the image, Child Name has NO red asterisk
             title={t('auth.child_name')}

@@ -4,12 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../components/CustomHeader';
 import { Icons } from '../../components/Icons';
 import Images from '../../constants2/images';
-import useRTL from '../../hooks/useRTL';
 import { hp, wp } from '../../utils/responsive';
 
 const ContactUs = ({ navigation }) => {
   const { t, i18n } = useTranslation();
-  const rtl = useRTL();
+  const isRTL = i18n.dir() === 'rtl';
 
   const handleCallPress = (phoneNumber) => {
     Alert.alert(
@@ -31,16 +30,16 @@ const ContactUs = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { direction: rtl.dir }]}>
+    <SafeAreaView style={[styles.container]}>
       <CustomHeader text={t('contact_us.title')} />
       
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { direction: isRTL ? 'ltr' : 'ltr' }]}>
         {/* Header Section */}
         <View style={styles.headerSection}>
-          <Text style={[styles.headerTitle, { textAlign: rtl.textAlign }]}>
+          <Text style={[styles.headerTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
             {t('contact_us.title')}
           </Text>
-          <Text style={[styles.headerSubtitle, { textAlign: rtl.textAlign }]}>
+          <Text style={[styles.headerSubtitle, { textAlign: isRTL ? 'right' : 'left' }]}>
             {t('contact_us.subtitle')}
           </Text>
         </View>
@@ -50,10 +49,10 @@ const ContactUs = ({ navigation }) => {
             <View style={styles.iconCircle}>
               <Icons.Locationa width={24} height={24} />
             </View>
-            <Text style={[styles.cardTitle, { textAlign: rtl.textAlign }]}>
+            <Text style={[styles.cardTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
               {t('contact_us.location')}
             </Text>
-            <Text style={[styles.cardDesc, { textAlign: rtl.textAlign }]}>
+            <Text style={[styles.cardDesc, { textAlign: isRTL ? 'right' : 'left' }]}>
               {t('contact_us.location_desc')}
             </Text>
             <TouchableOpacity 
@@ -69,10 +68,10 @@ const ContactUs = ({ navigation }) => {
             <View style={[styles.iconCircle, styles.emailIconBg]}>
               <Icons.Email width={24} height={24} />
             </View>
-            <Text style={[styles.cardTitle, { textAlign: rtl.textAlign }]}>
+            <Text style={[styles.cardTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
               {t('contact_us.email')}
             </Text>
-            <Text style={[styles.cardDesc, { textAlign: rtl.textAlign }]}>
+            <Text style={[styles.cardDesc, { textAlign: isRTL ? 'right' : 'left' }]}>
               {t('contact_us.email_desc')}
             </Text>
             <TouchableOpacity 
@@ -88,10 +87,10 @@ const ContactUs = ({ navigation }) => {
             <View style={styles.iconCircle}>
               <Icons.Chat width={24} height={24} />
             </View>
-            <Text style={[styles.cardTitle, { textAlign: rtl.textAlign }]}>
+            <Text style={[styles.cardTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
               {t('contact_us.live_chat')}
             </Text>
-            <Text style={[styles.cardDesc, { textAlign: rtl.textAlign }]}>
+            <Text style={[styles.cardDesc, { textAlign: isRTL ? 'right' : 'left' }]}>
               {t('contact_us.chat_desc')}
             </Text>
             <TouchableOpacity style={styles.blueButton}>
@@ -104,10 +103,10 @@ const ContactUs = ({ navigation }) => {
             <View style={styles.iconCircle}>
               <Image source={Images.call} style={styles.gridIcon} />
             </View>
-            <Text style={[styles.cardTitle, { textAlign: rtl.textAlign }]}>
+            <Text style={[styles.cardTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
               {t('contact_us.phone')}
             </Text>
-            <Text style={[styles.cardDesc, { textAlign: rtl.textAlign }]}>
+            <Text style={[styles.cardDesc, { textAlign: isRTL ? 'right' : 'left' }]}>
               {t('contact_us.phone_desc')}
             </Text>
             <TouchableOpacity 
