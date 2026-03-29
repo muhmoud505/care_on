@@ -63,7 +63,7 @@ const Signup = () => {
         gender: gender,
         isChild: false, // This flow is always for adults
         // Your API expects the 'id' field to contain the image data.
-        id: base64Image,
+        birth_certificate_url: base64Image,
         type:'patient'
       };
       // 3. Navigate to the password screen with the prepared data.
@@ -80,19 +80,20 @@ const Signup = () => {
     <SafeAreaView style={styles.safeArea}>
       <CustomHeader text={t('auth.create_account')} />
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.headerTextContainer}>
+      <ScrollView contentContainerStyle={[styles.scrollContainer, ]}>
+        <View style={[styles.headerTextContainer, { direction: isRTL ? 'ltr' : 'ltr' }]}>
   <Text style={[styles.subtitle, { textAlign: isRTL ? 'right' : 'left' }]}>
     {(() => {
       const fullText = t('auth.create_account_subtitle');
-      // Change 'auth.the_following_data' to 'auth.your_account'
-      const highlightText = t('auth.your_account'); 
+      const highlightText = t('auth.your_account');
+      
+      // Split the sentence into parts using the highlight word as the divider
       const parts = fullText.split(highlightText);
 
       return (
         <>
           <Text>{parts[0]}</Text>
-          <Text style={{ color: '#014CC4' }}>{highlightText}</Text>
+          <Text style={{ color: '#014CC4', fontWeight: 'bold' }}>{highlightText}</Text>
           <Text>{parts[1]}</Text>
         </>
       );
@@ -100,7 +101,7 @@ const Signup = () => {
   </Text>
 </View>
 
-        <View style={[styles.formContainer, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+        <View style={[styles.formContainer, { direction: isRTL ? 'ltr' : 'ltr' }]}>
           <FormField
             required
             title={t('common.name')}

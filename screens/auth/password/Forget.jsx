@@ -27,7 +27,7 @@ const Forget = () => {
   const { t, i18n } = useTranslation();
   const ISRTL = i18n.language === 'ar';
   const textAlign = ISRTL ? 'right' : 'left';
-  const direction = ISRTL ? 'rtl' : 'ltr';
+  const direction = ISRTL ? 'ltr' : 'ltr';
 
   const formIsValid = checkFormValidity();
 
@@ -45,9 +45,9 @@ const Forget = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { direction }]}>
+    <SafeAreaView style={styles.safeArea}>
       <CustomHeader text={t('auth.reset_password')} />
-      <View style={styles.container}>
+      <View style={[styles.container,{ direction }]}>
         <Text style={[styles.infoText, { textAlign }]}>
           {t('auth.enter_email_send_code')}
         </Text>

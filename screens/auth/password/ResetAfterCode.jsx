@@ -23,7 +23,7 @@ const AfterCode = () => {
   const { t, i18n } = useTranslation();
   const ISRTL = i18n.language === 'ar';
   const textAlign = ISRTL ? 'right' : 'left';
-  const direction = ISRTL ? 'rtl' : 'ltr';
+  const direction = ISRTL ? 'ltr' : 'ltr';
   const navigation = useNavigation();
   const route = useRoute();
   const { nationalId, code, email } = route.params || {};

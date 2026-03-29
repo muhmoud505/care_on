@@ -40,6 +40,8 @@ const ParentProfile = () => {
 
   /* ── Download birth certificate ── */
   const handleDownloadBirthCertificate = async () => {
+    console.log(user);
+    
     const url =
       user?.user?.resource?.birth_certificate_url ||
       user?.user?.resource?.birth_certificate ||
@@ -50,6 +52,7 @@ const ParentProfile = () => {
       user?.user?.certificate_url ||
       user?.user?.birth_cert_url ||
       null;
+
 
     if (!url) {
       Toast.show({ type: 'error', text1: t('common.error'), text2: t('common.no_file_to_download'), position: 'top', visibilityTime: 3000 });

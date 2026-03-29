@@ -31,7 +31,7 @@ const Code = () => {
   const { t, i18n } = useTranslation();
   const ISRTL = i18n.language === 'ar';
   const textAlign = ISRTL ? 'right' : 'left';
-  const direction = ISRTL ? 'rtl' : 'ltr';
+  const direction = ISRTL ? 'ltr' : 'ltr';
 
   useEffect(()=>{
     if(timeLeft<=0){
@@ -99,7 +99,7 @@ const Code = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { direction }]}>
+    <SafeAreaView style={[styles.safeArea]}>
       <CustomHeader text={t('auth.enter_code')} />
       <View style={[styles.container, { direction }]}>
         <Text style={[styles.txt1, { textAlign }]}>{t('auth.enter_code_sent_to')}</Text>
