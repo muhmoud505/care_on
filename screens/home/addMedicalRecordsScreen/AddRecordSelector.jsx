@@ -54,7 +54,7 @@ const AddRecordSelector = () => {
     <SafeAreaView style={styles.container}>
       <CustomHeader text={t('add_selector.title')} />
 
-      <View style={[styles.content, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+      <View style={[styles.content, { direction: isRTL ? 'ltr' : 'ltr' }]}>
         <FormField
           title={t('add_selector.prompt')}
           placeholder={t('add_selector.placeholder')}

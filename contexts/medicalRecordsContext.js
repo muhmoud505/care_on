@@ -1,92 +1,56 @@
 import Constants from 'expo-constants';
 import { createContext, useCallback, useContext, useState } from 'react';
 
-
+import { useTranslation } from 'react-i18next';
 import Images from '../constants2/images';
-
 import { useAuth } from './authContext';
 
-
-
 const MedicalRecordsContext = createContext();
-
-
 
 export const useMedicalRecords = () => {
   return useContext(MedicalRecordsContext);
 };
 
-
-
 const BASE_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
 
-
-
-/**
- * The API always returns Arabic type strings in item.type.
- * English keys are kept as a safety net in case the API ever changes.
- * Maps API type → internal component type used for rendering decisions.
- */
 const API_TYPE_MAP = {
-  // Arabic — what the real API returns
   'اختبار معملي': 'result',
   'أشعة':         'eshaa',
   'وصفة طبية':   'medicine',
   'تشخيص':       'report',
   'استشارة':      'report',
-  // English — safety net
   'lab_test':     'result',
   'radiology':    'eshaa',
   'prescription': 'medicine',
-  'Prescription': 'medicine',  // Handle uppercase from server
+  'Prescription': 'medicine',
   'diagnosis':    'report',
   'consultation': 'report',
 };
 
-/**
- * Maps API type → Arabic display label shown in the UI.
- * Used to populate the `subType` field so components can display
- * "كشف" or "روشتة" instead of the internal "report" string.
- */
 const API_TYPE_LABEL_MAP = {
-  // Arabic API values
   'تشخيص':       'كشف',
-  'استشارة':      'استشارة',  // Show as استشارة, not كشف
+  'استشارة':      'استشارة',
   'وصفة طبية':   'روشتة',
-  // English API values
   'diagnosis':    'كشف',
-  'Diagnosis':    'كشف',  // Handle uppercase from server
-  'consultation': 'استشارة',  // Show as استشارة
+  'Diagnosis':    'كشف',
+  'consultation': 'استشارة',
   'prescription': 'روشتة',
-  'Prescription': 'روشتة',  // Handle uppercase from server
+  'Prescription': 'روشتة',
   'lab_test':     'اختبار معملي',
   'radiology':    'أشعة',
 };
 
-/**
- * Values that mean "nothing entered" — used to clean up description JSON fields.
- * Covers common English and Arabic placeholder strings users type when a field
- * is not applicable.
- */
 const EMPTY_VALUES = new Set([
   'none', 'null', 'undefined', '', '-', 'n/a',
-  // Arabic equivalents
   'لا يوجد', 'لا يوحد', 'لايوجد', 'لايوحد', 'غير محدد', 'غير متاح', 'لا شيء',
 ]);
 
 const isEmpty = (val) =>
   val == null || EMPTY_VALUES.has(String(val).trim().toLowerCase());
 
-/**
- * Parses the description string into a clean structured object for report cards.
- * Handles both JSON (new records) and plain text (legacy records).
- * Filters out Arabic/English "empty" placeholder values so blank rows are hidden.
- */
 const parseDescriptionToProps = (description) => {
   if (!description || typeof description !== 'string') return { description: '' };
-
   const trimmed = description.trim();
-
   if (trimmed.startsWith('{')) {
     try {
       const parsed = JSON.parse(trimmed);
@@ -98,19 +62,13 @@ const parseDescriptionToProps = (description) => {
         diagnosis:     !isEmpty(parsed.diagnosis)                             ? parsed.diagnosis                               : '',
         notes:         !isEmpty(parsed.notes)                                 ? parsed.notes                                   : '',
       };
-    } catch (_e) {
-      // Not valid JSON — fall through and treat whole string as plain-text notes
-    }
+    } catch (_e) {}
   }
-
-  // Legacy plain-text description
   return { description: trimmed };
 };
 
-
 const mapApiDataToComponentProps = (item, componentType, originalTypeSent = null) => {
   let type;
-  // Raw API type string (Arabic or English)
   const rawApiType = item.type || item.record_type || item.recordType;
 
   if (componentType === 'all') {
@@ -119,47 +77,30 @@ const mapApiDataToComponentProps = (item, componentType, originalTypeSent = null
     type = componentType;
   }
 
-  // Use original type sent for subType if server ignores it and returns Diagnosis
   let subType;
   if (originalTypeSent && rawApiType === 'Diagnosis') {
-    // Server ignored our type, use what we originally sent
     subType = API_TYPE_LABEL_MAP[originalTypeSent] || rawApiType || '';
   } else {
-    // Normal case - use what server returned
     subType = API_TYPE_LABEL_MAP[rawApiType] || rawApiType || '';
   }
 
   const commonProps = {
     id:        item.id,
-    type,       // Use the mapped type, not raw type
+    type,
     subType,
     icon:      item.imageUrl ? { uri: item.imageUrl } : (Images.r5 ?? null),
     date:      item.dates?.created_at?.full,
     documents: item.documents,
   };
 
-  // Raw description string from the API
   const rawDescription = typeof item.description === 'string' ? item.description : '';
 
   switch (type) {
-    case 'result': // اختبار معملي
-      return {
-        ...commonProps,
-        title:       item.title,
-        description: rawDescription,
-        labName:     item.provider?.name || '',
-      };
-
-    case 'eshaa': // أشعة
-      return {
-        ...commonProps,
-        title:       item.title,
-        description: rawDescription,
-        labName:     item.provider?.name || '',
-      };
-
-    case 'report': { // تشخيص / استشارة
-      // Pre-parse the JSON description so Report.js receives clean individual props
+    case 'result':
+      return { ...commonProps, title: item.title, description: rawDescription, labName: item.provider?.name || '' };
+    case 'eshaa':
+      return { ...commonProps, title: item.title, description: rawDescription, labName: item.provider?.name || '' };
+    case 'report': {
       const descProps = parseDescriptionToProps(rawDescription);
       return {
         ...commonProps,
@@ -173,8 +114,7 @@ const mapApiDataToComponentProps = (item, componentType, originalTypeSent = null
         notes:         descProps.notes          || '',
       };
     }
-
-    case 'medicine': // وصفة طبية
+    case 'medicine':
       return {
         ...commonProps,
         icon:        item.imageUrl ? { uri: item.imageUrl } : (Images.medicine ?? null),
@@ -183,20 +123,57 @@ const mapApiDataToComponentProps = (item, componentType, originalTypeSent = null
         from:        item.dates?.start_date?.full || '',
         to:          item.dates?.end_date?.full   || '',
       };
-
     default:
       return { ...commonProps, title: item.title, description: rawDescription };
   }
 };
 
+// ✅ Recursively appends any value (primitive, array, nested object) to FormData
+// Produces: lab_tests[0][id]=xxx, lab_tests[1][id]=yyy, documents[0]=file, etc.
+const appendToFormData = (formData, key, value) => {
+  if (value == null || value === '') return;
 
+  if (value instanceof Object && value.uri) {
+    // File/blob object (React Native file picker result)
+    formData.append(key, value);
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      // Signal empty array to server
+      formData.append(`${key}[]`, '');
+    } else {
+      value.forEach((item, index) => {
+        appendToFormData(formData, `${key}[${index}]`, item);
+      });
+    }
+    return;
+  }
+
+  if (typeof value === 'object') {
+    // Nested object: { id: 'xxx' } → key[id]=xxx
+    Object.keys(value).forEach(subKey => {
+      appendToFormData(formData, `${key}[${subKey}]`, value[subKey]);
+    });
+    return;
+  }
+
+  // Primitive string/number/boolean
+  formData.append(key, String(value));
+};
 
 export const MedicalRecordsProvider = ({ children }) => {
-  const [allRecords, setAllRecords] = useState([]);
-  const [medicines,  setMedicines]  = useState([]);
-  const [results,    setResults]    = useState([]);
-  const [eshaa,      setEshaa]      = useState([]);
-  const [reports,    setReports]    = useState([]);
+  const { user, authFetch, fetchCurrentUser } = useAuth();
+  const { t } = useTranslation();
+
+  const [allRecords, setAllRecords]     = useState([]);
+  const [medicines, setMedicines]       = useState([]);
+  const [results, setResults]           = useState([]);
+  const [eshaa, setEshaa]               = useState([]);
+  const [reports, setReports]           = useState([]);
+  const [labTests, setLabTests]         = useState([]);
+  const [radiologyExams, setRadiologyExams] = useState([]);
 
   const [pagination, setPagination] = useState({
     all:       { page: 1, hasMore: true },
@@ -215,9 +192,7 @@ export const MedicalRecordsProvider = ({ children }) => {
     all: null, medicines: null, results: null, eshaa: null, reports: null,
   });
 
-  const { t, user, authFetch, fetchCurrentUser } = useAuth();
-
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  const CACHE_DURATION = 5 * 60 * 1000;
 
   const createFetcher = ({ stateKey, stateSetter, types, sort = false }) => {
     return useCallback(async (options = { force: false, loadMore: false, per_page: 10 }) => {
@@ -237,15 +212,10 @@ export const MedicalRecordsProvider = ({ children }) => {
       try {
         let nationalNumber = user?.user?.resource?.national_number;
 
-        // If national number is not available, fetch current user to get it
         if (!nationalNumber) {
-          console.log('National number not found in fetch, fetching current user...');
           const currentUser = await fetchCurrentUser();
-          console.log('Current user fetched:', currentUser);
-          
           if (currentUser?.resource?.national_number) {
             nationalNumber = currentUser.resource.national_number;
-            console.log('Updated national number:', nationalNumber);
           } else {
             throw new Error('National number could not be retrieved');
           }
@@ -289,13 +259,9 @@ export const MedicalRecordsProvider = ({ children }) => {
           }
         });
 
-        if (allFailed && types.length > 0) {
-          throw new Error(`All fetch attempts failed for ${stateKey}`);
-        }
+        if (allFailed && types.length > 0) throw new Error(`All fetch attempts failed for ${stateKey}`);
 
-        if (sort) {
-          combinedData.sort((a, b) => new Date(b.date) - new Date(a.date));
-        }
+        if (sort) combinedData.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         if (loadMore) {
           stateSetter(prev => [...prev, ...combinedData]);
@@ -312,38 +278,15 @@ export const MedicalRecordsProvider = ({ children }) => {
     }, [t, stateKey, types, sort, pagination, loading, user, authFetch, fetchCurrentUser]);
   };
 
-  const fetchAllRecords = createFetcher({
-    stateKey:    'all',
-    stateSetter: setAllRecords,
-    types:       [{ apiType: null, componentType: 'all' }],
-    sort:        true,
-  });
-
-  const fetchMedicines = createFetcher({
-    stateKey:    'medicines',
-    stateSetter: setMedicines,
-    types:       [{ apiType: 'prescription', componentType: 'medicine' }],
-  });
-
-  const fetchResults = createFetcher({
-    stateKey:    'results',
-    stateSetter: setResults,
-    types:       [{ apiType: 'lab_test', componentType: 'result' }],
-  });
-
-  const fetchEshaas = createFetcher({
-    stateKey:    'eshaa',
-    stateSetter: setEshaa,
-    types:       [{ apiType: 'radiology', componentType: 'eshaa' }],
-  });
-
-  const fetchReports = createFetcher({
-    stateKey:    'reports',
-    stateSetter: setReports,
+  const fetchAllRecords = createFetcher({ stateKey: 'all',       stateSetter: setAllRecords, types: [{ apiType: null,           componentType: 'all' }],      sort: true });
+  const fetchMedicines  = createFetcher({ stateKey: 'medicines', stateSetter: setMedicines,  types: [{ apiType: 'prescription', componentType: 'medicine' }] });
+  const fetchResults    = createFetcher({ stateKey: 'results',   stateSetter: setResults,    types: [{ apiType: 'lab_test',     componentType: 'result' }] });
+  const fetchEshaas     = createFetcher({ stateKey: 'eshaa',     stateSetter: setEshaa,      types: [{ apiType: 'radiology',    componentType: 'eshaa' }] });
+  const fetchReports    = createFetcher({
+    stateKey: 'reports', stateSetter: setReports,
     types: [
       { apiType: 'diagnosis',    componentType: 'report' },
       { apiType: 'consultation', componentType: 'report' },
-      // Removed prescription - should only be in medicines screen
     ],
     sort: true,
   });
@@ -354,56 +297,79 @@ export const MedicalRecordsProvider = ({ children }) => {
   const loadMoreEshaas     = () => fetchEshaas({ loadMore: true });
   const loadMoreReports    = () => fetchReports({ loadMore: true });
 
+  const fetchLabTests = useCallback(async () => {
+    try {
+      const response = await authFetch(`${BASE_URL}/api/v1/lab-tests`);
+      if (!response.ok) throw new Error('Failed to fetch lab tests');
+      const data = await response.json();
+      const formattedTests = data.data?.map(test => ({
+        label: test.name || test.title,
+        value: test.name || test.title,
+        id:    test.id,
+      })) || [];
+      setLabTests(formattedTests);
+      return formattedTests;
+    } catch (error) {
+      console.error('Failed to fetch lab tests:', error);
+      setError(prev => ({ ...prev, labTests: error.message }));
+      return [];
+    }
+  }, [authFetch]);
+
+  const fetchRadiologyExams = useCallback(async () => {
+    try {
+      const response = await authFetch(`${BASE_URL}/api/v1/radiology-exams`);
+      if (!response.ok) throw new Error('Failed to fetch radiology exams');
+      const data = await response.json();
+      const formattedExams = data.data?.map(exam => ({
+        label: exam.name || exam.title,
+        value: exam.name || exam.title,
+        id:    exam.id,
+      })) || [];
+      setRadiologyExams(formattedExams);
+      return formattedExams;
+    } catch (error) {
+      console.error('Failed to fetch radiology exams:', error);
+      setError(prev => ({ ...prev, radiologyExams: error.message }));
+      return [];
+    }
+  }, [authFetch]);
+
   const addMedicine = useCallback(async (newMedicineData) => {
     const descriptionParts = [];
-    if (newMedicineData.dosage)     descriptionParts.push(newMedicineData.dosage);
-    if (newMedicineData.startDate)  descriptionParts.push(`من: ${newMedicineData.startDate}`);
-    if (newMedicineData.endDate)    descriptionParts.push(`إلى: ${newMedicineData.endDate}`);
-
+    if (newMedicineData.dosage)    descriptionParts.push(newMedicineData.dosage);
+    if (newMedicineData.startDate) descriptionParts.push(`من: ${newMedicineData.startDate}`);
+    if (newMedicineData.endDate)   descriptionParts.push(`إلى: ${newMedicineData.endDate}`);
     const payload = {
-      type:        'Prescription',  // Send what server expects for medicines
+      type:        'Prescription',
       title:       newMedicineData.medicineName,
       description: descriptionParts.join(' | ') || newMedicineData.medicineName,
     };
-
     return await addRecord(payload);
   }, [t]);
 
   const addRecord = useCallback(async (newRecordData) => {
     const formData = new FormData();
-
-    // Capture the original type before processing
     const originalType = newRecordData.type;
 
+    // ✅ Use the recursive helper — handles primitives, arrays, and nested objects
+    // Produces: lab_tests[0][id]=xxx, radiology_exams[0][id]=yyy, documents[0]=file, etc.
     Object.keys(newRecordData).forEach(key => {
-      if (key === 'documents' && Array.isArray(newRecordData[key])) {
-        newRecordData[key].forEach((doc, index) => {
-          formData.append(`documents[${index}]`, doc);
-        });
-      } else if (newRecordData[key] != null && newRecordData[key] !== '') {
-        formData.append(key, newRecordData[key]);
-      }
+      appendToFormData(formData, key, newRecordData[key]);
     });
 
     try {
       let nationalNumber = user?.user?.resource?.national_number;
 
-      console.log('Initial national number:', nationalNumber);
-      
-      // If national number is not available, fetch current user to get it
       if (!nationalNumber) {
-        console.log('National number not found, fetching current user...');
         const currentUser = await fetchCurrentUser();
-        console.log('Current user fetched:', currentUser);
-        
         if (currentUser?.resource?.national_number) {
           nationalNumber = currentUser.resource.national_number;
-          console.log('Updated national number:', nationalNumber);
         } else {
           throw new Error('National number could not be retrieved');
         }
       }
-      
+
       formData.append('user_national_number', nationalNumber);
 
       const response = await authFetch(`${BASE_URL}/api/v1/medical-records`, {
@@ -415,11 +381,7 @@ export const MedicalRecordsProvider = ({ children }) => {
       console.log('--- Server Response ---', responseText);
 
       let responseData;
-      try {
-        responseData = JSON.parse(responseText);
-      } catch (e) {
-        // non-JSON response — responseData stays undefined
-      }
+      try { responseData = JSON.parse(responseText); } catch (e) {}
 
       if (!response.ok) {
         const errorMessage =
@@ -431,21 +393,11 @@ export const MedicalRecordsProvider = ({ children }) => {
       }
 
       if (responseData?.data) {
-        const newRecord = mapApiDataToComponentProps(responseData.data, 'all', originalType);
-        
-        // Use the original API type we sent, not what server returns
+        const newRecord  = mapApiDataToComponentProps(responseData.data, 'all', originalType);
         const mappedType = API_TYPE_MAP[originalType] || newRecord.type;
-        
-        console.log('=== Add Record Debug ===');
-        console.log('Original type sent:', originalType);
-        console.log('Server returned type:', responseData.data.type);
-        console.log('Mapped type:', mappedType);
-        console.log('New record component type:', newRecord.type);
-        console.log('New record subType:', newRecord.subType);
-        
+
         fetchAllRecords({ force: true });
-        
-        // Handle both lowercase and uppercase types for medicines
+
         if (originalType === 'prescription' || originalType === 'Prescription') {
           fetchMedicines({ force: true });
         } else if (mappedType === 'result' || originalType === 'lab_test') {
@@ -464,28 +416,16 @@ export const MedicalRecordsProvider = ({ children }) => {
       setError(prev => ({ ...prev, all: addRecordFailedError }));
       return { success: false, error: addRecordFailedError };
     }
-}, [t, user, authFetch, fetchCurrentUser]);
+  }, [t, user, authFetch, fetchCurrentUser]);
 
   const value = {
-    allRecords,
-    medicines,
-    results,
-    eshaa,
-    reports,
-    loading,
-    error,
-    fetchAllRecords,
-    fetchMedicines,
-    fetchResults,
-    fetchEshaas,
-    fetchReports,
-    addMedicine,
-    addRecord,
-    loadMoreAllRecords,
-    loadMoreMedicines,
-    loadMoreResults,
-    loadMoreEshaas,
-    loadMoreReports,
+    allRecords, medicines, results, eshaa, reports,
+    labTests, radiologyExams,
+    loading, error,
+    fetchAllRecords, fetchMedicines, fetchResults, fetchEshaas, fetchReports,
+    fetchLabTests, fetchRadiologyExams,
+    addMedicine, addRecord,
+    loadMoreAllRecords, loadMoreMedicines, loadMoreResults, loadMoreEshaas, loadMoreReports,
   };
 
   return (

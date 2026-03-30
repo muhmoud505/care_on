@@ -1,7 +1,7 @@
-// addReportScreen.jsx - Fully Fixed RTL + Dynamic Pickers
+// addReportScreen.jsx - Fixed: send lab_tests/radiology_exams with proper id format
 
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -23,30 +23,30 @@ import { hp, wp } from '../../../utils/responsive';
 
 const AddReportScreen = () => {
   const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
   const navigation = useNavigation();
-  const { addRecord, fetchReports } = useMedicalRecords();
-  const isRTL = i18n.dir() === 'rtl';
+  const {
+    addRecord,
+    fetchReports,
+    labTests,
+    radiologyExams,
+    fetchLabTests,
+    fetchRadiologyExams,
+  } = useMedicalRecords();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [labItems, setLabItems] = useState([
-    { label: t('lab_test.blood_test', { defaultValue: 'تحليل دم' }), value: t('lab_test.blood_test', { defaultValue: 'تحليل دم' }) },
-    { label: t('lab_test.urine_test', { defaultValue: 'تحليل بول' }), value: t('lab_test.urine_test', { defaultValue: 'تحليل بول' }) },
-    { label: t('lab_test.sugar_test', { defaultValue: 'تحليل سكر' }), value: t('lab_test.sugar_test', { defaultValue: 'تحليل سكر' }) },
-  ]);
-
-  const [scanItems, setScanItems] = useState([
-    { label: t('scan.xray', { defaultValue: 'اشعة x ray' }), value: t('scan.xray', { defaultValue: 'اشعة x ray' }) },
-    { label: t('scan.ct_scan', { defaultValue: 'اشعة مقطعية' }), value: t('scan.ct_scan', { defaultValue: 'اشعة مقطعية' }) },
-    { label: t('scan.mri', { defaultValue: 'رنين مغناطيسي' }), value: t('scan.mri', { defaultValue: 'رنين مغناطيسي' }) },
-  ]);
+  useEffect(() => {
+    fetchLabTests();
+    fetchRadiologyExams();
+  }, [fetchLabTests, fetchRadiologyExams]);
 
   const { form, errors, handleChange, checkFormValidity } = useForm({
     doctorName: '',
     date: null,
     type: '',
-    RequiredTests: '',
-    RequiredScans: '',
+    RequiredTests: [],   // stores selected IDs (strings)
+    RequiredScans: [],   // stores selected IDs (strings)
     diagnosis: '',
     notes: '',
     documents: null,
@@ -59,29 +59,36 @@ const AddReportScreen = () => {
     setIsSubmitting(true);
 
     const typeMap = {
-      'كشف': 'diagnosis',
+      'كشف':  'diagnosis',
       'روشتة': 'consultation',
     };
-
     const apiType = typeMap[form.type] || 'diagnosis';
 
     const descriptionObj = {
-      date: form.date,
-      RequiredTests: form.RequiredTests,
-      RequiredScans: form.RequiredScans,
+      date:      form.date,
       diagnosis: form.diagnosis,
-      notes: form.notes,
+      notes:     form.notes,
     };
 
+    // ✅ Build lab_tests and radiology_exams as arrays of { id } objects
+    // The server expects: lab_tests[0][id], lab_tests[1][id], ...
+    // form.RequiredTests stores the selected values (which are the item IDs from pickerItems)
+    const lab_tests = form.RequiredTests.map(id => ({ id }));
+    const radiology_exams = form.RequiredScans.map(id => ({ id }));
+
     const payload = {
-      type: apiType,
-      title: form.doctorName,
-      description: JSON.stringify(descriptionObj),
+      type:            apiType,
+      title:           form.doctorName,
+      description:     JSON.stringify(descriptionObj),
+      lab_tests,        // array of { id } — handled by context's FormData builder
+      radiology_exams,  // array of { id } — handled by context's FormData builder
     };
 
     if (form.documents) {
       payload.documents = [form.documents];
     }
+
+    console.log('=== Payload to send ===', JSON.stringify(payload, null, 2));
 
     const result = await addRecord(payload);
     setIsSubmitting(false);
@@ -109,8 +116,8 @@ const AddReportScreen = () => {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollContainer}
         ListHeaderComponent={
-          <View style={[styles.formContainer, { direction: isRTL ? 'rtl' : 'ltr' }]}>
-            <Text style={[styles.txt, { textAlign: isRTL ? 'right' : 'left' }]}>
+          <View style={[styles.formContainer,{direction:isRTL ? 'ltr' : 'ltr'}]}>
+            <Text style={[styles.txt,{direction:isRTL ? 'rtl' : 'ltr'}]}>
               {t('add_medicine.enter_following_data')}
             </Text>
 
@@ -140,12 +147,12 @@ const AddReportScreen = () => {
               error={errors.type}
               type="picker"
               pickerItems={[
-                { label: t('report_type.checkup', { defaultValue: 'كشف' }), value: t('report_type.checkup', { defaultValue: 'كشف' }) },
+                { label: t('report_type.checkup',      { defaultValue: 'كشف' }),   value: t('report_type.checkup',      { defaultValue: 'كشف' }) },
                 { label: t('report_type.prescription', { defaultValue: 'روشتة' }), value: t('report_type.prescription', { defaultValue: 'روشتة' }) },
               ]}
             />
 
-            {/* Lab Tests Picker with Add Others */}
+            {/* ✅ pickerItems use item.id as value so selection stores the real DB id */}
             <FormField
               title={t('add_report.required_tests')}
               placeholder={t('add_report.required_tests_placeholder')}
@@ -153,20 +160,22 @@ const AddReportScreen = () => {
               onChangeText={(v) => handleChange('RequiredTests', v)}
               error={errors.RequiredTests}
               type="picker"
-              pickerItems={labItems}
+              pickerItems={labTests.map(item => ({
+                label: item.label,
+                value: String(item.id), // ✅ value = id, not name
+              }))}
+              multiSelect={true}
               addOthers
               addLabel={t('add_report.create_new_test')}
               addModalTitle={t('add_report.add_new_test')}
               addArabicLabel={t('add_report.test_name_arabic')}
               addEnglishLabel={t('add_report.test_name_english')}
               onAddConfirm={(arabic) => {
-                const newItem = { label: arabic, value: arabic };
-                setLabItems(prev => [...prev, newItem]);
-                handleChange('RequiredTests', arabic);
+                // For custom items we don't have a real id yet — use name as fallback
+                handleChange('RequiredTests', [...form.RequiredTests, arabic]);
               }}
             />
 
-            {/* Scans Picker with Add Others */}
             <FormField
               title={t('add_report.required_scans')}
               placeholder={t('add_report.required_scans_placeholder')}
@@ -174,16 +183,18 @@ const AddReportScreen = () => {
               onChangeText={(v) => handleChange('RequiredScans', v)}
               error={errors.RequiredScans}
               type="picker"
-              pickerItems={scanItems}
+              pickerItems={radiologyExams.map(item => ({
+                label: item.label,
+                value: String(item.id), // ✅ value = id, not name
+              }))}
+              multiSelect={true}
               addOthers
               addLabel={t('add_report.create_new_scan')}
               addModalTitle={t('add_report.add_new_scan')}
               addArabicLabel={t('add_report.scan_name_arabic')}
               addEnglishLabel={t('add_report.scan_name_english')}
               onAddConfirm={(arabic) => {
-                const newItem = { label: arabic, value: arabic };
-                setScanItems(prev => [...prev, newItem]);
-                handleChange('RequiredScans', arabic);
+                handleChange('RequiredScans', [...form.RequiredScans, arabic]);
               }}
             />
 
@@ -211,7 +222,10 @@ const AddReportScreen = () => {
             />
 
             <TouchableOpacity
-              style={[styles.saveButton, (!formIsValid || isSubmitting) && styles.disabledButton]}
+              style={[
+                styles.saveButton,
+                (!formIsValid || isSubmitting) && styles.disabledButton,
+              ]}
               onPress={handleSave}
               disabled={!formIsValid || isSubmitting}
             >
