@@ -63,7 +63,7 @@ const Signup = () => {
         gender: gender,
         isChild: false, // This flow is always for adults
         // Your API expects the 'id' field to contain the image data.
-        birth_certificate_url: base64Image,
+        birth_certificate: base64Image,
         type:'patient'
       };
       // 3. Navigate to the password screen with the prepared data.

@@ -14,8 +14,8 @@ const Reset = () => {
   const { t, i18n } = useTranslation();
   const ISRTL = i18n.language === 'ar';
   const { user } = useAuth();
-  const textAlign = ISRTL ? 'right' : 'left';
-  const direction = ISRTL ? 'rtl' : 'ltr';
+  // const textAlign = ISRTL ? 'right' : 'left';
+  // const direction = ISRTL ? 'rtl' : 'ltr';
   const navigation = useNavigation();
   const { resetPassword, isAuthLoading } = useAuth();
   const { form, errors, handleChange, checkFormValidity } = useForm({
@@ -89,8 +89,8 @@ const Reset = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <CustomHeader text={t('auth.reset_password', { defaultValue: 'اعادة تعيين كلمة السر' })} />
-      <View style={[styles.container, { direction }]}>
-        <Text style={[styles.txt1, { textAlign }]}>{t('auth.enter_passwords', { defaultValue: 'برجاء ادخال كلمات السر' })}</Text>
+      <View style={[styles.container, { direction:ISRTL ? 'ltr' : 'ltr' }]}>
+        <Text style={[styles.txt1, { textAlign:ISRTL? 'right' : 'left' }]}>{t('auth.enter_passwords', { defaultValue: 'برجاء ادخال كلمات السر' })}</Text>
         <View style={styles.minContainer}>
           <FormField
             required
@@ -125,7 +125,7 @@ const Reset = () => {
             secureTextEntry={isConfirmPasswordSecure}
             onToggleSecureEntry={() => setIsConfirmPasswordSecure(!isConfirmPasswordSecure)}
           />
-          <Text style={[styles.txt2, { textAlign }]} numberOfLines={2}>
+          <Text style={[styles.txt2, { textAlign:ISRTL ? 'right' : 'left' }]} numberOfLines={2}>
             {t('auth.password_rules', { defaultValue: 'يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)' })}
           </Text>
         </View>

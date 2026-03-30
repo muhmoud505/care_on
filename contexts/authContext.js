@@ -203,6 +203,7 @@ export const AuthProvider = ({ children }) => {
     const defaultHeaders = {
       'Accept': 'application/json',
       'lang': i18next.language,
+      "content-type": "application/json",
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     };
 
@@ -406,57 +407,50 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const resetPassword = async ({ current_password, password, password_confirmation, email }) => {
-    console.log('resetPassword function called with:', { current_password, password, password_confirmation, email });
-    setIsAuthLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('current_password', current_password);
-      formData.append('password', password);
-      formData.append('email', email);
-      formData.append('password_confirmation', password_confirmation);
-      formData.append('token', user?.token);
-      formData.append('_method', 'POST'); // Use POST method for password update
-
-      console.log('Making API call to:', `${API_URL}/api/auth/password/reset/`);
-      const response = await authFetch(`${API_URL}/api/auth/password/reset/`, {
-        method: 'POST',
-        body: formData,
-      });
-      console.log('API response status:', response.status);
-      
-      const data = await safeParseJson(response);
-      console.log('API response data:', data);
-      
-      if (!response.ok || !data) {
-        throw new Error(data?.message || 'Failed to reset password');
-      }
-      return data;
-    } finally {
-      setIsAuthLoading(false);
+const resetPassword = async ({ current_password, password, password_confirmation }) => {
+  setIsAuthLoading(true);
+  try {
+    // Use JSON like the web - no email, token, or _method needed
+    const response = await authFetch(`${API_URL}/api/v1/auth/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        current_password,
+        password,
+        password_confirmation,
+      }),
+    });
+    
+    const data = await safeParseJson(response);
+    
+    if (!response.ok || !data) {
+      throw new Error(data?.message || 'Failed to change password');
     }
-  };
-
-  const resetPasswordAfterCode = async ({ national_id, email, code, password, password_confirmation }) => {
-    setIsAuthLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('national_id', national_id);
-      formData.append('email', email);
-      formData.append('otp', code); // API expects 'otp' field
-      formData.append('password', password);
-      formData.append('password_confirmation', password_confirmation);
-
-      const response = await fetch(`${API_URL}/api/auth/password/reset`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'multipart/form-data',
-          'lang': i18next.language,
-        },
-        body: formData,
-      });
-      const data = await safeParseJson(response);
+    return data;
+  } finally {
+    setIsAuthLoading(false);
+  }
+};
+ const resetPasswordAfterCode = async ({ email, code, password, password_confirmation }) => {
+  setIsAuthLoading(true);
+  try {
+    // Regular fetch - NO auth header, NO token needed
+    const response = await fetch(`${API_URL}/api/auth/password/reset`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'lang': i18next.language,
+      },
+      body: JSON.stringify({
+        email,
+        otp: code,
+        password,
+        password_confirmation,
+      }),
+    });     const data = await safeParseJson(response);
       if (!response.ok || !data) {
         throw new Error(data?.message || 'Failed to reset password');
       }

@@ -61,7 +61,7 @@ const Signup2 = () => {
         age: age,
         gender: gender,
         isChild: true,
-        id: base64Image,
+        birth_certificate: base64Image,
         type: 'patient',
         isParentAddingChild: isParentAddingChild,
         ...(isParentAddingChild && parentUser?.user?.id && { parent_id: parentUser?.user?.id }),
