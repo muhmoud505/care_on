@@ -36,6 +36,10 @@ const AddReportScreen = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Local state for custom items added via "Add Others"
+  const [customLabTests, setCustomLabTests] = useState([]);
+  const [customRadiologyExams, setCustomRadiologyExams] = useState([]);
+
   useEffect(() => {
     fetchLabTests();
     fetchRadiologyExams();
@@ -70,11 +74,27 @@ const AddReportScreen = () => {
       notes:     form.notes,
     };
 
-    // ✅ Build lab_tests and radiology_exams as arrays of { id } objects
-    // The server expects: lab_tests[0][id], lab_tests[1][id], ...
-    // form.RequiredTests stores the selected values (which are the item IDs from pickerItems)
-    const lab_tests = form.RequiredTests.map(id => ({ id }));
-    const radiology_exams = form.RequiredScans.map(id => ({ id }));
+    // Separate custom items (send as name) from existing items (send as id)
+    const customLabTests = form.RequiredTests.filter(id => id.startsWith('custom_'));
+    const validLabTests = form.RequiredTests.filter(id => !id.startsWith('custom_'));
+    const customRadiologyExams = form.RequiredScans.filter(id => id.startsWith('custom_'));
+    const validRadiologyExams = form.RequiredScans.filter(id => !id.startsWith('custom_'));
+
+    // Build lab_tests: existing items as { id }, custom items as { name }
+    const lab_tests = [
+      ...validLabTests.map(id => ({ id })),
+      ...customLabTests.map(id => ({ 
+        name: customLabTests.find(item => item.value === id)?.label || id.replace('custom_', '') 
+      }))
+    ];
+
+    // Build radiology_exams: existing items as { id }, custom items as { name }
+    const radiology_exams = [
+      ...validRadiologyExams.map(id => ({ id })),
+      ...customRadiologyExams.map(id => ({ 
+        name: customRadiologyExams.find(item => item.value === id)?.label || id.replace('custom_', '') 
+      }))
+    ];
 
     const payload = {
       type:            apiType,
@@ -160,10 +180,10 @@ const AddReportScreen = () => {
               onChangeText={(v) => handleChange('RequiredTests', v)}
               error={errors.RequiredTests}
               type="picker"
-              pickerItems={labTests.map(item => ({
+              pickerItems={[...labTests.map(item => ({
                 label: item.label,
                 value: String(item.id), // ✅ value = id, not name
-              }))}
+              })), ...customLabTests]}
               multiSelect={true}
               addOthers
               addLabel={t('add_report.create_new_test')}
@@ -171,8 +191,10 @@ const AddReportScreen = () => {
               addArabicLabel={t('add_report.test_name_arabic')}
               addEnglishLabel={t('add_report.test_name_english')}
               onAddConfirm={(arabic) => {
-                // For custom items we don't have a real id yet — use name as fallback
-                handleChange('RequiredTests', [...form.RequiredTests, arabic]);
+                const customId = `custom_${Date.now()}`;
+                setCustomLabTests(prev => [...prev, { label: arabic, value: customId }]);
+                const currentTests = form.RequiredTests || [];
+                handleChange('RequiredTests', [...currentTests, customId]);
               }}
             />
 
@@ -183,10 +205,10 @@ const AddReportScreen = () => {
               onChangeText={(v) => handleChange('RequiredScans', v)}
               error={errors.RequiredScans}
               type="picker"
-              pickerItems={radiologyExams.map(item => ({
+              pickerItems={[...radiologyExams.map(item => ({
                 label: item.label,
                 value: String(item.id), // ✅ value = id, not name
-              }))}
+              })), ...customRadiologyExams]}
               multiSelect={true}
               addOthers
               addLabel={t('add_report.create_new_scan')}
@@ -194,7 +216,10 @@ const AddReportScreen = () => {
               addArabicLabel={t('add_report.scan_name_arabic')}
               addEnglishLabel={t('add_report.scan_name_english')}
               onAddConfirm={(arabic) => {
-                handleChange('RequiredScans', [...form.RequiredScans, arabic]);
+                const customId = `custom_${Date.now()}`;
+                setCustomRadiologyExams(prev => [...prev, { label: arabic, value: customId }]);
+                const currentScans = form.RequiredScans || [];
+                handleChange('RequiredScans', [...currentScans, customId]);
               }}
             />
 

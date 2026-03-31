@@ -1,4 +1,5 @@
-import { API_URL } from '@env';
+
+import Constants from 'expo-constants';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -32,7 +33,7 @@ const Survey = () => {
 
   const navigation = useNavigation();
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [questions, setQuestions] = useState([]);
 
@@ -51,6 +52,8 @@ const Survey = () => {
   const { user } = useAuth(); // 2. Get user object from context
 
   const token = user?.token?.value;
+
+  const API_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
 
 
 
@@ -108,7 +111,7 @@ const Survey = () => {
 
             'Accept': 'application/json',
 
-            'lang':'ar'
+            'lang': i18n.language || 'en'
 
           },
 
@@ -174,10 +177,6 @@ const Survey = () => {
 
     if (!isFormValid) return;
 
-    console.log('hi');
-
-    
-
     setIsSubmitting(true);
 
 
@@ -232,15 +231,11 @@ const Survey = () => {
 
     }
 
-    console.log('hiiii');
-
     
 
     
 
     try {
-
-      console.log(token);
 
       
 

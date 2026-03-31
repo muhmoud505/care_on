@@ -203,7 +203,7 @@ const CustomDrawerContent = (props) => {
                   style={styles.profileImage}
                 />
               ) : (
-                <Icons.Profilec width={48} height={48} />
+                <Icons.Profilec width={24} height={24} />
               )}
             </TouchableOpacity>
 

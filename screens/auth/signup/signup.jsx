@@ -1,7 +1,6 @@
 // signup.jsx - Fixed RTL Version
 
 import { useNavigation, useRoute } from '@react-navigation/native';
-import * as FileSystem from 'expo-file-system';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -47,13 +46,8 @@ const Signup = () => {
 
     setIsProcessing(true);
     try {
-      // 1. Read the image file and convert it to a Base64 string.
-      const base64Image = await FileSystem.readAsStringAsync(form.nationalIdFile.uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
       // 2. Create a plain JavaScript object to pass to the next screen.
-      // This is more reliable than passing a FormData object through navigation.
+      // Backend expects actual file object, not base64 string
       const signupData = {
         name: form.name,
         email: form.email,
@@ -62,8 +56,8 @@ const Signup = () => {
         age: age,
         gender: gender,
         isChild: false, // This flow is always for adults
-        // Your API expects the 'id' field to contain the image data.
-        birth_certificate: base64Image,
+        // Send the actual file object for backend validation
+        birth_certificate: form.nationalIdFile,
         type:'patient'
       };
       // 3. Navigate to the password screen with the prepared data.

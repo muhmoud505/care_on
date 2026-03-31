@@ -1,5 +1,4 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import * as FileSystem from 'expo-file-system';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -49,10 +48,7 @@ const Signup2 = () => {
 
     setIsProcessing(true);
     try {
-      const base64Image = await FileSystem.readAsStringAsync(form.birthCertificate.uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
+      // Backend expects actual file object, not base64 string
       const signupData = {
         name: form.name,
         email: form.email,
@@ -61,7 +57,7 @@ const Signup2 = () => {
         age: age,
         gender: gender,
         isChild: true,
-        birth_certificate: base64Image,
+        birth_certificate: form.birthCertificate, // Send actual file object
         type: 'patient',
         isParentAddingChild: isParentAddingChild,
         ...(isParentAddingChild && parentUser?.user?.id && { parent_id: parentUser?.user?.id }),
@@ -90,7 +86,7 @@ const Signup2 = () => {
           <Text style={[styles.headerText, { textAlign: isRTL ? 'right' : 'left' }]}>
             {(() => {
                const fullText = t('auth.create_account_subtitle');
-      const highlightText = t('auth.your_account');
+              const highlightText = t('auth.the_following_data');
               
               if (!fullText.includes(highlightText)) return fullText;
               const parts = fullText.split(highlightText);
