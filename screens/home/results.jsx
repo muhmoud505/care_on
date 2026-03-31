@@ -1,7 +1,7 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react'; // Added useEffect
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message'; // Import Toast
 import CustomHeader from '../../components/CustomHeader';
@@ -88,6 +88,9 @@ console.log(results[0])
   return (
     <SafeAreaView style={[styles.container, ]}>
       <CustomHeader text={t('home.results_title')} />
+      <View style={{ direction: isRTL ? 'ltr' : 'ltr' }}>
+
+      
       <ListContainer
         loading={loading.results}
         error={error.results}
@@ -114,6 +117,7 @@ console.log(results[0])
       </TouchableOpacity>
 
       {/* Render the Toast component here */}
+      </View>
       <Toast />
     </SafeAreaView>
   );

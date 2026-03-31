@@ -203,10 +203,10 @@ export const AuthProvider = ({ children }) => {
     const defaultHeaders = {
       'Accept': 'application/json',
       'lang': i18next.language,
-      "content-type": "application/json",
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     };
 
+    // Only set Content-Type for non-FormData requests
     if (options.body && !(options.body instanceof FormData)) {
       defaultHeaders['Content-Type'] = 'application/json';
     }

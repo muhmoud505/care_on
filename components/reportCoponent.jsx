@@ -55,13 +55,14 @@ const Report = ({
   icon,
   fileUrl,
   documents,
+  lab_tests,      // ✅ New: Structured lab tests array
+  radiology_exams, // ✅ New: Structured radiology exams array
   TYPE
 }) => {
   const { t } = useTranslation();
 
   // Parse structured fields out of the description string
   const parsed = parseDescription(description);
-
 
   // Prop-level values take priority; fall back to what's inside the description JSON
   const displayDoctorName    = doctorName    || '';
@@ -70,6 +71,25 @@ const Report = ({
   const displayRequiredScans = requiredScans || parsed.requiredScans || '';
   const displayDiagnosis     = parsed.diagnosis || '';
   const displayNotes         = parsed.notes     || '';
+
+  // ✅ Build lab tests display: use structured array first, then fallback to string
+  const getLabTestsDisplay = () => {
+    if (lab_tests && Array.isArray(lab_tests) && lab_tests.length > 0) {
+      return lab_tests.map(test => test.name).join(', ');
+    }
+    return displayRequiredTests;
+  };
+
+  // ✅ Build radiology exams display: use structured array first, then fallback to string
+  const getRadiologyExamsDisplay = () => {
+    if (radiology_exams && Array.isArray(radiology_exams) && radiology_exams.length > 0) {
+      return radiology_exams.map(exam => exam.name).join(', ');
+    }
+    return displayRequiredScans;
+  };
+
+  const labTestsDisplay = getLabTestsDisplay();
+  const radiologyExamsDisplay = getRadiologyExamsDisplay();
 
   // Support both direct fileUrl prop and documents array
   const resolvedFileUrl =
@@ -163,20 +183,20 @@ const Report = ({
         )}
 
         {/* التحاليل المطلوبة */}
-        {!!displayRequiredTests && (
+        {!!labTestsDisplay && (
           <View style={styles.miccontianer}>
             <Icons.analysisA width={20} height={20} />
             <Text style={styles.txt2}>{t('report.required_tests', { defaultValue: 'التحليل المطلوب' })}:</Text>
-            <Text style={styles.txt3}>{displayRequiredTests}</Text>
+            <Text style={styles.txt3}>{labTestsDisplay}</Text>
           </View>
         )}
 
         {/* الاشعة المطلوبة */}
-        {!!displayRequiredScans && (
+        {!!radiologyExamsDisplay && (
           <View style={styles.miccontianer}>
             <Icons.Union width={20} height={20} />
             <Text style={styles.txt2}>{t('report.required_scans', { defaultValue: 'الاشعة المطلوبة' })}:</Text>
-            <Text style={styles.txt3}>{displayRequiredScans}</Text>
+            <Text style={styles.txt3}>{radiologyExamsDisplay}</Text>
           </View>
         )}
 

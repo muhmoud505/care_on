@@ -112,6 +112,8 @@ const mapApiDataToComponentProps = (item, componentType, originalTypeSent = null
         requiredScans: descProps.requiredScans  || '',
         diagnosis:     descProps.diagnosis      || '',
         notes:         descProps.notes          || '',
+        lab_tests:     item.lab_tests     || [],
+        radiology_exams: item.radiology_exams || [],
       };
     }
     case 'medicine':
