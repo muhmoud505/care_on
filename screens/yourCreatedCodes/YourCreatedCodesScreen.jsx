@@ -3,7 +3,6 @@ import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, FlatList, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
 import { Icons } from '../../components/Icons';
 
@@ -40,22 +39,18 @@ const YourCreatedCodesScreen = () => {
     const handleCopy = async () => {
       try {
         await Clipboard.setStringAsync(item.code);
-        Toast.show({
-          type: 'success',
-          text1: t('common.success'),
-          text2: t('common.copied', { defaultValue: 'تم النسخ' }),
-          position: 'top',
-          visibilityTime: 2000,
-        });
-      } catch (e) {
-        console.error('Clipboard copy failed', e);
-        Toast.show({
-          type: 'error',
-          text1: t('common.error'),
-          text2: t('common.copy_failed', { defaultValue: 'فشل النسخ' }),
-          position: 'top',
-          visibilityTime: 3000,
-        });
+        showSuccess(
+          t('common.success'),
+          t('your_codes.code_copy_success'),
+          { duration: 2000 }
+        );
+      } catch (error) {
+        console.error('Clipboard copy failed', error);
+        showError(
+          t('common.error'),
+          t('your_codes.code_copy_failed'),
+          { duration: 3000 }
+        );
       }
     };
 

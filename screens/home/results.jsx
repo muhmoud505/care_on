@@ -11,6 +11,14 @@ import Result from '../../components/resultComponents';
 import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
+import {
+  showError,
+  showInfo,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
+} from '../../utils/toastService';
 
 const Results = () => {
   const [expandedItems, setExpandedItems] = useState({});
@@ -29,27 +37,51 @@ console.log(results[0])
     }, [user?.token?.value, fetchResults])
   );
 
-  // NEW: Monitor results and show Toast if empty after loading finishes
+  // Enhanced empty state handling with toast service
   useEffect(() => {
-    // We only show the toast if loading has finished AND it's not the very first app boot
-    if (loading.results === false && results.length === 0 && !error.results && !loading.results) {
-      console.log("Triggering Toast..."); // If you see this in LOG, the logic is working
-      
-      Toast.show({
-        type: 'info',
-        text1: t('common.info'),
-        text2: t('home.no_results_found'),
-        position: 'top', // Changed to top to ensure it's not under the tab bar
-        visibilityTime: 3000,
-        autoHide: true,
-        topOffset: 60, // Gives it some space from the header
-      });
+    if (loading.results === false && results.length === 0 && !error.results) {
+      showInfo(
+        t('common.info'),
+        t('results_list.results_empty_state'),
+        { duration: 3000 }
+      );
     }
   }, [loading.results, results.length, error.results, t]);
 
-  const onRefresh = useCallback(() => {
-    fetchResults({ force: true });
-  }, [fetchResults]);
+  const onRefresh = useCallback(async () => {
+    try {
+      await fetchResults({ force: true });
+      showSuccess(
+        t('common.success'),
+        t('results_list.results_loading_success'),
+        { duration: 2000 }
+      );
+    } catch (error) {
+      // Enhanced error handling for refresh
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('results_list.results_network_error'),
+          () => onRefresh() // Retry function
+        );
+      } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+        showPermissionError(
+          t('results_list.results_permission_error'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('server') || error.message?.includes('500')) {
+        showServerError(
+          t('results_list.results_server_error'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('results_list.results_refresh_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
+    }
+  }, [fetchResults, t]);
 
   const handleItemExpand = (id, isExpanded) => {
     setExpandedItems((prev) => ({ ...prev, [id]: isExpanded }));
@@ -110,7 +142,7 @@ console.log(results[0])
       )}
 
       <TouchableOpacity
-        style={[finalAddButtonStyle, { [isRTL ? 'left' : 'right']: wp(5) }]}
+        style={[styles.addButton, { [isRTL ? 'right' : 'left']: wp(5) }]}
         onPress={() => navigation.navigate('addResult')}
       >
         <Icons.Add width={wp(18)} height={wp(18)} />
@@ -138,20 +170,25 @@ const styles = StyleSheet.create({
   },
   addButtonHigh: {
     position: 'absolute',
-    bottom: hp(24),
+    bottom: hp(1),
     right: wp(5),
     zIndex: 1,
   },
   addButtonLow: {
     position: 'absolute',
-    bottom: hp(16),
+    bottom: hp(1),
     right: wp(5),
     zIndex: 1,
   },
   toggleButton: {
     position: 'absolute',
-    bottom: hp(16),
+    bottom: hp(1),
     right: wp(8),
     zIndex: 1,
+  },
+  addButton: {
+    position: 'absolute',
+     bottom: hp(24),
+    right: wp(5),
   },
 });

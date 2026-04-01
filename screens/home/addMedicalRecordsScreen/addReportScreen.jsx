@@ -20,6 +20,15 @@ import Uploader from '../../../components/Uploader';
 import { useMedicalRecords } from '../../../contexts/medicalRecordsContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
+import {
+  showError,
+  showFileError,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
+  showValidationError,
+} from '../../../utils/toastService';
 
 const AddReportScreen = () => {
   const { t, i18n } = useTranslation();
@@ -59,7 +68,11 @@ const AddReportScreen = () => {
   const formIsValid = checkFormValidity();
 
   const handleSave = async () => {
-    if (!formIsValid) return;
+    if (!formIsValid) {
+      showValidationError('form', t('add_report.report_validation_error'));
+      return;
+    }
+    
     setIsSubmitting(true);
 
     const typeMap = {
@@ -75,33 +88,39 @@ const AddReportScreen = () => {
     };
 
     // Separate custom items (send as name) from existing items (send as id)
-    const customLabTests = form.RequiredTests.filter(id => id.startsWith('custom_'));
+    const selectedCustomLabTests = form.RequiredTests.filter(id => id.startsWith('custom_'));
     const validLabTests = form.RequiredTests.filter(id => !id.startsWith('custom_'));
-    const customRadiologyExams = form.RequiredScans.filter(id => id.startsWith('custom_'));
+    const selectedCustomRadiologyExams = form.RequiredScans.filter(id => id.startsWith('custom_'));
     const validRadiologyExams = form.RequiredScans.filter(id => !id.startsWith('custom_'));
 
-    // Build lab_tests: existing items as { id }, custom items as { name }
-    const lab_tests = [
-      ...validLabTests.map(id => ({ id })),
-      ...customLabTests.map(id => ({ 
-        name: customLabTests.find(item => item.value === id)?.label || id.replace('custom_', '') 
-      }))
-    ];
-
-    // Build radiology_exams: existing items as { id }, custom items as { name }
-    const radiology_exams = [
-      ...validRadiologyExams.map(id => ({ id })),
-      ...customRadiologyExams.map(id => ({ 
-        name: customRadiologyExams.find(item => item.value === id)?.label || id.replace('custom_', '') 
-      }))
-    ];
-
+    // Build payload with proper structure for server
     const payload = {
       type:            apiType,
       title:           form.doctorName,
       description:     JSON.stringify(descriptionObj),
-      lab_tests,        // array of { id } — handled by context's FormData builder
-      radiology_exams,  // array of { id } — handled by context's FormData builder
+      // Existing items: send as { id }
+      lab_tests: validLabTests.map(id => ({ id })),
+      radiology_exams: validRadiologyExams.map(id => ({ id })),
+      // Custom items: send as new_lab_tests and new_radiology_exams with name[en]/name[ar]
+      new_lab_tests: selectedCustomLabTests.map(customId => {
+        const customItem = customLabTests.find(item => item.value === customId);
+        return {
+          name: {
+            en: customItem?.label || customId.replace('custom_', ''),
+            ar: customItem?.label || customId.replace('custom_', '')
+          }
+        };
+      }),
+      new_radiology_exams: selectedCustomRadiologyExams.map(customId => {
+        const customItem = customRadiologyExams.find(item => item.value === customId);
+        return {
+          name: {
+            en: customItem?.label || customId.replace('custom_', ''),
+            ar: customItem?.label || customId.replace('custom_', '')
+          }
+        };
+      }),
+      patient_id: 1,
     };
 
     if (form.documents) {
@@ -110,19 +129,63 @@ const AddReportScreen = () => {
 
     console.log('=== Payload to send ===', JSON.stringify(payload, null, 2));
 
-    const result = await addRecord(payload);
-    setIsSubmitting(false);
+    try {
+      const result = await addRecord(payload);
+      setIsSubmitting(false);
 
-    if (result.success) {
-      await fetchReports({ force: true });
-      navigation.goBack();
-    } else {
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: result.error,
-        position: 'top',
-      });
+      if (result.success) {
+        await fetchReports({ force: true });
+        showSuccess(
+          t('common.success'),
+          t('add_report.report_created_success'),
+          { duration: 3000 }
+        );
+        navigation.goBack();
+      } else {
+        // Enhanced error handling with specific error types
+        if (result.error?.message?.includes('Network request failed') || result.error?.message?.includes('network')) {
+          showNetworkError(
+            t('add_report.report_network_error'),
+            () => handleSave() // Retry function
+          );
+        } else if (result.error?.message?.includes('file') || result.error?.message?.includes('upload') || result.error?.message?.includes('size')) {
+          showFileError(form.documents?.name || 'report document');
+        } else if (result.error?.message?.includes('permission') || result.error?.message?.includes('unauthorized')) {
+          showPermissionError(
+            t('add_report.report_permission_error'),
+            { duration: 4000 }
+          );
+        } else if (result.error?.message?.includes('server') || result.error?.message?.includes('500')) {
+          showServerError(
+            t('add_report.report_server_error'),
+            { duration: 4000 }
+          );
+        } else {
+          showError(
+            t('add_report.report_creation_failed'),
+            result.error?.message || t('common.something_went_wrong'),
+            { duration: 4000 }
+          );
+        }
+      }
+    } catch (error) {
+      setIsSubmitting(false);
+      
+      // Enhanced error handling for exceptions
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('add_report.report_network_error'),
+          () => handleSave() // Retry function
+        );
+      } else if (error.message?.includes('file') || error.message?.includes('upload')) {
+        showFileError(form.documents?.name || 'report document');
+      } else {
+        showError(
+          t('add_report.report_creation_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
     }
   };
 

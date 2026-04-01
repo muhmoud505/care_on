@@ -11,6 +11,10 @@ import { Icons } from '../../components/Icons';
 import SurveyPopup from '../../components/SurveyPopup';
 import Images from '../../constants2/images';
 import { useAuth } from '../../contexts/authContext';
+import {
+  showError,
+  showSuccess
+} from '../../utils/toastService';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -54,36 +58,89 @@ const Home = () => {
 
   useFocusEffect(
     useCallback(() => {
-      refreshToken();
-      const checkSurveyStatus = async () => {
-        const userId = user?.user?.id;
-        if (!userId) return;
-
-        const surveyStatusKey = `hasCompletedSurvey_${userId}`;
-        const hasCompletedSurvey = await AsyncStorage.getItem(surveyStatusKey);
-
-        if (hasCompletedSurvey === 'true') {
-          setSurveySkippedThisSession(false);
-          return;
-        }
-
-        if (age !== null && age < CHILD_AGE_LIMIT) {
-          setShowSurveyPopup(true);
+      const refreshSession = async () => {
+        try {
+          await refreshToken();
+        } catch (error) {
+          showError(
+            t('home.refresh_token_failed'),
+            error.message || t('common.something_went_wrong'),
+            { duration: 4000 }
+          );
         }
       };
 
+      const checkSurveyStatus = async () => {
+        try {
+          const userId = user?.user?.id;
+          if (!userId) return;
+
+          const surveyStatusKey = `hasCompletedSurvey_${userId}`;
+          const hasCompletedSurvey = await AsyncStorage.getItem(surveyStatusKey);
+
+          if (hasCompletedSurvey === 'true') {
+            setSurveySkippedThisSession(false);
+            return;
+          }
+
+          if (age !== null && age < CHILD_AGE_LIMIT) {
+            setShowSurveyPopup(true);
+          }
+        } catch (error) {
+          showError(
+            t('home.survey_status_check_failed'),
+            error.message || t('common.something_went_wrong'),
+            { duration: 4000 }
+          );
+        }
+      };
+
+      refreshSession();
       checkSurveyStatus();
     }, [user, age])
   );
 
   const handleTakeSurvey = async () => {
-    setShowSurveyPopup(false);
-    navigation.navigate('survey');
+    try {
+      setShowSurveyPopup(false);
+      navigation.navigate('survey');
+    } catch (error) {
+      showError(
+        t('home.navigation_error'),
+        error.message || t('common.something_went_wrong'),
+        { duration: 4000 }
+      );
+    }
   };
 
   const handleSkipSurvey = () => {
-    setShowSurveyPopup(false);
-    setSurveySkippedThisSession(true);
+    try {
+      setShowSurveyPopup(false);
+      setSurveySkippedThisSession(true);
+      showSuccess(
+        t('home.survey_reminder_title'),
+        t('home.survey_skip_success'),
+        { duration: 3000 }
+      );
+    } catch (error) {
+      showError(
+        t('home.navigation_error'),
+        error.message || t('common.something_went_wrong'),
+        { duration: 4000 }
+      );
+    }
+  };
+
+  const handleMenuNavigation = (navigateTo) => {
+    try {
+      navigation.navigate(navigateTo);
+    } catch (error) {
+      showError(
+        t('home.menu_navigation_failed'),
+        error.message || t('common.something_went_wrong'),
+        { duration: 4000 }
+      );
+    }
   };
 
   return (
@@ -109,7 +166,7 @@ const Home = () => {
           <TouchableOpacity
             key={item.key}
             style={styles.secContainer}
-            onPress={() => navigation.navigate(item.navigateTo)}
+            onPress={() => handleMenuNavigation(item.navigateTo)}
             activeOpacity={0.7}
           >
             <item.icon width={wp(7)} height={wp(7)} stroke="#000" />

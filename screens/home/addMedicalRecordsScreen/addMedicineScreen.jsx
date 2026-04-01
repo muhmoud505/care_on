@@ -13,6 +13,14 @@ import { useAuth } from '../../../contexts/authContext';
 import { useMedicalRecords } from '../../../contexts/medicalRecordsContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
+import {
+  showError,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
+  showValidationError,
+} from '../../../utils/toastService';
 
 const AddMedicineScreen = () => {
   const navigation = useNavigation();
@@ -33,8 +41,24 @@ const AddMedicineScreen = () => {
   const formIsValid = checkFormValidity();
 
   const handleSave = async () => {
-    if (!formIsValid) return;
+    if (!formIsValid) {
+      showValidationError('form', t('add_medicine.medicine_validation_error'), t);
+      return;
+    }
+    
     setIsSubmitting(true);
+
+    // Validate date logic
+    if (form.startDate && form.endDate && new Date(form.endDate) < new Date(form.startDate)) {
+      showError(
+        t('add_medicine.medicine_date_error'),
+        t('add_medicine.medicine_date_error'),
+        t,
+        { duration: 4000 }
+      );
+      setIsSubmitting(false);
+      return;
+    }
 
     const descriptionObject = {
       dosage: form.dosage,
@@ -48,18 +72,72 @@ const AddMedicineScreen = () => {
       description: JSON.stringify(descriptionObject),
     };
 
-    const result = await addRecord(payload);
-    setIsSubmitting(false);
+    try {
+      const result = await addRecord(payload);
+      setIsSubmitting(false);
 
-    if (result.success) {
-      navigation.goBack();
-    } else {
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: result.error,
-        position: 'top',
-      });
+      if (result.success) {
+        showSuccess(
+          t('common.success'),
+          t('add_medicine.medicine_created_success'),
+          t,
+          { duration: 3000 }
+        );
+        navigation.goBack();
+      } else {
+        // Enhanced error handling with specific error types
+        if (result.error?.message?.includes('Network request failed') || result.error?.message?.includes('network')) {
+          showNetworkError(
+            t('add_medicine.medicine_network_error'),
+            () => handleSave(), // Retry function
+            t
+          );
+        } else if (result.error?.message?.includes('permission') || result.error?.message?.includes('unauthorized')) {
+          showPermissionError(
+            t('add_medicine.medicine_permission_error'),
+            t,
+            { duration: 4000 }
+          );
+        } else if (result.error?.message?.includes('duplicate') || result.error?.message?.includes('exists')) {
+          showError(
+            t('add_medicine.medicine_duplicate_error'),
+            result.error?.message || t('common.something_went_wrong'),
+            t,
+            { duration: 4000 }
+          );
+        } else if (result.error?.message?.includes('server') || result.error?.message?.includes('500')) {
+          showServerError(
+            t('add_medicine.medicine_server_error'),
+            t,
+            { duration: 4000 }
+          );
+        } else {
+          showError(
+            t('add_medicine.medicine_creation_failed'),
+            result.error?.message || t('common.something_went_wrong'),
+            t,
+            { duration: 4000 }
+          );
+        }
+      }
+    } catch (error) {
+      setIsSubmitting(false);
+      
+      // Enhanced error handling for exceptions
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('add_medicine.medicine_network_error'),
+          () => handleSave(), // Retry function
+          t
+        );
+      } else {
+        showError(
+          t('add_medicine.medicine_creation_failed'),
+          error.message || t('common.something_went_wrong'),
+          t,
+          { duration: 4000 }
+        );
+      }
     }
   };
 
@@ -120,6 +198,7 @@ const AddMedicineScreen = () => {
           )}
         </TouchableOpacity>
       </View>
+      <Toast />
     </SafeAreaView>
   );
 };

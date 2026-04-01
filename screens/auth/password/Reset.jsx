@@ -40,13 +40,11 @@ const Reset = () => {
     
     if (!formIsValid) {
       if (!passwordsMatch) {
-        Toast.show({
-          type: 'error',
-          text1: t('common.error', { defaultValue: 'Error' }),
-          text2: t('auth.passwords_do_not_match', { defaultValue: 'Passwords do not match' }),
-          position: 'top',
-          visibilityTime: 3000,
-        });
+        showValidationError(
+          'password',
+          t('reset_password.password_validation_error'),
+          { duration: 4000 }
+        );
       }
       return;
     }
@@ -65,24 +63,65 @@ const Reset = () => {
         email: user?.user?.email
       });
 
-      Toast.show({
-        type: 'success',
-        text1: t('common.success', { defaultValue: 'Success' }),
-        text2: t('auth.password_reset_success', { defaultValue: 'Your password has been reset successfully.' }),
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      showSuccess(
+        t('common.success'),
+        t('reset_password.password_reset_success'),
+        { duration: 3000 }
+      );
 
       navigation.goBack();
     } catch (error) {
       console.error('Reset password error:', error);
-      Toast.show({
-        type: 'error',
-        text1: t('common.error', { defaultValue: 'Error' }),
-        text2: error.message,
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      // Enhanced error handling for password reset
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        Toast.show({
+          type: 'error',
+          text1: t('reset_password.password_network_error', { defaultValue: 'Network error' }),
+          text2: t('common.try_again', { defaultValue: 'Please try again' }),
+          position: 'top',
+          visibilityTime: 4000,
+        });
+      } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+        Toast.show({
+          type: 'error',
+          text1: t('reset_password.password_permission_error', { defaultValue: 'Permission error' }),
+          text2: t('common.try_again', { defaultValue: 'Please try again' }),
+          position: 'top',
+          visibilityTime: 4000,
+        });
+      } else if (error.message?.includes('server') || error.message?.includes('500')) {
+        Toast.show({
+          type: 'error',
+          text1: t('reset_password.password_server_error', { defaultValue: 'Server error' }),
+          text2: t('common.try_again', { defaultValue: 'Please try again' }),
+          position: 'top',
+          visibilityTime: 4000,
+        });
+      } else if (error.message?.includes('too short') || error.message?.includes('short')) {
+        Toast.show({
+          type: 'error',
+          text1: t('reset_password.password_too_short', { defaultValue: 'Password too short' }),
+          text2: error.message || t('common.something_went_wrong', { defaultValue: 'Something went wrong' }),
+          position: 'top',
+          visibilityTime: 4000,
+        });
+      } else if (error.message?.includes('weak') || error.message?.includes('strength')) {
+        Toast.show({
+          type: 'error',
+          text1: t('reset_password.password_weak', { defaultValue: 'Password too weak' }),
+          text2: error.message || t('common.something_went_wrong', { defaultValue: 'Something went wrong' }),
+          position: 'top',
+          visibilityTime: 4000,
+        });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: t('reset_password.password_reset_failed', { defaultValue: 'Password reset failed' }),
+          text2: error.message || t('common.something_went_wrong', { defaultValue: 'Something went wrong' }),
+          position: 'top',
+          visibilityTime: 4000,
+        });
+      }
     }
   };
 

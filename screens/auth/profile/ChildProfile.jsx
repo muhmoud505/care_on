@@ -12,6 +12,15 @@ import CustomHeader from '../../../components/CustomHeader';
 import { Icons } from '../../../components/Icons';
 import Images from '../../../constants2/images';
 import { useAuth } from '../../../contexts/authContext';
+import {
+  showError,
+  showFileError,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
+  showValidationError,
+} from '../../../utils/toastService';
 import { getDynamicStyles, hp, profileStyles as styles, wp } from './profileStyles';
 
 const AgeDisplay = ({ value, label }) => (
@@ -99,28 +108,82 @@ const ChildProfile = () => {
     try {
       const result = await deleteUserAvatar(user.user.id);
       if (!result.success) throw new Error(result.error || 'Unknown error');
-      Toast.show({ type: 'success', text1: t('common.success'), text2: t('profile.photo_deleted'), position: 'top', visibilityTime: 3000 });
+      showSuccess(
+        t('common.success'),
+        t('profile.photo_deleted'),
+        { duration: 3000 }
+      );
     } catch (error) {
-      Toast.show({ type: 'error', text1: t('common.error'), text2: error?.message || t('common.unknown_error'), position: 'top', visibilityTime: 3000 });
+      // Enhanced error handling for photo deletion
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('profile.profile_network_error'),
+          () => handleDeletePhoto() // Retry function
+        );
+      } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+        showPermissionError(
+          t('profile.profile_permission_error'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('server') || error.message?.includes('500')) {
+        showServerError(
+          t('profile.profile_server_error'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('profile.photo_delete_failed'),
+          error?.message || t('common.unknown_error'),
+          { duration: 4000 }
+        );
+      }
     }
   };
 
   /* ── Download file ── */
   const downloadFile = async (url, filename) => {
     if (!url) {
-      Toast.show({ type: 'error', text1: t('common.error'), text2: t('common.no_file_to_download'), position: 'top', visibilityTime: 3000 });
+      showValidationError(
+        'download',
+        t('common.no_file_to_download'),
+        { duration: 3000 }
+      );
       return;
     }
     try {
       const fileUri = `${FileSystem.cacheDirectory}${filename}`;
       const { uri } = await FileSystem.createDownloadResumable(url, fileUri).downloadAsync();
       if (!(await Sharing.isAvailableAsync())) {
-        Toast.show({ type: 'error', text1: t('common.error'), text2: t('common.sharing_not_available'), position: 'top', visibilityTime: 3000 });
+        showFileError(
+          t('common.sharing_not_available'),
+          { duration: 3000 }
+        );
         return;
       }
       await Sharing.shareAsync(uri);
     } catch (error) {
-      Toast.show({ type: 'error', text1: t('common.error'), text2: error.message, position: 'top', visibilityTime: 3000 });
+      // Enhanced error handling for file download
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('profile.file_download_failed'),
+          () => downloadFile(url, filename) // Retry function
+        );
+      } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+        showPermissionError(
+          t('profile.profile_permission_error'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('server') || error.message?.includes('500')) {
+        showServerError(
+          t('profile.profile_server_error'),
+          { duration: 4000 }
+        );
+      } else {
+        showFileError(
+          t('profile.file_download_failed'),
+          { duration: 4000 }
+        );
+      }
     }
   };
 
@@ -132,7 +195,10 @@ const ChildProfile = () => {
       if (type === 'camera') {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
-          Toast.show({ type: 'error', text1: t('common.error'), text2: t('permissions.camera_required'), position: 'top', visibilityTime: 3000 });
+          showPermissionError(
+            t('profile.camera_permission_denied'),
+            { duration: 3000 }
+          );
           return;
         }
         pickerResult = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [1, 1], quality: 0.5 });
@@ -142,6 +208,16 @@ const ChildProfile = () => {
       if (!pickerResult || pickerResult.canceled) return;
       if (pickerResult.assets?.length > 0) {
         const asset = pickerResult.assets[0];
+        
+        // Validate file type
+        if (!asset.mimeType || !asset.mimeType.startsWith('image/')) {
+          showFileError(
+            t('profile.invalid_file_type'),
+            { duration: 3000 }
+          );
+          return;
+        }
+        
         const formData = new FormData();
         formData.append('avatar', { uri: asset.uri, name: asset.fileName || `avatar_${Date.now()}.jpg`, type: asset.mimeType || 'image/jpeg' });
         const previousAvatar = user?.user?.avatar;
@@ -151,13 +227,67 @@ const ChildProfile = () => {
         if (!updateResult.success) {
           setPreviewAvatar(previousAvatar);
           try { setTempAvatar(user.user.id, previousAvatar); } catch (e) { console.warn('reverting failed', e.message); }
-          Toast.show({ type: 'error', text1: t('common.error'), text2: updateResult.error || t('common.unknown_error'), position: 'top', visibilityTime: 3000 });
+          
+          // Enhanced error handling for photo upload
+          if (updateResult.error?.includes('Network request failed') || updateResult.error?.includes('network')) {
+            showNetworkError(
+              t('profile.photo_upload_failed'),
+              () => handleImagePick(type) // Retry function
+            );
+          } else if (updateResult.error?.includes('permission') || updateResult.error?.includes('unauthorized')) {
+            showPermissionError(
+              t('profile.profile_permission_error'),
+              { duration: 4000 }
+            );
+          } else if (updateResult.error?.includes('server') || updateResult.error?.includes('500')) {
+            showServerError(
+              t('profile.profile_server_error'),
+              { duration: 4000 }
+            );
+          } else if (updateResult.error?.includes('file too large') || updateResult.error?.includes('size')) {
+            showFileError(
+              t('profile.file_too_large'),
+              { duration: 4000 }
+            );
+          } else {
+            showError(
+              t('profile.photo_upload_failed'),
+              updateResult.error || t('common.unknown_error'),
+              { duration: 4000 }
+            );
+          }
           return;
         }
-        Toast.show({ type: 'success', text1: t('common.success'), text2: t('profile.photo_updated'), position: 'top', visibilityTime: 3000 });
+        showSuccess(
+          t('common.success'),
+          t('profile.photo_updated'),
+          { duration: 3000 }
+        );
       }
     } catch (error) {
-      Toast.show({ type: 'error', text1: t('common.error'), text2: error.message, position: 'top', visibilityTime: 3000 });
+      // Enhanced error handling for image picker
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('profile.photo_upload_failed'),
+          () => handleImagePick(type) // Retry function
+        );
+      } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+        showPermissionError(
+          t('profile.profile_permission_error'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('server') || error.message?.includes('500')) {
+        showServerError(
+          t('profile.profile_server_error'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('profile.photo_upload_failed'),
+          error.message || t('common.unknown_error'),
+          { duration: 4000 }
+        );
+      }
     }
   };
 
@@ -260,11 +390,17 @@ const ChildProfile = () => {
 
       {/* ── Photo options modal ── */}
       {modalVisible && (
-        <TouchableOpacity style={localStyles.modalOverlay} activeOpacity={1} onPress={() => setModalVisible(false)}>
+        <TouchableOpacity style={localStyles.modalOverlay} activeOpacity={1} onPress={() => {
+          setModalVisible(false);
+          setPreviewAvatar(null);
+        }}>
           <TouchableOpacity activeOpacity={1} style={localStyles.modalContent} onPress={() => { }}>
             <TouchableOpacity
               style={[localStyles.closeIconContainer, { [isRTL ? 'left' : 'right']: 15 }]}
-              onPress={() => setModalVisible(false)}
+              onPress={() => {
+                setModalVisible(false);
+                setPreviewAvatar(null);
+              }}
             >
               <Text style={localStyles.closeIcon}>✕</Text>
             </TouchableOpacity>

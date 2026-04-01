@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Image,
@@ -21,43 +21,34 @@ const CustomDrawerContent = (props) => {
   const { navigation } = props;
   const { t, i18n } = useTranslation();
   const { isRTL, rowDirection, textAlign } = useRTL();
-
   const { width, height } = useWindowDimensions();
-  const { user, logout } = useAuth();
+  const { user, logout, fetchCurrentUser } = useAuth();
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // Calculate age
-  const age = useMemo(() => {
-    const nationalId = user?.user?.resource?.national_number;
-    if (!nationalId || nationalId.length !== 14) return null;
-
-    try {
-      const firstDigit = nationalId.substring(0, 1);
-      if (firstDigit !== '2' && firstDigit !== '3') return null;
-
-      const century = firstDigit === '3' ? '20' : '19';
-      const year = parseInt(century + nationalId.substring(1, 3), 10);
-      const month = parseInt(nationalId.substring(3, 5), 10) - 1;
-      const day = parseInt(nationalId.substring(5, 7), 10);
-
-      const birthDate = new Date(year, month, day);
-      if (isNaN(birthDate.getTime())) return null;
-
-      const today = new Date();
-      let calculatedAge = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        calculatedAge--;
+  // Fetch current user data on mount
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        const userData = await fetchCurrentUser();
+        if (userData) {
+          setCurrentUser(userData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch current user:', error);
+        // Fallback to cached user if fetch fails
+        setCurrentUser(user?.user);
       }
-      return calculatedAge;
-    } catch (e) {
-      return null;
-    }
-  }, [user]);
+    };
+    
+    getCurrentUser();
+  }, [fetchCurrentUser, user?.user]);
+  console.log("currentUser", currentUser);
 
+  // Use age directly from user resource (API already calculates it)
+  const age = currentUser?.resource?.age;
   const isChild = age !== null && age < 18;
 
-  if (!user?.user) return null;
+  if (!currentUser) return null;
 
   const parentNavigation = navigation.getParent();
 
@@ -197,9 +188,9 @@ const CustomDrawerContent = (props) => {
         <View style={[styles.profileHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <View style={[styles.profileInfo, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
               <TouchableOpacity onPress={() => handleNavigate('ProfileStack')}>
-              {user?.user?.avatar ? (
+              {currentUser?.avatar ? (
                 <Image
-                  source={{ uri: user.user.avatar }}
+                  source={{ uri: currentUser.avatar }}
                   style={styles.profileImage}
                 />
               ) : (
@@ -208,7 +199,7 @@ const CustomDrawerContent = (props) => {
             </TouchableOpacity>
 
             <Text style={styles.profileName} numberOfLines={1}>
-              {user?.user?.name || t('drawer.user_name_placeholder')}
+              {currentUser?.name || t('drawer.user_name_placeholder')}
             </Text>
           </View>
 

@@ -1,4 +1,3 @@
-
 import Constants from 'expo-constants';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,7 +13,6 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
 import Check from '../../components/check';
 
 import FormField from '../../components/FormInput';
@@ -24,9 +22,15 @@ import { HomeHeader } from '../../components/homeHeader';
 import Uploader from '../../components/Uploader';
 
 import { useAuth } from '../../contexts/authContext'; // 1. Import useAuth
-
-
-
+import {
+  showError,
+  showFileError,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
+  showValidationError,
+} from '../../utils/toastService';
 
 
 const Survey = () => {
@@ -175,7 +179,10 @@ const Survey = () => {
 
   const handleSubmit = async () => {
 
-    if (!isFormValid) return;
+    if (!isFormValid) {
+      showValidationError('form', t('survey.survey_validation_error'));
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -233,19 +240,15 @@ const Survey = () => {
 
     
 
-    
-
     try {
 
-      
-
-      const response = await fetch(`${API_URL}/api/v1/answers`, {
+      const response = await fetch(`${API_URL}/api/v1/survey`, {
 
         method: 'POST',
 
         headers: {
 
-          'Authorization': `Bearer ${token}`, // Use the actual token from the user object
+          'Authorization': `Bearer ${token}`,
 
           'Accept': 'application/json', // Inform the server that we expect a JSON response
 
@@ -277,43 +280,50 @@ const Survey = () => {
 
         }
 
-
-
-        Toast.show({
-          type: 'success',
-          text1: t('survey.success_title'),
-          text2: t('survey.success_message'),
-          position: 'top',
-          visibilityTime: 3000,
-        });
+        showSuccess(
+          t('survey.success_title'),
+          t('survey.success_message'),
+          { duration: 3000 }
+        );
 
         navigation.goBack();
 
       } else {
-
-        Toast.show({
-          type: 'error',
-          text1: t('common.error'),
-          text2: result.message || t('survey.submit_failed'),
-          position: 'top',
-          visibilityTime: 3000,
-        });
+        // Enhanced error handling with specific error types
+        if (result.message?.includes('Network request failed') || result.message?.includes('network')) {
+          showNetworkError(
+            t('survey.survey_network_error'),
+            () => handleSubmit() // Retry function
+          );
+        } else if (result.message?.includes('file') || result.message?.includes('upload') || result.message?.includes('size')) {
+          showFileError(file?.name || 'survey file');
+        } else if (result.message?.includes('permission') || result.message?.includes('unauthorized')) {
+          showPermissionError(
+            t('survey.survey_permission_error'),
+            { duration: 4000 }
+          );
+        } else if (result.message?.includes('server') || result.message?.includes('500')) {
+          showServerError(
+            t('survey.survey_server_error'),
+            { duration: 4000 }
+          );
+        } else {
+          showError(
+            t('survey.survey_creation_failed'),
+            result.message || t('survey.submit_failed'),
+            { duration: 4000 }
+          );
+        }
       }
-
     } catch (error) {
-      console.error('Submission Error:', error);
-
-      // Provide a more specific error message for network failures.
-
-      if (error instanceof TypeError && error.message === 'Network request failed') {
-
-        Toast.show({
-          type: 'error',
-          text1: t('survey.network_error'),
-          text2: t('survey.network_error_message'),
-          position: 'top',
-          visibilityTime: 3000,
-        });
+      // Enhanced error handling for exceptions
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('survey.survey_network_error'),
+          () => handleSubmit() // Retry function
+        );
+      } else if (error.message?.includes('file') || error.message?.includes('upload')) {
+        showFileError(file?.name || 'survey file');
       } else {
 
         Toast.show({

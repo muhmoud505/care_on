@@ -2,7 +2,6 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Alert,
   Image,
   StyleSheet,
   Text,
@@ -14,6 +13,9 @@ import CustomHeader from '../../../components/CustomHeader';
 import DatePick from '../../../components/datePicker';
 import FormField from '../../../components/FormInput';
 import { hp, wp } from '../../../utils/responsive';
+import {
+  showValidationError
+} from '../../../utils/toastService';
 
 const S2 = () => {
   const route = useRoute();
@@ -75,7 +77,7 @@ const S2 = () => {
 
     if (flowType === 'adult') {
       if (age < 18) {
-        Alert.alert(t('common.error'), t('auth.under_18_error'));
+        showValidationError('age', t('auth.under_18_error'), t);
         return;
       }
       navigation.navigate('Signup', {
@@ -85,7 +87,7 @@ const S2 = () => {
       });
     } else {
       if (age >= 18) {
-        Alert.alert(t('common.error'), t('auth.over_18_error'));
+        showValidationError('age', t('auth.over_18_error'), t);
         return;
       }
       navigation.navigate('signupBaby', {
@@ -108,7 +110,7 @@ const S2 = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <CustomHeader text={t('auth.signup')} />
+      <CustomHeader text={t('auth.signup')} /> 
        
       {!flowType ? (
         <View style={[styles.container, { direction: isRTL ? 'ltr' : 'ltr' }]}>

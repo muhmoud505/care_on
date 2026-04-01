@@ -2,7 +2,7 @@
   "welcome": {
     "registered_successfully": "تم التسجيل بنجاح",
     "welcome_to": "مرحبا بك في"
-  }, 
+  },
   "Care": "كير",
   "On": "أون",
 
@@ -46,8 +46,47 @@
     "error_fetching_data": "حدث خطأ أثناء جلب البيانات",
     "ask_me_later": "ذكرني لاحقاً",
     "allow": "سماح",
-    "dont_allow": "عدم السماح"
+    "dont_allow": "عدم السماح",
+    "network_error": "خطأ في الشبكة",
+    "check_internet_connection": "يرجى فحص الاتصال بالإنترنت",
+    "validation_error": "خطأ في التحقق",
+    "check_required_fields": "يرجى ملء جميع الحقول المطلوبة",
+    "auth_error": "خطأ في المصادقة",
+    "session_expired": "انتهت جلستك",
+    "please_login_again": "يرجى تسجيل الدخول مرة أخرى",
+    "file_error": "خطأ في الملف",
+    "file_upload_failed": "فشل رفع الملف",
+    "check_file_format_and_size": "يرجى فحص تنسيق وحجم الملف",
+    "server_error": "خطأ في الخادم",
+    "server_maintenance": "الخادم تحت الصيانة",
+    "try_again_later": "يرجى المحاولة لاحقاً",
+    "permission_denied": "الوصول مرفوض",
+    "insufficient_permissions": "صلاحيات غير كافية",
+    "contact_admin": "يرجى التواصل مع المسؤول",
+    "something_went_wrong": "حدث خطأ ما",
+    "invalid_data": "بيانات غير صحيحة",
+    "access_denied": "الوصول مرفوض",
+    "login_success": "تم تسجيل الدخول بنجاح",
+    "welcome_back": "مرحباً بعودتك",
+    "account_created": "تم إنشاء الحساب بنجاح",
+    "please_complete_profile": "يرجى إكمال ملفك الشخصي",
+    "email_already_exists": "البريد الإلكتروني مستخدم بالفعل",
+    "use_different_email": "يرجى استخدام بريد إلكتروني مختلف",
+    "invalid_credentials": "بيانات الاعتماد غير صحيحة",
+    "account_locked": "الحساب مقفول",
+    "contact_support": "يرجى التواصل مع الدعم الفني",
+    "image_processing_failed": "فشل معالجة الصورة. يرجى المحاولة مرة أخرى",
+    "survey_success_title": "نجاح",
+    "survey_success_message": "تم إرسال الاستبيان بنجاح",
+    "survey_network_error": "خطأ في الشبكة",
+    "survey_please_try_again": "يرجى المحاولة مرة أخرى",
+    "survey_unexpected_error": "حدث خطأ غير متوقع",
+    "survey_child_access_denied": "الوصول مرفوض للمستخدمين الأطفال",
+    "survey.submitting": "جاري الإرسال...",
+    "retry": "إعادة المحاولة",
+    "loading": "جاري التحميل..."
   },
+
   "contact_us": {
     "title": "تواصل معنا",
     "subtitle": "تواصل مع فريق الدعم في Rayaa 360",
@@ -72,12 +111,35 @@
     "call_message": "هل تريد الاتصال بـ {{phoneNumber}}؟",
     "call": "اتصل"
   },
+
   "drawer": {
     "profile": "الملف الشخصي",
     "contact_us": "اتصل بنا",
     "linked_accounts": "الحسابات المرتبطة",
     "privacy_policy": "سياسة الخصوصية",
     "terms_of_service": "شروط الخدمة"
+  },
+
+  "privacy_policy": {
+    "title": "سياسة الخصوصية",
+    "privacy_statement": "بيان الخصوصية",
+    "description": "نحن ملتزمون بحماية خصوصيتك وضمان أمان معلوماتك الشخصية.",
+    "data_collection": "جمع البيانات",
+    "data_collection_text": "نقوم بجمع المعلومات التي تقدمها لنا مباشرة، مثل عند إنشاء حساب، استخدام خدماتنا، أو الاتصال بنا للحصول على الدعم.",
+    "data_usage": "استخدام البيانات",
+    "data_usage_text": "نستخدم معلوماتك لتقديم وصيانة وتحسين خدماتنا. يشمل ذلك معالجة السجلات الطبية، جدولة المواعيد، والتواصل مع مقدمي الرعاية الصحية.",
+    "data_sharing": "مشاركة البيانات",
+    "data_sharing_text": "قد نشارك معلوماتك مع مقدمي الرعاية الصحية فقط بموافقتك الصريحة أو كما يقتضي القانون. نحن لا نبيع معلوماتك الشخصية إلى أطراف ثالثة.",
+    "cookies": "ملفات تعريف الارتباط",
+    "cookies_text": "نحن نستخدم ملفات تعريف الارتباط والتقنيات المماثلة لتعزيز تجربتك. يمكنك التحكم في إعدادات ملفات تعريف الارتباط من خلال تفضيلات جهازك.",
+    "security": "الأمان",
+    "security_text": "نحن ننفذ تدابير أمان مناسبة لحماية معلوماتك ضد الوصول غير المصرح به أو التغيير أو الكشف أو التدمير.",
+    "changes": "التغييرات في السياسة",
+    "changes_text": "قد نقوم بتحديث سياسة الخصوصية هذه من وقت لآخر. سيتم نشر أي تغييرات على هذه الصورة وستصبح سارية المفعول فوراً.",
+    "contact": "اتصل بنا",
+    "contact_text": "إذا كانت لديك أسئلة حول سياسة الخصوصية هذه، يرجى الاتصال بنا على privacy@care_on.com",
+    "contact_privacy": "بريد فريق الخصوصية",
+    "last_updated": "آخر تحديث"
   },
 
   "create_code": {
@@ -92,12 +154,24 @@
     "code_created": "تم إنشاء الكود بنجاح",
     "failed_to_create": "فشل إنشاء الكود",
     "copy_failed": "فشل نسخ الكود",
-    "no_code_returned": "لم يُرجع الخادم أي كود"
+    "no_code_returned": "لم يُرجع الخادم أي كود",
+    "code_created_success": "تم إنشاء رمز الوصول بنجاح",
+    "code_creation_failed": "فشل في إنشاء رمز الوصول",
+    "code_network_error": "خطأ في الشبكة أثناء إنشاء رمز الوصول",
+    "code_server_error": "خطأ في الخادم أثناء إنشاء رمز الوصول",
+    "code_permission_error": "مرفوض الإذن لإنشاء رمز الوصول",
+    "code_duplicate_error": "رمز الوصول هذا موجود بالفعل",
+    "code_invalid_format": "تنسيق الرمز غير صالح",
+    "code_copy_success": "تم نسخ الرمز إلى الحافظة",
+    "code_copy_failed": "فشل في نسخ الرمز إلى الحافظة",
+    "code_generated": "تم إنشاء رمز الوصول بنجاح"
   },
+
   "report_type": {
     "checkup": "كشف",
     "prescription": "روشتة"
   },
+
   "add_selector": {
     "title": "إضافة سجل جديد",
     "prompt": "ماذا تود أن تضيف؟",
@@ -120,7 +194,17 @@
     "lab_name": "اسم المعمل",
     "lab_name_placeholder": "أدخل اسم المعمل",
     "date": "تاريخ التحليل",
-    "date_placeholder": "اختر تاريخ التحليل"
+    "date_placeholder": "اختر تاريخ التحليل",
+    "result_created_success": "تم إضافة النتيجة الطبية بنجاح",
+    "result_creation_failed": "فشل في إضافة النتيجة الطبية",
+    "result_validation_error": "يرجى ملء جميع الحقول المطلوبة",
+    "result_network_error": "خطأ في الشبكة أثناء إضافة النتيجة الطبية",
+    "result_server_error": "خطأ في الخادم أثناء إضافة النتيجة الطبية",
+    "result_permission_error": "مرفوض الإذن لإضافة النتيجة الطبية",
+    "result_duplicate_error": "هذه النتيجة الطبية موجودة بالفعل",
+    "result_date_error": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء",
+    "result_file_error": "تنسيق الملف غير صالح",
+    "result_upload_failed": "فشل في رفع الملف"
   },
 
   "add_eshaa": {
@@ -135,7 +219,17 @@
     "doctor_name_placeholder": "أدخل اسم الطبيب",
     "notes": "ملاحظات",
     "notes_placeholder": "ملاحظات (اختياري)",
-    "upload_file": "رفع صورة الأشعة"
+    "upload_file": "رفع صورة الأشعة",
+    "eshaa_created_success": "تم إضافة الأشعة/التصوير بنجاح",
+    "eshaa_creation_failed": "فشل في إضافة الأشعة/التصوير",
+    "eshaa_validation_error": "يرجى ملء جميع الحقول المطلوبة",
+    "eshaa_network_error": "خطأ في الشبكة أثناء إضافة الأشعة/التصوير",
+    "eshaa_server_error": "خطأ في الخادم أثناء إضافة الأشعة/التصوير",
+    "eshaa_permission_error": "مرفوض الإذن لإضافة الأشعة/التصوير",
+    "eshaa_duplicate_error": "هذه الأشعة/التصوير موجودة بالفعل",
+    "eshaa_date_error": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء",
+    "eshaa_file_error": "تنسيق الملف غير صالح",
+    "eshaa_upload_failed": "فشل في رفع الملف"
   },
 
   "add_report": {
@@ -170,7 +264,15 @@
     "add_new_scan": "اضافة اشعة جديدة",
     "scan_name_arabic": "اسم الاشعة بالعربية",
     "scan_name_english": "اسم الاشعة الانجليزية",
-    "medical_description": "الوصف الطبي"
+    "medical_description": "الوصف الطبي",
+    "report_created_success": "تم إنشاء التقرير بنجاح",
+    "report_creation_failed": "فشل في إنشاء التقرير",
+    "report_upload_failed": "فشل في رفع مستندات التقرير",
+    "report_validation_error": "يرجى ملء جميع الحقول المطلوبة",
+    "report_network_error": "خطأ في الشبكة أثناء إنشاء التقرير",
+    "report_server_error": "خطأ في الخادم أثناء إنشاء التقرير",
+    "report_file_error": "خطأ في معالجة ملفات التقرير",
+    "report_permission_error": "مرفوض الإذن لإنشاء التقرير"
   },
 
   "add_medicine": {
@@ -183,7 +285,15 @@
     "start_date": "تاريخ البدء",
     "start_date_placeholder": "اختر تاريخ البدء",
     "end_date": "تاريخ الانتهاء",
-    "end_date_placeholder": "اختر تاريخ الانتهاء"
+    "end_date_placeholder": "اختر تاريخ الانتهاء",
+    "medicine_created_success": "تم إضافة الدواء بنجاح",
+    "medicine_creation_failed": "فشل في إضافة الدواء",
+    "medicine_validation_error": "يرجى ملء جميع الحقول المطلوبة",
+    "medicine_network_error": "خطأ في الشبكة أثناء إضافة الدواء",
+    "medicine_server_error": "خطأ في الخادم أثناء إضافة الدواء",
+    "medicine_permission_error": "مرفوض الإذن لإضافة الدواء",
+    "medicine_duplicate_error": "هذا الدواء موجود بالفعل",
+    "medicine_date_error": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء"
   },
 
   "form": {
@@ -198,48 +308,34 @@
   "auth": {
     "signin": "تسجيل الدخول",
     "signup": "إنشاء حساب",
-    "set_password_header": "لتعيين كلمة سر حسابك",
-    "password_highlight": "كلمة سر",
-    "create_account_button": "تسجيل",
-    "create_child_account": "لإنشاء حساب طفلك يرجي ملئ\nالبيانات التالية ..",
-    "create_account_subtitle": "لإنشاء حساب المستخدم يرجي ملئ\nالبيانات التالية ..",
+    "password_highlight": "كلمة المرور",
+    "set_password_header": "لتحديد كلمة مرور لحسابك",
+    "create_account_button": "إنشاء حساب",
+    "create_account_subtitle": "لإنشاء حساب المستخدم، يرجى ملء البيانات التالية ..",
     "the_following_data": "البيانات التالية ..",
     "name_placeholder": "ادخل اسمك",
-    "personal_id": "البطاقة الشخصية",
+    "personal_id": "الرقم الشخصي",
     "reset_password": "إعادة تعيين كلمة المرور",
-    "set_password": "كلمة السر",
+    "set_password": "تحديد كلمة المرور",
     "logout": "تسجيل الخروج",
-    "enter_passwords": "برجاء ادخال كلمات السر",
+    "enter_passwords": "يرجى إدخال كلمات المرور",
     "current_password": "كلمة المرور الحالية",
-    "enter_current_password": "ادخل كلمة المرور الحالية",
+    "enter_current_password": "أدخل كلمة المرور الحالية",
     "new_password": "كلمة المرور الجديدة",
-    "enter_new_password": "ادخل كلمة المرور الجديدة",
-    "confirm_new_password": "تأكيد كلمة المرور الجديدة",
+    "enter_new_password": "برجاء ادخال كلمة السر الجديدة",
     "reenter_new_password": "اعد ادخال كلمة المرور الجديدة",
     "passwords_do_not_match": "كلمات المرور غير متطابقة",
-    "password_rules": "يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...)",
+    "password_rules": "يجب ان تحتوي علي: 8 أحرف علي الاقل ، أحرف انجليزية ، علامات (@, #, $ ...) ",
     "password_reset_success": "تم إعادة تعيين كلمة المرور بنجاح.",
     "id": "الرقم القومي",
     "create": "إنشاء",
     "your_account": "حساب المستخدم",
-    "national_id": "البطاقة الشخصية",
-    "national_id_placeholder": "ادخل الرقم القومي",
-    "final_step_password": "الخطوة الأخيرة، كلمة المرور",
-    "password": "كلمة المرور",
-    "forgot_password_q": "هل نسيت كلمة المرور؟",
-    "password_placeholder": "ادخل كلمة المرور",
-    "confirm_password": "تأكيد كلمة المرور",
-    "confirm_password_placeholder": "أعد إدخال كلمة المرور",
-    "email_placeholder": "ادخل البريد الالكتروني",
-    "enter_email_send_code": "ادخل بريدك الالكتروني وسيتم إرسال كود",
-    "send_code": "إرسال الكود",
-    "enter_code": "برجاء ادخال الكود",
+    "create_account_prompt": "لإنشاء حسابك يرجي ملئ البيانات التالية ..",
     "enter_code_sent_to": "برجاء ادخال الكود المرسل الي بريدك الالكتروني",
     "resend_code": "إعادة إرسال الكود",
     "resend_in": "إعادة الارسال بعد",
     "code_resent_success": "تم إعادة إرسال الكود بنجاح",
     "invalid_code_error": "الكود غير صحيح",
-    "enter_new_password": "برجاء ادخال كلمة السر الجديدة",
     "new_password_title": "كلمة السر الجديدة",
     "enter_password": "ادخل كلمة السر",
     "reenter_password": "اعد ادخال كلمة السر",
@@ -247,22 +343,30 @@
     "create_your_account_prompt": "لإنشاء حسابك يرجي ملئ البيانات التالية ..",
     "linked_accounts": "الحسابات المرتبطة",
     "choose_account_type": "اختر نوع الحساب",
-    "personal_account": "حساب شخصي",
-    "child_account": "حساب طفل",
-    "enter_your_data": "ادخل بياناتك",
-    "enter_child_data": "ادخل بيانات الطفل",
-    "add_another_account": "إضافة حساب آخر",
     "impersonate_user": "تمثيل المستخدم",
     "email": "البريد الإلكتروني",
     "enter_email": "ادخل البريد الالكتروني",
+    "personal_account": "الحساب الشخصي",
+    "child_account": "الحساب الطفل",
+    "enter_your_data": "ادخل بياناتك",
+    "enter_child_data": "ادخل بيانات الطفل",
     "code": "الكود",
     "under_18_error": "يجب أن يكون عمر المستخدم 18 عامًا أو أكثر لإنشاء حساب شخصي.",
     "over_18_error": "للمستخدمين الذين تجاوزوا 18 عامًا، يرجى إنشاء حساب شخصي.",
     "your_child_account": "حساب طفلك",
+    "confirm_password": "تأكيد كلمة المرور",
+    "confirm_password_placeholder": "اعد ادخال كلمة المرور",
+    "create_account": "إنشاء حساب",
     "child_name": "اسم الطفل",
     "child_name_placeholder": "ادخل اسم الطفل",
+    "email_placeholder": "ادخل البريد الالكتروني",
+    "forgot_password_q": "نسيت كلمة المرور؟",
+    "password": "كلمة المرور",
+    "password_placeholder": "ادخل كلمة المرور",
     "child_email": "البريد الإلكتروني للطفل",
     "child_email_placeholder": "ادخل البريد الإلكتروني للطفل",
+    "national_id": "الرقم القومي",
+    "national_id_placeholder": "ادخل الرقم القومي",
     "child_national_id": "الرقم القومي للطفل",
     "child_national_id_placeholder": "ادخل الرقم القومي للطفل",
     "child_birth_certificate": "شهادة ميلاد الطفل",
@@ -270,26 +374,60 @@
     "agree": "موافق",
     "terms_only": "الشروط والأحكام",
     "terms_full_text": "يرجى قراءة الشروط والأحكام بعناية قبل استخدام التطبيق. باستخدام هذا التطبيق، فإنك توافق على الالتزام بهذه الشروط. إذا كنت لا توافق على هذه الشروط، فلا تستخدم التطبيق.",
-    "child_account_created": "تم إنشاء حساب الطفل بنجاح."
-  },
-
-  "errors": {
-    "add_medicine_failed": "لا يمكن حفظ الدواء. يرجى المحاولة مرة أخرى.",
-    "add_record_failed": "لا يمكن حفظ السجل. يرجى المحاولة مرة أخرى.",
-    "image_processing_failed": "فشل في معالجة الصورة. يرجى تجربة صورة أخرى.",
-    "error_fetching_data": "حدث خطأ أثناء جلب البيانات"
-  },
-
-  "account": {
-    "linked_accounts": "الحسابات المرتبطة",
-    "primary_user": "المستخدم الأساسي",
-    "no_phone_number": "لا يوجد رقم هاتف",
-    "current_account": "الحساب الحالي",
-    "linked_accounts_mother": "الحسابات المرتبطة بحساب الأم",
-    "impersonate_user": "التبديل للطفل",
-    "add_another_account": "إضافة حساب آخر",
-    "switch_to_parent": "انتقال لحساب الأم",
-    "logout": "تسجيل الخروج"
+    "child_account_created": "تم إنشاء حساب الطفل بنجاح.",
+    "login_failed": "فشل تسجيل الدخول",
+    "login_success": "تم تسجيل الدخول بنجاح",
+    "welcome_back": "مرحباً بعودتك",
+    "invalid_credentials": "بيانات الاعتماد غير صحيحة",
+    "account_locked": "الحساب مقفول",
+    "contact_support": "يرجى التواصل مع الدعم الفني",
+    "account_created": "تم إنشاء الحساب بنجاح",
+    "please_complete_profile": "يرجى إكمال ملفك الشخصي",
+    "email_already_exists": "البريد الإلكتروني مستخدم بالفعل",
+    "use_different_email": "يرجى استخدام بريد إلكتروني مختلف",
+    "password_reset_code_sent": "تم إرسال كود إعادة تعيين كلمة المرور إلى بريدك الإلكتروني",
+    "password_reset_failed": "فشل في إرسال كود إعادة تعيين كلمة المرور",
+    "code_verification_failed": "فشل في التحقق من الكود",
+    "password_update_failed": "فشل في تحديث كلمة المرور",
+    "password_updated_success": "تم تحديث كلمة المرور بنجاح",
+    "profile_updated_success": "تم تحديث الملف الشخصي بنجاح",
+    "profile_update_failed": "فشل في تحديث الملف الشخصي",
+    "file_upload_failed": "فشل رفع الملف",
+    "check_file_format_and_size": "يرجى فحص تنسيق وحجم الملف",
+    "image_processing_failed": "فشل معالجة الصورة. يرجى المحاولة مرة أخرى",
+    "something_went_wrong": "حدث خطأ ما",
+    "invalid_data": "بيانات غير صحيحة",
+    "check_required_fields": "يرجى ملء جميع الحقول المطلوبة",
+    "network_error": "خطأ في الشبكة",
+    "check_internet_connection": "يرجى فحص الاتصال بالإنترنت",
+    "server_error": "خطأ في الخادم",
+    "server_maintenance": "الخادم تحت الصيانة",
+    "try_again_later": "يرجى المحاولة لاحقاً",
+    "permission_denied": "الوصول مرفوض",
+    "insufficient_permissions": "صلاحيات غير كافية",
+    "contact_admin": "يرجى التواصل مع المسؤول",
+    "session_expired": "انتهت جلستك",
+    "please_login_again": "يرجى تسجيل الدخول مرة أخرى",
+    "validation_error": "خطأ في التحقق",
+    "auth_error": "خطأ في المصادقة",
+    "file_error": "خطأ في الملف",
+    "success": "نجاح",
+    "error": "خطأ",
+    "info": "معلومة",
+    "retry": "إعادة المحاولة",
+    "tap_to_retry": "انقر لإعادة المحاولة",
+    "check_your_email": "يرجى فحص بريدك الإلكتروني",
+    "email_not_found": "البريد الإلكتروني غير موجود",
+    "check_email_address": "يرجى فحص عنوان البريد الإلكتروني",
+    "code_verified_success": "تم التحقق من الكود بنجاح",
+    "code_expired": "انتهت صلاحية الكود",
+    "resend_code_success": "تم إعادة إرسال الكود بنجاح",
+    "resend_code_failed": "فشل في إعادة إرسال الكود",
+    "proceed_to_reset_password": "يرجى المتابعة لإعادة تعيين كلمة المرور",
+    "request_new_code": "يرجى طلب كود جديد",
+    "too_many_requests": "طلبات كثيرة جداً",
+    "password_mismatch_error": "تأكيد كلمة المرور لا يتطابق",
+    "password_requirements_not_met": "متطلبات كلمة المرور غير مستوفاة"
   },
 
   "survey": {
@@ -312,7 +450,15 @@
     "lets_go": "هيا بنا!",
     "later": "لاحقًا",
     "popup_description": "يرجي عمل استبيان سريع للطفل",
-    "take_survey": "هيا بنا !"
+    "take_survey": "هيا بنا !",
+    "survey_created_success": "تم تقديم الاستبيان بنجاح",
+    "survey_creation_failed": "فشل في تقديم الاستبيان",
+    "survey_validation_error": "يرجى الإجابة على جميع الأسئلة المطلوبة",
+    "survey_network_error": "خطأ في الشبكة أثناء تقديم الاستبيان",
+    "survey_server_error": "خطأ في الخادم أثناء تقديم الاستبيان",
+    "survey_file_error": "خطأ في معالجة ملفات الاستبيان",
+    "survey_permission_error": "مرفوض الإذن لتقديم الاستبيان",
+    "survey_loading_failed": "فشل في تحميل أسئلة الاستبيان"
   },
 
   "home": {
@@ -352,7 +498,15 @@
     "no_medicines_found": "لم يتم العثور على أدوية.",
     "no_doctor_reports_found": "لم يتم العثور على تقارير أطباء.",
     "no_xrays_found": "لم يتم العثور على أشعة.",
-    "no_reports_found": "لم يتم العثور على تقارير سابقة."
+    "no_reports_found": "لم يتم العثور على تقارير سابقة.",
+    "navigation_error": "فشل في التنقل",
+    "refresh_token_failed": "فشل في تحديث الجلسة",
+    "survey_status_check_failed": "فشل في فحص حالة الاستبيان",
+    "home_screen_error": "خطأ في تحميل الشاشة الرئيسية",
+    "menu_navigation_failed": "فشل في التنقل إلى عنصر القائمة",
+    "complete_survey_prompt": "يرجى ملء الاستبيان لاكمال بيانات الملف الشخصي",
+    "survey_reminder_title": "تذكير الاستبيان",
+    "survey_skip_success": "تم تخطي الاستبيان لهذه الجلسة"
   },
 
   "profile": {
@@ -372,7 +526,122 @@
     "camera_photo": "التقط صورة",
     "gallery_photo": "اختر من المعرض",
     "photo_deleted": "تم حذف صورة الملف الشخصي بنجاح",
-    "photo_updated": "تم تحديث صورة الملف الشخصي بنجاح"
+    "photo_updated": "تم تحديث صورة الملف الشخصي بنجاح",
+    "photo_upload_failed": "فشل في رفع الصورة",
+    "photo_delete_failed": "فشل في حذف الصورة",
+    "profile_update_failed": "فشل في تحديث الملف الشخصي",
+    "profile_network_error": "خطأ في الشبكة أثناء تحديث الملف الشخصي",
+    "profile_server_error": "خطأ في الخادم أثناء تحديث الملف الشخصي",
+    "profile_permission_error": "مرفوض الإذن لتحديث الملف الشخصي",
+    "file_download_failed": "فشل في تحميل الملف",
+    "camera_permission_denied": "مرفوض إذن الكاميرا",
+    "gallery_permission_denied": "مرفوض إذن المعرض",
+    "invalid_file_type": "نوع الملف غير صالح",
+    "file_too_large": "حجم الملف كبير جداً",
+    "profile_loading_success": "تم تحميل الملف الشخصي بنجاح"
+  },
+
+  "medicines_list": {
+    "no_medicines_found": "لم يتم العثور على أدوية",
+    "medicines_load_failed": "فشل في تحميل الأدوية",
+    "medicines_refresh_failed": "فشل في تحديث الأدوية",
+    "add_medicine_failed": "فشل في إضافة الدواء",
+    "medicines_network_error": "خطأ في الشبكة أثناء تحميل الأدوية",
+    "medicines_server_error": "خطأ في الخادم أثناء تحميل الأدوية",
+    "medicines_permission_error": "مرفوض الإذن للوصول إلى الأدوية",
+    "medicines_empty_state": "ستظهر أدويتك هنا",
+    "medicines_loading_success": "تم تحميل الأدوية بنجاح"
+  },
+
+  "reports_list": {
+    "no_reports_found": "لم يتم العثور على تقارير",
+    "reports_load_failed": "فشل في تحميل التقارير",
+    "reports_refresh_failed": "فشل في تحديث التقارير",
+    "reports_network_error": "خطأ في الشبكة أثناء تحميل التقارير",
+    "reports_server_error": "خطأ في الخادم أثناء تحميل التقارير",
+    "reports_permission_error": "مرفوض الإذن للوصول إلى التقارير",
+    "reports_empty_state": "ستظهر تقاريرك هنا",
+    "reports_loading_success": "تم تحميل التقارير بنجاح",
+    "add_report_failed": "فشل في إضافة التقرير"
+  },
+
+  "last_reports": {
+    "no_reports_found": "لم يتم العثور على تقارير حديثة",
+    "last_reports_load_failed": "فشل في تحميل التقارير الحديثة",
+    "last_reports_refresh_failed": "فشل في تحديث التقارير الحديثة",
+    "last_reports_network_error": "خطأ في الشبكة أثناء تحميل التقارير الحديثة",
+    "last_reports_server_error": "خطأ في الخادم أثناء تحميل التقارير الحديثة",
+    "last_reports_permission_error": "مرفوض الإذن للوصول إلى التقارير الحديثة",
+    "last_reports_empty_state": "ستظهر تقاريرك الحديثة هنا",
+    "last_reports_loading_success": "تم تحميل التقارير الحديثة بنجاح"
+  },
+
+  "eshaa_list": {
+    "no_eshaa_found": "لم يتم العثور على أشعة/تصوير",
+    "eshaa_load_failed": "فشل في تحميل الأشعة/التصوير",
+    "eshaa_refresh_failed": "فشل في تحديث الأشعة/التصوير",
+    "eshaa_network_error": "خطأ في الشبكة أثناء تحميل الأشعة/التصوير",
+    "eshaa_server_error": "خطأ في الخادم أثناء تحميل الأشعة/التصوير",
+    "eshaa_permission_error": "مرفوض الإذن للوصول إلى الأشعة/التصوير",
+    "eshaa_empty_state": "ستظهر أشعتك/التصوير هنا",
+    "eshaa_loading_success": "تم تحميل الأشعة/التصوير بنجاح",
+    "add_eshaa_failed": "فشل في إضافة الأشعة/التصوير"
+  },
+
+  "results_list": {
+    "no_results_found": "لم يتم العثور على نتائج طبية",
+    "results_load_failed": "فشل في تحميل النتائج الطبية",
+    "results_refresh_failed": "فشل في تحديث النتائج الطبية",
+    "results_network_error": "خطأ في الشبكة أثناء تحميل النتائج الطبية",
+    "results_server_error": "خطأ في الخادم أثناء تحميل النتائج الطبية",
+    "results_permission_error": "مرفوض الإذن للوصول إلى النتائج الطبية",
+    "results_empty_state": "ستظهر نتائجك الطبية هنا",
+    "results_loading_success": "تم تحميل النتائج الطبية بنجاح",
+    "add_result_failed": "فشل في إضافة النتيجة الطبية"
+  },
+
+  "reset_password": {
+    "password_reset_success": "تم إعادة تعيين كلمة المرور بنجاح",
+    "password_reset_failed": "فشل في إعادة تعيين كلمة المرور",
+    "password_validation_error": "كلمات المرور غير متطابقة",
+    "password_network_error": "خطأ في الشبكة أثناء إعادة تعيين كلمة المرور",
+    "password_server_error": "خطأ في الخادم أثناء إعادة تعيين كلمة المرور",
+    "password_permission_error": "مرفوض الإذن لإعادة تعيين كلمة المرور",
+    "password_too_short": "كلمة المرور قصيرة جداً",
+    "password_weak": "كلمة المرور ضعيفة جداً",
+    "password_reset_request_failed": "فشل في إرسال طلب إعادة تعيين كلمة المرور"
+  },
+
+  "your_codes": {
+    "code_copy_success": "تم نسخ الرمز إلى الحافظة بنجاح",
+    "code_copy_failed": "فشل في نسخ الرمز إلى الحافظة",
+    "codes_load_failed": "فشل في تحميل الرموز التي أنشأتها",
+    "codes_network_error": "خطأ في الشبكة أثناء تحميل الرموز",
+    "codes_server_error": "خطأ في الخادم أثناء تحميل الرموز",
+    "codes_permission_error": "مرفوض الإذن للوصول إلى الرموز",
+    "codes_empty_state": "لم يتم العثور على رموز منشأة",
+    "codes_loading_success": "تم تحميل الرموز بنجاح",
+    "code_delete_success": "تم حذف الرمز بنجاح",
+    "code_delete_failed": "فشل في حذف الرمز"
+  },
+
+  "errors": {
+    "add_medicine_failed": "لا يمكن حفظ الدواء. يرجى المحاولة مرة أخرى.",
+    "add_record_failed": "لا يمكن حفظ السجل. يرجى المحاولة مرة أخرى.",
+    "image_processing_failed": "فشل في معالجة الصورة. يرجى تجربة صورة أخرى.",
+    "error_fetching_data": "حدث خطأ أثناء جلب البيانات"
+  },
+
+  "account": {
+    "linked_accounts": "الحسابات المرتبطة",
+    "primary_user": "المستخدم الأساسي",
+    "no_phone_number": "لا يوجد رقم هاتف",
+    "current_account": "الحساب الحالي",
+    "linked_accounts_mother": "الحسابات المرتبطة بحساب الأم",
+    "impersonate_user": "التبديل للطفل",
+    "add_another_account": "إضافة حساب آخر",
+    "switch_to_parent": "انتقال لحساب الأم",
+    "logout": "تسجيل الخروج"
   },
 
   "marketing": {
@@ -438,7 +707,7 @@
   },
 
   "doctors_used_codes": { "title": "الأطباء الذين استخدموا أكوادك" },
-  "your_created_codes":  { "title": "الأكواد التي أنشأتها" },
+  "your_created_codes": { "title": "الأكواد التي أنشأتها" },
 
   "result": {
     "analysis_name": "اسم التحليل",

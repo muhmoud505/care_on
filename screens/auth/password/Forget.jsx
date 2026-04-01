@@ -1,21 +1,26 @@
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
-  Alert,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
 import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
-
 import { hp, wp } from '../../../utils/responsive';
+import {
+    showAuthError,
+    showError,
+    showNetworkError,
+    showSuccess,
+    showValidationError,
+} from '../../../utils/toastService';
 
 const Forget = () => {
   
@@ -32,15 +37,49 @@ const Forget = () => {
   const formIsValid = checkFormValidity();
 
   const handleNext = async () => {
-    if (!formIsValid) return;
+    if (!formIsValid) {
+      showValidationError('form', 'Please fill in all required fields');
+      return;
+    }
+    
     try {
       // Call the API to request a password reset code
       await forgotPassword({ email: form.email });
 
+      // Show success toast
+      showSuccess(
+        t('auth.password_reset_code_sent'),
+        t('auth.check_your_email'),
+        { duration: 3000 }
+      );
+
       // On success, navigate to the code verification screen
       navigation.navigate('code', { email: form.email });
     } catch (error) {
-      Alert.alert(t('common.error'), error.message);
+      // Enhanced error handling with specific error types
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('common.check_internet_connection'),
+          () => handleNext() // Retry function
+        );
+      } else if (error.message?.includes('unauthorized') || error.message?.includes('401') || error.message?.includes('invalid')) {
+        showAuthError(
+          t('auth.invalid_credentials'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('email') || error.message?.includes('not found')) {
+        showError(
+          t('auth.email_not_found'),
+          t('auth.check_email_address'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('auth.password_reset_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
     }
   };
 

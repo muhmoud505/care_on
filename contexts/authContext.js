@@ -343,11 +343,36 @@ export const AuthProvider = ({ children }) => {
   };
 
   const deleteUserAvatar = async (userId) => {
-    const formData = new FormData();
-    formData.append('_method', 'PUT');
-    formData.append('avatar', '');
-    formData.append('remove_avatar', '1');
-    return await updateUserProfile(userId, formData);
+    setIsAuthLoading(true);
+    try {
+      const response = await authFetch(`${API_URL}/api/v1/profile/avatar`, {
+        method: 'DELETE',
+      });
+      
+      const data = await safeParseJson(response);
+      
+      if (!response.ok) {
+        throw new Error(data?.message || data?.error || 'Failed to delete avatar');
+      }
+      
+      // Update user data to reflect avatar removal
+      if (user?.user) {
+        setUser(prev => ({
+          ...prev,
+          user: {
+            ...prev.user,
+            avatar: null
+          }
+        }));
+      }
+      
+      return { success: true, data };
+    } catch (error) {
+      console.error('Delete avatar error:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setIsAuthLoading(false);
+    }
   };
 
   const fetchCurrentUser = async () => {

@@ -11,6 +11,14 @@ import ListContainer from '../../components/ListContainer';
 import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
+import {
+    showError,
+    showInfo,
+    showNetworkError,
+    showPermissionError,
+    showServerError,
+    showSuccess,
+} from '../../utils/toastService';
 
 const Eshaas = () => { 
    const [expandedItems, setExpandedItems] = useState({});
@@ -30,26 +38,63 @@ const Eshaas = () => {
   );
 
    useEffect(() => {
-      // We only show the toast if loading has finished AND it's not the very first app boot
-      if (loading.eshaa === false && eshaa.length === 0 && !error.eshaa && !loading.eshaa) {
-        console.log("Triggering Toast..."); // If you see this in LOG, the logic is working
-        
-        Toast.show({
-          type: 'info',
-          text1: t('common.info'),
-          text2: t('home.no_xrays_found'),
-          position: 'top', // Changed to top to ensure it's not under the tab bar
-          visibilityTime: 3000,
-          autoHide: true,
-          topOffset: 60, // Gives it some space from the header
-        });
-      }
-    }, [loading.eshaa, eshaa.length, error.eshaa, t]);
+    // Enhanced empty state handling with toast service
+    if (loading.eshaa === false && eshaa.length === 0 && !error.eshaa) {
+      showInfo(
+        t('common.info'),
+        t('eshaa_list.eshaa_empty_state'),
+        { duration: 3000 }
+      );
+    }
+  }, [loading.eshaa, eshaa.length, error.eshaa, t]);
 
-  const onRefresh = useCallback(() => {
-    fetchEshaas({ force: true });
-  }, [fetchEshaas]);
-  
+  const onRefresh = useCallback(async () => {
+    try {
+      await fetchEshaas({ force: true });
+      showSuccess(
+        t('common.success'),
+        t('eshaa_list.eshaa_loading_success'),
+        { duration: 2000 }
+      );
+    } catch (error) {
+      // Enhanced error handling for refresh
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('eshaa_list.eshaa_network_error'),
+          () => onRefresh() // Retry function
+        );
+      } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+        showPermissionError(
+          t('eshaa_list.eshaa_permission_error'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('server') || error.message?.includes('500')) {
+        showServerError(
+          t('eshaa_list.eshaa_server_error'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('eshaa_list.eshaa_refresh_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
+    }
+  }, [fetchEshaas, t]);
+
+  const handleAddEshaa = () => {
+    try {
+      navigation.navigate('addEshaa');
+    } catch (error) {
+      showError(
+        t('home.navigation_error'),
+        error.message || t('common.something_went_wrong'),
+        { duration: 4000 }
+      );
+    }
+  };
+
   const handleItemExpand = (id, isExpanded) => {
     setExpandedItems(prev => ({
       ...prev,
@@ -112,7 +157,7 @@ const Eshaas = () => {
          )}
          <TouchableOpacity
            style={[finalAddButtonStyle, { [isRTL ? 'left' : 'right']: wp(5) }]}
-           onPress={() => navigation.navigate('addEshaa')}
+           onPress={handleAddEshaa}
          >
            <Icons.Add width={wp(18)} height={wp(18)} />
          </TouchableOpacity>

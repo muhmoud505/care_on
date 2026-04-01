@@ -19,6 +19,11 @@ import FormField from '../../../components/FormInput';
 import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
+import {
+  showSuccess,
+  showValidationError
+} from '../../../utils/toastService';
+import { validatePassword } from '../../../utils/validators';
 
 // The specific green from your image
 const THEME_GREEN = '#82D481';
@@ -52,22 +57,43 @@ const PasswordScreen = ({ route }) => {
   const formIsValid = checkFormValidity();
 
   const handleSignup = async () => {
+    // Validate password using validator
+    const passwordValidationError = validatePassword(form.password);
+    if (passwordValidationError) {
+      showValidationError('password', passwordValidationError, t);
+      return;
+    }
+
     if (!formIsValid || form.password !== form.password_confirmation) {
-      Alert.alert(t('common.error'), t('auth.passwords_do_not_match'));
+      showValidationError('password_confirmation', t('auth.passwords_do_not_match'), t);
       return;
     }
 
     if (!agreedToTerms) {
-      Alert.alert(t('common.error'), t('auth.must_agree_terms'));
+      showValidationError('terms', t('auth.must_agree_terms'), t);
       return;
     }
 
+    // Show data confirmation modal
+    showSuccess(
+      t('auth.confirm_data'),
+      `${t('auth.name')}: ${signupData.name}\n${t('auth.email')}: ${signupData.email}\n${t('auth.national_id')}: ${signupData.national_number}\n${t('common.password')}: ${form.password}`,
+      { duration: 3000 }
+    );
+
+    // Proceed with signup after showing confirmation
+    setTimeout(() => {
+      proceedWithSignup();
+    }, 3500);
+  };
+
+  const proceedWithSignup = async () => {
     signupData.password = form.password;
     signupData.password_confirmation = form.password_confirmation;
 
     try {
       const response = await signup(signupData);
-      
+
       if (signupData.isParentAddingChild) {
         if (response && response.token) {
           const existingChildAccounts = await AsyncStorage.getItem('child_accounts');
@@ -82,7 +108,7 @@ const PasswordScreen = ({ route }) => {
           CommonActions.reset({
             index: 0,
             routes: [{ name: 'welcome', params: { sessionData: response } }],
-          })
+          }),
         );
       }
     } catch (error) {

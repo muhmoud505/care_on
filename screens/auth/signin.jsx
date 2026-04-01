@@ -12,6 +12,13 @@ import { Icons } from '../../components/Icons';
 import { useAuth } from '../../contexts/authContext';
 import useForm from '../../hooks/useForm';
 import { hp, wp } from '../../utils/responsive';
+import {
+  showAuthError,
+  showError,
+  showNetworkError,
+  showSuccess,
+  showValidationError,
+} from '../../utils/toastService';
 
 const SignIn = () => {
   const navigation = useNavigation();
@@ -27,17 +34,43 @@ const SignIn = () => {
   const formIsValid = checkFormValidity();
 
   const handleSignIn = async () => {
-    if (formIsValid) {
-      try {
-        await login({ email: form.email, password: form.password });
-        navigation.replace('App');
-      } catch (error) {
-        Toast.show({
-          type: 'error',
-          text1: t('auth.login_failed'),
-          text2: error.message,
-          position: 'top',
-        });
+    if (!formIsValid) {
+      showValidationError('form', 'Please fill in all required fields');
+      return;
+    }
+    
+    try {
+      await login({ email: form.email, password: form.password });
+      showSuccess(
+        t('auth.login_success'),
+        t('auth.welcome_back'),
+        { duration: 3000 }
+      );
+      navigation.replace('App');
+    } catch (error) {
+      // Enhanced error handling with specific error types
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('common.check_internet_connection'),
+          () => handleSignIn() // Retry function
+        );
+      } else if (error.message?.includes('unauthorized') || error.message?.includes('401') || error.message?.includes('invalid')) {
+        showAuthError(
+          t('auth.invalid_credentials'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('password') || error.message?.includes('blocked')) {
+        showError(
+          t('auth.account_locked'),
+          t('auth.contact_support'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('auth.login_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
       }
     }
   };

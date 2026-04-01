@@ -11,6 +11,14 @@ import Medicine from '../../components/medicineComponent';
 import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
+import {
+    showError,
+    showInfo,
+    showNetworkError,
+    showPermissionError,
+    showServerError,
+    showSuccess,
+} from '../../utils/toastService';
 
 const Medicines = () => {
   const [expandedItems, setExpandedItems] = useState({});
@@ -29,37 +37,87 @@ const Medicines = () => {
       }
     }, [user?.token?.value, fetchMedicines])
   );
-   useEffect(() => {
-      // We only show the toast if loading has finished AND it's not the very first app boot
-      if (loading.medicines === false && medicines.length === 0 && !error.medicines && !loading.medicines) {
-        console.log("Triggering Toast..."); // If you see this in LOG, the logic is working
-        
-        Toast.show({
-          type: 'info',
-          text1: t('common.info'),
-          text2: t('home.no_medicines_found'),
-          position: 'top', // Changed to top to ensure it's not under the tab bar
-          visibilityTime: 3000,
-          autoHide: true,
-          topOffset: 60, // Gives it some space from the header
-        });
-      }
-    }, [loading.medicines, medicines.length, error.medicines, t]);
+
+  useEffect(() => {
+    // Enhanced empty state handling with toast service
+    if (loading.medicines === false && medicines.length === 0 && !error.medicines) {
+      showInfo(
+        t('common.info'),
+        t('medicines_list.medicines_empty_state'),
+        { duration: 3000 }
+      );
+    }
+  }, [loading.medicines, medicines.length, error.medicines, t]);
 
   useEffect(() => {
     if (route.params?.newMedicine) {
-      // Call the new context function to handle the optimistic update and API call
-      addMedicine(route.params.newMedicine);
+      // Enhanced medicine addition with error handling
+      try {
+        addMedicine(route.params.newMedicine);
+        showSuccess(
+          t('common.success'),
+          t('add_medicine.medicine_created_success'),
+          { duration: 3000 }
+        );
+      } catch (error) {
+        showError(
+          t('medicines_list.add_medicine_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
       // Clear the parameter so it's not added again on re-render
       navigation.setParams({ newMedicine: null });
     }
-  }, [route.params?.newMedicine, addMedicine, navigation]);
+  }, [route.params?.newMedicine, addMedicine, navigation, t]);
 
   // Memoize the onRefresh function to prevent unnecessary re-renders of ListContainer
-  const onRefresh = useCallback(() => {
-    // You can pass { force: true } if your context supports it for pull-to-refresh
-    fetchMedicines();
-  }, [fetchMedicines]);
+  const onRefresh = useCallback(async () => {
+    try {
+      await fetchMedicines();
+      showSuccess(
+        t('common.success'),
+        t('medicines_list.medicines_loading_success'),
+        { duration: 2000 }
+      );
+    } catch (error) {
+      // Enhanced error handling for refresh
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('medicines_list.medicines_network_error'),
+          () => onRefresh() // Retry function
+        );
+      } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+        showPermissionError(
+          t('medicines_list.medicines_permission_error'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('server') || error.message?.includes('500')) {
+        showServerError(
+          t('medicines_list.medicines_server_error'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('medicines_list.medicines_refresh_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
+    }
+  }, [fetchMedicines, t]);
+
+  const handleAddMedicine = () => {
+    try {
+      navigation.navigate('addMedicine');
+    } catch (error) {
+      showError(
+        t('home.navigation_error'),
+        error.message || t('common.something_went_wrong'),
+        { duration: 4000 }
+      );
+    }
+  };
 
   const handleItemExpand = (id, isExpanded) => {
     setExpandedItems(prev => ({ ...prev, [id]: isExpanded }));
@@ -120,7 +178,7 @@ const Medicines = () => {
             )}
             <TouchableOpacity
               style={[finalAddButtonStyle, { [isRTL ? 'left' : 'right']: wp(5) }]}
-              onPress={() => navigation.navigate('addMedicine')}
+              onPress={handleAddMedicine}
             >
               <Icons.Add width={wp(18)} height={wp(18)} />
             </TouchableOpacity>

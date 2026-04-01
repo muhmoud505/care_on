@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Alert,
   Dimensions,
   SafeAreaView,
   ScrollView,
@@ -18,6 +17,15 @@ import FormField from '../../../components/FormInput';
 import Uploader from '../../../components/Uploader';
 import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
+import {
+  showError,
+  showFileError,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
+  showValidationError,
+} from '../../../utils/toastService';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -43,7 +51,53 @@ const Signup2 = () => {
 
   const isFormValid = Object.values(form).every(value => !!value);
 
+  const validateName = (name) => {
+    if (name.length < 3) {
+      return 'Name must be at least 3 characters long';
+    }
+    return null;
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return 'Invalid email address';
+    }
+    return null;
+  };
+
+  const validateNationalId = (nationalId) => {
+    if (nationalId.length !== 14) {
+      return 'National ID must be 14 digits long';
+    }
+    return null;
+  };
+
   const handleRegister = async () => {
+    // Validate each field using validators
+    const nameError = validateName(form.name);
+    if (nameError) {
+      showValidationError('name', nameError, t);
+      return;
+    }
+
+    const emailError = validateEmail(form.email);
+    if (emailError) {
+      showValidationError('email', emailError, t);
+      return;
+    }
+
+    const nationalIdError = validateNationalId(form.national_number);
+    if (nationalIdError) {
+      showValidationError('national_id', nationalIdError, t);
+      return;
+    }
+
+    if (!form.birthCertificate) {
+      showValidationError('file', 'Please upload birth certificate file', t);
+      return;
+    }
+
     if (!isFormValid) return;
 
     setIsProcessing(true);
@@ -63,13 +117,52 @@ const Signup2 = () => {
         ...(isParentAddingChild && parentUser?.user?.id && { parent_id: parentUser?.user?.id }),
       };
 
-      navigation.navigate('password', { signupData ,isChild});
+      // Show data confirmation before proceeding
+      showSuccess(
+        t('auth.confirm_data'),
+        `${t('auth.child_name')}: ${form.name}\n${t('auth.child_email')}: ${form.email}\n${t('auth.child_national_id')}: ${form.national_number}\n${t('auth.birthdate')}: ${birthdate}\n${t('auth.gender')}: ${gender}`,
+        { duration: 3000 }
+      );
+
+      // Navigate to password screen after showing confirmation
+      setTimeout(() => {
+        proceedToPassword(signupData);
+      }, 3500);
     } catch (err) {
       console.error("Registration error:", err);
-      Alert.alert(t('common.error'), t('errors.image_processing_failed'));
+      
+      // Enhanced error handling with toast notifications
+      if (err.message?.includes('Network request failed') || err.message?.includes('network')) {
+        showNetworkError(
+          t('common.check_internet_connection'),
+          () => handleRegister() // Retry function
+        );
+      } else if (err.message?.includes('file') || err.message?.includes('upload') || err.message?.includes('size')) {
+        showFileError(form.birthCertificate?.name || 'Birth certificate file');
+      } else if (err.message?.includes('permission') || err.message?.includes('unauthorized')) {
+        showPermissionError(
+          t('common.permission_denied'),
+          { duration: 4000 }
+        );
+      } else if (err.message?.includes('server') || err.message?.includes('500')) {
+        showServerError(
+          t('common.server_error'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('common.error'),
+          err.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const proceedToPassword = (signupData) => {
+    navigation.navigate('password', { signupData, isChild });
   };
 
   return (

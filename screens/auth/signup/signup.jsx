@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Alert,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -19,6 +18,14 @@ import FormField from '../../../components/FormInput';
 import Uploader from '../../../components/Uploader';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
+import {
+  showError,
+  showFileError,
+  showNetworkError,
+  showSuccess,
+  showValidationError
+} from '../../../utils/toastService';
+import { validateEmail, validateName, validateNationalId } from '../../../utils/validators';
 
 const Signup = () => {
   const { t, i18n } = useTranslation();
@@ -42,11 +49,33 @@ const Signup = () => {
   const formIsValid = Object.values(form).every(value => !!value);
 
   const handleSignup = async () => {
-    if (!formIsValid) return;
+    // Validate each field using validators
+    const nameError = validateName(form.name);
+    if (nameError) {
+      showValidationError('name', nameError, t);
+      return;
+    }
+
+    const emailError = validateEmail(form.email);
+    if (emailError) {
+      showValidationError('email', emailError, t);
+      return;
+    }
+
+    const nationalIdError = validateNationalId(form.national_number);
+    if (nationalIdError) {
+      showValidationError('national_id', nationalIdError, t);
+      return;
+    }
+
+    if (!form.nationalIdFile) {
+      showValidationError('file', 'Please upload your national ID file', t);
+      return;
+    }
 
     setIsProcessing(true);
     try {
-      // 2. Create a plain JavaScript object to pass to the next screen.
+      // 2. Create a plain JavaScript object to pass to next screen.
       // Backend expects actual file object, not base64 string
       const signupData = {
         name: form.name,
@@ -56,18 +85,62 @@ const Signup = () => {
         age: age,
         gender: gender,
         isChild: false, // This flow is always for adults
-        // Send the actual file object for backend validation
+        // Send actual file object for backend validation
         birth_certificate: form.nationalIdFile,
         type:'patient'
       };
-      // 3. Navigate to the password screen with the prepared data.
-      navigation.navigate('password', { signupData });
+      
+      // Show data confirmation before proceeding
+      showSuccess(
+        t('auth.confirm_data'),
+        `${t('auth.name')}: ${form.name}\n${t('auth.email')}: ${form.email}\n${t('auth.national_id')}: ${form.national_number}\n${t('auth.birthdate')}: ${birthdate}\n${t('auth.gender')}: ${gender}`,
+        { duration: 3000 }
+      );
+
+      // Navigate to password screen after showing confirmation
+      setTimeout(() => {
+        proceedToPassword(signupData);
+      }, 3500);
     } catch (err) {
-      console.error("Failed to process image or navigate:", err); 
-      Alert.alert(t('common.error'), t('errors.image_processing_failed'));
+      console.error("Failed to process image or navigate:", err);
+      
+      // Enhanced error handling
+      if (err.message?.includes('Network request failed') || err.message?.includes('network')) {
+        showNetworkError(
+          t('common.check_internet_connection'),
+          () => handleSignup() // Retry function
+        );
+      } else if (err.message?.includes('file') || err.message?.includes('upload') || err.message?.includes('size')) {
+        showFileError(form.nationalIdFile?.name || 'ID file');
+      } else if (err.message?.includes('email') || err.message?.includes('exists')) {
+        showError(
+          t('auth.email_already_exists'),
+          t('auth.use_different_email'),
+          { duration: 4000 }
+        );
+      } else if (err.message?.includes('validation') || err.message?.includes('invalid')) {
+        showValidationError('form', err.message || t('common.invalid_data'));
+      } else {
+        showError(
+          t('common.error'),
+          err.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const proceedToPassword = (signupData) => {
+    // 3. Navigate to password screen with prepared data.
+    navigation.navigate('password', { signupData });
+    
+    showSuccess(
+      t('auth.account_created'),
+      t('auth.please_complete_profile'),
+      { duration: 3000 }
+    );
   };
 
   return (

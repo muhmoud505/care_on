@@ -151,7 +151,7 @@ const TermsOfService = ({ navigation }) => {
             onPress={() => handleLinkPress('mailto:support@care_on.com')}
           >
             {/* <Icons.Mail width={wp(6)} height={wp(6)} style={styles.contactIcon} /> */}
-            <Text style={[styles.contactButtonText, { textAlign: isRTL ? 'right' : 'left' }]}>
+            <Text style={[styles.contactButtonText, { textAlign: isRTL ? 'center' : 'center' }]}>
               {t('terms_of_service.contact_support')}
             </Text>
           </TouchableOpacity>
@@ -207,6 +207,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    justifyContent: 'center',
   },
   contactIcon: {
     tintColor: '#fff',

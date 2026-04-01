@@ -2,15 +2,14 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomHeader from '../../../components/CustomHeader';
@@ -18,6 +17,13 @@ import FormField from '../../../components/FormInput';
 import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
+import {
+    showAuthError,
+    showError,
+    showNetworkError,
+    showSuccess,
+    showValidationError,
+} from '../../../utils/toastService';
 
 const AfterCode = () => {
   const { t, i18n } = useTranslation();
@@ -42,7 +48,9 @@ const AfterCode = () => {
   const handleConfirm = async () => {
     if (!formIsValid) {
       if (!passwordsMatch) {
-        Alert.alert(t('common.error'), t('auth.passwords_do_not_match'));
+        showValidationError('password', t('auth.password_mismatch_error'));
+      } else {
+        showValidationError('form', t('common.check_required_fields'));
       }
       return;
     }
@@ -56,13 +64,49 @@ const AfterCode = () => {
         password_confirmation: form.password_confirmation,
       });
 
-      Alert.alert(
-        t('common.success'),
+      // Show success toast
+      showSuccess(
+        t('auth.password_updated_success'),
         t('auth.password_reset_success_login'),
-        [{ text: t('common.ok'), onPress: () => navigation.replace('signin') }]
+        { duration: 4000 }
       );
+
+      // Navigate to signin after a short delay to allow user to see the toast
+      setTimeout(() => {
+        navigation.replace('signin');
+      }, 2000);
     } catch (error) {
-      Alert.alert(t('common.error'), error.message);
+      // Enhanced error handling with specific error types
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('common.check_internet_connection'),
+          () => handleConfirm() // Retry function
+        );
+      } else if (error.message?.includes('unauthorized') || error.message?.includes('401') || error.message?.includes('invalid')) {
+        showAuthError(
+          t('auth.invalid_code_error'),
+          t('auth.request_new_code'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('password') || error.message?.includes('weak') || error.message?.includes('requirements')) {
+        showError(
+          t('auth.password_requirements_not_met'),
+          t('auth.password_rules'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('expired') || error.message?.includes('timeout')) {
+        showError(
+          t('auth.code_expired'),
+          t('auth.request_new_code'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('auth.password_update_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
     }
   };
 

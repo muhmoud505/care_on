@@ -16,6 +16,13 @@ import Toast from 'react-native-toast-message';
 import CustomHeader from '../../components/CustomHeader';
 import { Icons } from '../../components/Icons';
 import { useAuth } from '../../contexts/authContext';
+import {
+  showError,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
+} from '../../utils/toastService';
 
 const API_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
 
@@ -54,21 +61,54 @@ const CreateCodeScreen = () => {
       setGeneratedCode(code.toString());
       setShowCode(true);
 
-      Toast.show({
-        type: 'success',
-        text1: t('common.success'),
-        text2: t('create_code.code_created'),
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      showSuccess(
+        t('common.success'),
+        t('create_code.code_created_success'),
+        t,
+        { duration: 3000 }
+      );
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: `${t('create_code.failed_to_create')}: ${error.message}`,
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      // Enhanced error handling for code creation
+      if (error.message?.includes('Network request failed') || error.message?.includes('network') || error.message?.includes('fetch')) {
+        showNetworkError(
+          t('create_code.code_network_error'),
+          () => createPatientAccessCode(), // Retry function
+          t
+        );
+      } else if (error.message?.includes('permission') || error.message?.includes('unauthorized') || error.message?.includes('403')) {
+        showPermissionError(
+          t('create_code.code_permission_error'),
+          t,
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('server') || error.message?.includes('500') || error.message?.includes('502')) {
+        showServerError(
+          t('create_code.code_server_error'),
+          t,
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('duplicate') || error.message?.includes('exists') || error.message?.includes('409')) {
+        showError(
+          t('create_code.code_duplicate_error'),
+          error.message || t('common.something_went_wrong'),
+          t,
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('format') || error.message?.includes('invalid')) {
+        showError(
+          t('create_code.code_invalid_format'),
+          error.message || t('common.something_went_wrong'),
+          t,
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('create_code.code_creation_failed'),
+          error.message || t('common.something_went_wrong'),
+          t,
+          { duration: 4000 }
+        );
+      }
     } finally {
       setIsCreating(false);
     }
@@ -77,21 +117,19 @@ const CreateCodeScreen = () => {
   const handleCopyCode = async () => {
     try {
       await Clipboard.setString(generatedCode);
-      Toast.show({
-        type: 'success',
-        text1: t('create_code.copied'),
-        text2: t('create_code.code_copied'),
-        position: 'top',
-        visibilityTime: 2000,
-      });
-    } catch {
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: t('create_code.copy_failed'),
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      showSuccess(
+        t('create_code.copied'),
+        t('create_code.code_copy_success'),
+        t,
+        { duration: 2000 }
+      );
+    } catch (error) {
+      showError(
+        t('common.error'),
+        t('create_code.code_copy_failed'),
+        t,
+        { duration: 3000 }
+      );
     }
   };
 
@@ -138,7 +176,8 @@ const CreateCodeScreen = () => {
 
               <View style={styles.codeBox}>
                 <Text style={styles.codeText}>
-                  {generatedCode.split('').join(' ')}
+                  {/* {generatedCode.split('').join(' ')} */}
+                  {generatedCode}
                 </Text>
               </View>
 

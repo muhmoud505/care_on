@@ -14,6 +14,14 @@ import Result from '../../components/resultComponents';
 import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
+import {
+    showError,
+    showInfo,
+    showNetworkError,
+    showPermissionError,
+    showServerError,
+    showSuccess,
+} from '../../utils/toastService';
 
 const LastReports = () => {
   const [expandedItems, setExpandedItems] = useState({});
@@ -59,35 +67,72 @@ const LastReports = () => {
     }, [user?.token?.value, fetchMedicines, fetchResults, fetchEshaas, fetchReports])
   );
    useEffect(() => {
-      // We only show the toast if loading has finished AND it's not the very first app boot
-      if (loading.results === false && results.length === 0 && !error.results && !loading.results
-        && 
-        loading.medicines === false && medicines.length === 0 && !error.medicines && !loading.medicines &&
-        loading.eshaa === false && eshaa.length === 0 && !error.eshaa && !loading.eshaa &&
-        loading.reports === false && reports.length === 0 && !error.reports && !loading.reports
+    // Enhanced empty state handling with toast service
+    if (loading.results === false && results.length === 0 && !error.results &&
+        loading.medicines === false && medicines.length === 0 && !error.medicines &&
+        loading.eshaa === false && eshaa.length === 0 && !error.eshaa &&
+        loading.reports === false && reports.length === 0 && !error.reports
       ) {
-        console.log("Triggering Toast..."); // If you see this in LOG, the logic is working
-        
-        Toast.show({
-          type: 'info',
-          text1: t('common.info'),
-          text2: t('home.no_reports_found'),
-          position: 'top', // Changed to top to ensure it's not under the tab bar
-          visibilityTime: 3000,
-          autoHide: true,
-          topOffset: 60, // Gives it some space from the header
-        });
-      }
-    }, [loading.results, results.length, error.results, loading.medicines, medicines.length, error.medicines, loading.eshaa, eshaa.length, error.eshaa, loading.reports, reports.length, error.reports, t]);
-  
+      showInfo(
+        t('common.info'),
+        t('last_reports.last_reports_empty_state'),
+        { duration: 3000 }
+      );
+    }
+  }, [loading.results, results.length, error.results, loading.medicines, medicines.length, error.medicines, loading.eshaa, eshaa.length, error.eshaa, loading.reports, reports.length, error.reports, t]);
 
-  const onRefresh = useCallback(() => {
-    // When refreshing, force a refetch of the latest record for each category.
-    fetchMedicines({ force: true, per_page: 1 });
-    fetchResults({ force: true, per_page: 1 });
-    fetchEshaas({ force: true, per_page: 1 });
-    fetchReports({ force: true, per_page: 1 });
-  }, [fetchMedicines, fetchResults, fetchEshaas, fetchReports]);
+  const onRefresh = useCallback(async () => {
+    try {
+      // When refreshing, force a refetch of the latest record for each category.
+      await Promise.all([
+        fetchMedicines({ force: true, per_page: 1 }),
+        fetchResults({ force: true, per_page: 1 }),
+        fetchEshaas({ force: true, per_page: 1 }),
+        fetchReports({ force: true, per_page: 1 }),
+      ]);
+      showSuccess(
+        t('common.success'),
+        t('last_reports.last_reports_loading_success'),
+        { duration: 2000 }
+      );
+    } catch (error) {
+      // Enhanced error handling for refresh
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('last_reports.last_reports_network_error'),
+          () => onRefresh() // Retry function
+        );
+      } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+        showPermissionError(
+          t('last_reports.last_reports_permission_error'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('server') || error.message?.includes('500')) {
+        showServerError(
+          t('last_reports.last_reports_server_error'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('last_reports.last_reports_refresh_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
+    }
+  }, [fetchMedicines, fetchResults, fetchEshaas, fetchReports, t]);
+
+  const handleAddRecord = () => {
+    try {
+      navigation.navigate('AddRecordSelector');
+    } catch (error) {
+      showError(
+        t('home.navigation_error'),
+        error.message || t('common.something_went_wrong'),
+        { duration: 4000 }
+      );
+    }
+  };
 
   const handleItemExpand = (id, isExpanded) => {
     setExpandedItems(prev => ({ ...prev, [id]: isExpanded }));
@@ -168,7 +213,7 @@ const LastReports = () => {
            )}
            <TouchableOpacity
              style={[finalAddButtonStyle, { [isRTL ? 'left' : 'right']: wp(5) }]}
-             onPress={() => navigation.navigate('AddRecordSelector')}
+             onPress={handleAddRecord}
            >
              <Icons.Add width={wp(18)} height={wp(18)} />
            </TouchableOpacity>

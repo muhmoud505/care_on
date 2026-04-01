@@ -11,6 +11,14 @@ import Report from '../../components/reportCoponent';
 import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
+import {
+  showError,
+  showInfo,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
+} from '../../utils/toastService';
 
 const Reports = () => {
   const [expandedItems, setExpandedItems] = useState({});
@@ -30,25 +38,62 @@ const Reports = () => {
     }, [user?.token?.value, fetchReports])
   );
  useEffect(() => {
-    // We only show the toast if loading has finished AND it's not the very first app boot
-    if (loading.reports === false && reports.length === 0 && !error.reports && !loading.reports) {
-      console.log("Triggering Toast..."); // If you see this in LOG, the logic is working
-      
-      Toast.show({
-        type: 'info',
-        text1: t('common.info'),
-        text2: t('home.no_reports_found'),
-        position: 'top', // Changed to top to ensure it's not under the tab bar
-        visibilityTime: 3000,
-        autoHide: true,
-        topOffset: 60, // Gives it some space from the header
-      });
+    // Enhanced empty state handling with toast service
+    if (loading.reports === false && reports.length === 0 && !error.reports) {
+      showInfo(
+        t('common.info'),
+        t('reports_list.reports_empty_state'),
+        { duration: 3000 }
+      );
     }
   }, [loading.reports, reports.length, error.reports, t]);
 
-  const onRefresh = useCallback(() => {
-    fetchReports({ force: true });
-  }, [fetchReports]);
+  const onRefresh = useCallback(async () => {
+    try {
+      await fetchReports({ force: true });
+      showSuccess(
+        t('common.success'),
+        t('reports_list.reports_loading_success'),
+        { duration: 2000 }
+      );
+    } catch (error) {
+      // Enhanced error handling for refresh
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('reports_list.reports_network_error'),
+          () => onRefresh() // Retry function
+        );
+      } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
+        showPermissionError(
+          t('reports_list.reports_permission_error'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('server') || error.message?.includes('500')) {
+        showServerError(
+          t('reports_list.reports_server_error'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('reports_list.reports_refresh_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
+    }
+  }, [fetchReports, t]);
+
+  const handleAddReport = () => {
+    try {
+      navigation.navigate('addReport');
+    } catch (error) {
+      showError(
+        t('home.navigation_error'),
+        error.message || t('common.something_went_wrong'),
+        { duration: 4000 }
+      );
+    }
+  };
 
   const handleItemExpand = (id, isExpanded) => {
     setExpandedItems(prev => ({ ...prev, [id]: isExpanded }));
@@ -106,7 +151,7 @@ const Reports = () => {
            )}
            <TouchableOpacity
              style={[finalAddButtonStyle, { [isRTL ? 'left' : 'right']: wp(5) }]}
-             onPress={() => navigation.navigate('addReport')}
+             onPress={handleAddReport}
            >
              <Icons.Add width={wp(18)} height={wp(18)} />
            </TouchableOpacity>

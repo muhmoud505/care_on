@@ -2,11 +2,11 @@ import { useNavigation, useRoute } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
@@ -15,6 +15,13 @@ import FormField from '../../../components/FormInput'
 import { useAuth } from '../../../contexts/authContext'
 import useForm from '../../../hooks/useForm'
 import { hp, wp } from '../../../utils/responsive'
+import {
+    showAuthError,
+    showError,
+    showNetworkError,
+    showSuccess,
+    showValidationError
+} from '../../../utils/toastService'
 
 const Code = () => {
   const navigation = useNavigation();
@@ -53,31 +60,52 @@ const Code = () => {
     setIsResending(true);
     try {
       await resendResetCode({ email: email });
-      Toast.show({
-          type: 'success',
-          text1: t('common.success'),
-          text2: t('auth.code_resent_success'),
-          position: 'top',
-          visibilityTime: 3000,
-        });
-        // Reset the timer
-        setTimeLeft(60);
-        setShowResend(false);
+      
+      showSuccess(
+        t('auth.resend_code_success'),
+        t('auth.check_your_email'),
+        { duration: 3000 }
+      );
+      
+      // Reset the timer
+      setTimeLeft(60);
+      setShowResend(false);
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: error.message,
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      // Enhanced error handling with specific error types
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('common.check_internet_connection'),
+          () => handleResend() // Retry function
+        );
+      } else if (error.message?.includes('unauthorized') || error.message?.includes('401')) {
+        showAuthError(
+          t('auth.email_not_found'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('rate') || error.message?.includes('limit')) {
+        showError(
+          t('auth.too_many_requests'),
+          t('auth.try_again_later'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('auth.resend_code_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
     } finally {
       setIsResending(false);
     }
   };
 
   const handleNext = async () => {
-    if (!formIsValid) return;
+    if (!formIsValid) {
+      showValidationError('form', 'Please enter the verification code');
+      return;
+    }
+    
     try {
       // The API should validate the code.
       // We assume the API returns success if the code is correct.
@@ -85,16 +113,41 @@ const Code = () => {
         email: email,
         code: form.code,
       });
+      
+      // Show success toast
+      showSuccess(
+        t('auth.code_verified_success'),
+        t('auth.proceed_to_reset_password'),
+        { duration: 3000 }
+      );
+      
       // On success, navigate to the next step, passing the necessary data.
       navigation.navigate('aftercode', { code: form.code, email: email });
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: error.message || t('auth.invalid_code_error'),
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      // Enhanced error handling with specific error types
+      if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
+        showNetworkError(
+          t('common.check_internet_connection'),
+          () => handleNext() // Retry function
+        );
+      } else if (error.message?.includes('invalid') || error.message?.includes('wrong') || error.message?.includes('incorrect')) {
+        showAuthError(
+          t('auth.invalid_code_error'),
+          { duration: 4000 }
+        );
+      } else if (error.message?.includes('expired') || error.message?.includes('timeout')) {
+        showError(
+          t('auth.code_expired'),
+          t('auth.request_new_code'),
+          { duration: 4000 }
+        );
+      } else {
+        showError(
+          t('auth.code_verification_failed'),
+          error.message || t('common.something_went_wrong'),
+          { duration: 4000 }
+        );
+      }
     }
   };
 

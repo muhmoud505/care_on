@@ -111,22 +111,22 @@ const PrivacyPolicy = ({ navigation }) => {
     if (!privacyData) return null;
 
     return (
-      <View style={styles.contentWrapper}>
-        {/* Title from API */}
+      <View style={[styles.contentWrapper, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+        {/* Title from API or fallback to localized title */}
         <Text style={[styles.pageTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
-          {privacyData.title}
+          {privacyData.title || t('privacy_policy.title')}
         </Text>
 
-        {/* Render HTML content */}
+        {/* Render HTML content from API with localized styles */}
         <RenderHtml
           contentWidth={width - wp(8)}
           source={{ html: privacyData.content }}
           tagsStyles={tagsStyles}
         />
 
-        {/* Last updated */}
+        {/* Last updated from API or fallback */}
         {privacyData.updated_at && (
-          <Text style={[styles.updatedAt, { textAlign: isRTL ? 'right' : 'left' }]}>
+          <Text style={[styles.updatedAt, { textAlign: isRTL ? 'left' : 'left' }]}>
             {t('privacy_policy.last_updated')}: {new Date(privacyData.updated_at).toLocaleDateString()}
           </Text>
         )}
@@ -188,6 +188,19 @@ const styles = StyleSheet.create({
     fontSize: Math.min(wp(6), 24),
     fontWeight: 'bold',
     color: '#014CC4',
+    marginBottom: hp(2),
+  },
+  sectionTitle: {
+    fontSize: Math.min(wp(5), 20),
+    fontWeight: 'bold',
+    color: '#1A1D44',
+    marginTop: hp(2),
+    marginBottom: hp(1),
+  },
+  sectionText: {
+    fontSize: Math.min(wp(3.5), 14),
+    color: '#333',
+    lineHeight: hp(2.5),
     marginBottom: hp(2),
   },
   updatedAt: {
