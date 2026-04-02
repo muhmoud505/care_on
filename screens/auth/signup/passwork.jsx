@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Alert,
   Modal,
   SafeAreaView,
   ScrollView,
@@ -20,13 +19,14 @@ import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 import {
+  showError,
   showSuccess,
   showValidationError
 } from '../../../utils/toastService';
 import { validatePassword } from '../../../utils/validators';
 
 // The specific green from your image
-const THEME_GREEN = '#82D481';
+const THEME_GREEN = '#80D280';
 const DISABLED_GREEN = '#B9E8BD';
 
 const PasswordScreen = ({ route }) => {
@@ -78,13 +78,14 @@ const PasswordScreen = ({ route }) => {
     showSuccess(
       t('auth.confirm_data'),
       `${t('auth.name')}: ${signupData.name}\n${t('auth.email')}: ${signupData.email}\n${t('auth.national_id')}: ${signupData.national_number}\n${t('common.password')}: ${form.password}`,
+      t,
       { duration: 3000 }
     );
 
     // Proceed with signup after showing confirmation
     setTimeout(() => {
       proceedWithSignup();
-    }, 3500);
+    }, );
   };
 
   const proceedWithSignup = async () => {
@@ -102,7 +103,11 @@ const PasswordScreen = ({ route }) => {
           await AsyncStorage.setItem('child_accounts', JSON.stringify(childAccounts));
         }
         navigation.navigate('accounts');
-        Alert.alert(t('common.success'), t('auth.child_account_created'));
+        showSuccess(
+      t('auth.account_created'),
+      t('auth.please_complete_profile'),
+      { duration: 3000 }
+    );
       } else {
         navigation.dispatch(
           CommonActions.reset({
@@ -112,9 +117,16 @@ const PasswordScreen = ({ route }) => {
         );
       }
     } catch (error) {
-      Alert.alert(t('common.error'), error.message);
+      showError(
+        t('common.error'),
+        error.message || t('common.something_went_wrong'),
+        t,
+        { duration: 4000 }
+      );
     }
   };
+  
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -183,7 +195,7 @@ const PasswordScreen = ({ route }) => {
             onPress={() => setAgreedToTerms(!agreedToTerms)}
             activeOpacity={0.7}
           >
-            {agreedToTerms && <View style={styles.checkboxInner} />}
+            {agreedToTerms && <View style={[styles.checkboxInner,{backgroundColor: isChild ? THEME_GREEN : '#014CC4'}]} />}
           </TouchableOpacity>
           <Text style={styles.termsText}>
             {t('auth.agree_prefix')}
@@ -202,7 +214,7 @@ const PasswordScreen = ({ route }) => {
             styles.submitButton, 
             (!formIsValid || isAuthLoading || !agreedToTerms) && {backgroundColor: DISABLED_GREEN,
     elevation: 0,},
-            {backgroundColor:isChild ? THEME_GREEN : '#ccc'}
+            {backgroundColor:isChild ? THEME_GREEN : '#014CC4'}
           ]}
         >
           {isAuthLoading ? (
@@ -285,7 +297,7 @@ const styles = StyleSheet.create({
   checkboxInner: {
     width: wp(3.5),
     height: wp(3.5),
-    backgroundColor: THEME_GREEN,
+   
     borderRadius: 4,
   },
   termsText: {

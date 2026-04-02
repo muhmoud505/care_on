@@ -2,11 +2,11 @@ import { useNavigation, useRoute } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
@@ -16,18 +16,18 @@ import { useAuth } from '../../../contexts/authContext'
 import useForm from '../../../hooks/useForm'
 import { hp, wp } from '../../../utils/responsive'
 import {
-    showAuthError,
-    showError,
-    showNetworkError,
-    showSuccess,
-    showValidationError
+  showAuthError,
+  showError,
+  showNetworkError,
+  showSuccess,
+  showValidationError
 } from '../../../utils/toastService'
 
 const Code = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { email } = route.params || {};
-  const { verifyResetCode, resendResetCode, isAuthLoading } = useAuth();
+  const { verifyResetCode, forgotPassword, isAuthLoading } = useAuth();
   const { form, errors, handleChange, checkFormValidity } = useForm({
     code: '',
   });
@@ -59,7 +59,7 @@ const Code = () => {
    const handleResend = async () => {
     setIsResending(true);
     try {
-      await resendResetCode({ email: email });
+      await forgotPassword({ email: email });
       
       showSuccess(
         t('auth.resend_code_success'),
@@ -153,7 +153,7 @@ const Code = () => {
 
   return (
     <SafeAreaView style={[styles.safeArea]}>
-      <CustomHeader text={t('auth.enter_code')} />
+      <CustomHeader text={t('auth.reset_password')} />
       <View style={[styles.container, { direction }]}>
         <Text style={[styles.txt1, { textAlign }]}>{t('auth.enter_code_sent_to')}</Text>
         <View style={styles.minContainer}>

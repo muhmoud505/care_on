@@ -22,7 +22,6 @@ import {
   showError,
   showFileError,
   showNetworkError,
-  showSuccess,
   showValidationError
 } from '../../../utils/toastService';
 import { validateEmail, validateName, validateNationalId } from '../../../utils/validators';
@@ -91,16 +90,16 @@ const Signup = () => {
       };
       
       // Show data confirmation before proceeding
-      showSuccess(
-        t('auth.confirm_data'),
-        `${t('auth.name')}: ${form.name}\n${t('auth.email')}: ${form.email}\n${t('auth.national_id')}: ${form.national_number}\n${t('auth.birthdate')}: ${birthdate}\n${t('auth.gender')}: ${gender}`,
-        { duration: 3000 }
-      );
+      // showSuccess(
+      //   t('auth.confirm_data'),
+      //   `${t('auth.name')}: ${form.name}\n${t('auth.email')}: ${form.email}\n${t('auth.national_id')}: ${form.national_number}\n${t('auth.birthdate')}: ${birthdate}\n${t('auth.gender')}: ${gender}`,
+      //   { duration: 3000 }
+      // );
 
       // Navigate to password screen after showing confirmation
       setTimeout(() => {
         proceedToPassword(signupData);
-      }, 3500);
+      }, 0);
     } catch (err) {
       console.error("Failed to process image or navigate:", err);
       
@@ -136,11 +135,7 @@ const Signup = () => {
     // 3. Navigate to password screen with prepared data.
     navigation.navigate('password', { signupData });
     
-    showSuccess(
-      t('auth.account_created'),
-      t('auth.please_complete_profile'),
-      { duration: 3000 }
-    );
+    
   };
 
   return (
@@ -208,7 +203,7 @@ const Signup = () => {
         
         <TouchableOpacity
           onPress={handleSignup}
-          activeOpacity={0.7}
+          activeOpacity={1}
           disabled={!formIsValid}
           style={[styles.submitButton, (!formIsValid || isProcessing) && styles.disabledButton]}
         >
@@ -255,7 +250,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(2),
   },
   submitButton: {
-    backgroundColor: '#7FA8D4',
+    backgroundColor: '#014CC4',
     width: '100%',
     height: hp(7),
     marginTop: hp(4),

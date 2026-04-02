@@ -307,6 +307,7 @@
 
   "auth": {
     "signin": "تسجيل الدخول",
+    "enter_email_send_code": "أدخل بريدك الإلكتروني، سيتم إرسال رمز",
     "signup": "إنشاء حساب",
     "password_highlight": "كلمة المرور",
     "set_password_header": "لتحديد كلمة مرور لحسابك",
@@ -316,6 +317,7 @@
     "name_placeholder": "ادخل اسمك",
     "personal_id": "الرقم الشخصي",
     "reset_password": "إعادة تعيين كلمة المرور",
+    "enter_code": "برجاء ادخال الكود",
     "set_password": "تحديد كلمة المرور",
     "logout": "تسجيل الخروج",
     "enter_passwords": "يرجى إدخال كلمات المرور",

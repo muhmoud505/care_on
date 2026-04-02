@@ -2,27 +2,28 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import CustomHeader from '../../../components/CustomHeader';
 import FormField from '../../../components/FormInput';
 import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 import {
-    showAuthError,
-    showError,
-    showNetworkError,
-    showSuccess,
-    showValidationError,
+  showAuthError,
+  showError,
+  showNetworkError,
+  showSuccess,
+  showValidationError,
 } from '../../../utils/toastService';
 
 const AfterCode = () => {
@@ -46,6 +47,15 @@ const AfterCode = () => {
   const formIsValid = checkFormValidity() && passwordsMatch;
 
   const handleConfirm = async () => {
+    // Test toast to debug
+    Toast.show({
+      type: 'success',
+      text1: 'Test Toast',
+      text2: 'This is a test message',
+      position: 'top',
+      visibilityTime: 2000,
+    });
+    
     if (!formIsValid) {
       if (!passwordsMatch) {
         showValidationError('password', t('auth.password_mismatch_error'));
@@ -162,6 +172,7 @@ const AfterCode = () => {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+      <Toast />
     </SafeAreaView>
   )
 }

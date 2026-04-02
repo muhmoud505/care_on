@@ -242,7 +242,7 @@ const Survey = () => {
 
     try {
 
-      const response = await fetch(`${API_URL}/api/v1/survey`, {
+      const response = await fetch(`${API_URL}/api/v1/answers`, {
 
         method: 'POST',
 

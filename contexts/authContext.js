@@ -396,6 +396,7 @@ export const AuthProvider = ({ children }) => {
         },
         body: JSON.stringify({ email }),
       });
+        console.log("response forget password ",response);
       const data = await safeParseJson(response);
       if (!response.ok || !data) {
         throw new Error(data?.message || 'Failed to send password reset email');
@@ -407,30 +408,34 @@ export const AuthProvider = ({ children }) => {
   };
 
   const verifyResetCode = async ({ email, code }) => {
-    setIsAuthLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('email', email);
-      formData.append('otp', code);
-
-      const response = await fetch(`${API_URL}/api/auth/password/verify-otp`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'multipart/form-data',
-          'lang': i18next.language,
-        },
-        body: formData,
-      });
-      const data = await safeParseJson(response);
-      if (!response.ok || !data) {
-        throw new Error(data?.message || 'Failed to verify reset code');
-      }
-      return data;
-    } finally {
-      setIsAuthLoading(false);
+  setIsAuthLoading(true);
+  try {
+    // Use JSON like the web, NOT FormData
+    const response = await fetch(`${API_URL}/api/auth/password/verify-otp`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'lang': i18next.language,
+      },
+      body: JSON.stringify({
+        email,
+        otp: code, // Match web's field name
+      }),
+    });
+    console.log("response verify code ",response);
+    
+    const data = await safeParseJson(response);
+    console.log("data ",data);
+    
+    if (!response.ok || !data) {
+      throw new Error(data?.message || 'Failed to verify reset code');
     }
-  };
+    return data;
+  } finally {
+    setIsAuthLoading(false);
+  }
+};
 
 const resetPassword = async ({ current_password, password, password_confirmation }) => {
   setIsAuthLoading(true);
@@ -460,8 +465,8 @@ const resetPassword = async ({ current_password, password, password_confirmation
 };
  const resetPasswordAfterCode = async ({ email, code, password, password_confirmation }) => {
   setIsAuthLoading(true);
+  
   try {
-    // Regular fetch - NO auth header, NO token needed
     const response = await fetch(`${API_URL}/api/auth/password/reset`, {
       method: 'POST',
       headers: {
@@ -475,15 +480,22 @@ const resetPassword = async ({ current_password, password, password_confirmation
         password,
         password_confirmation,
       }),
-    });     const data = await safeParseJson(response);
-      if (!response.ok || !data) {
-        throw new Error(data?.message || 'Failed to reset password');
-      }
-      return data;
-    } finally {
-      setIsAuthLoading(false);
+    });
+    
+    const data = await safeParseJson(response);
+    
+    if (!response.ok || !data) {
+      throw new Error(data?.message || 'Failed to reset password');
     }
-  };
+    
+    return data;
+  } catch (error) {
+    console.error('Reset password error:', error);
+    throw error;
+  } finally {
+    setIsAuthLoading(false);
+  }
+};
 
   const switchAccount = async (account) => {
     if (!account) {
