@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white'
   },
   text: {
-    marginTop: -hp(12),
+    marginTop: hp(6),
     fontSize: Math.min(wp(16), 64),
     fontFamily: "Nunito",
     fontWeight: '700',

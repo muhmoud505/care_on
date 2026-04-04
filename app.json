@@ -4,7 +4,7 @@
     "slug": "HC",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets2/images/logo.png",
+    "icon": "./assets2/svgImages/logo.png",
     "scheme": "hc",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,7 +14,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets2/images/logo.png",
+        "foregroundImage": "./assets2/svgImages/logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,

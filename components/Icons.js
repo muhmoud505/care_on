@@ -35,7 +35,7 @@ import Location from '../assets2/svgImages/location.svg';
 import Locationa from '../assets2/svgImages/locationA.svg';
 import Locationb from '../assets2/svgImages/locationB.svg';
 import Login from '../assets2/svgImages/login.svg';
-import Logo from '../assets2/svgImages/logo.svg';
+import Logo from '../assets2/svgImages/logo.png';
 import Medicine from '../assets2/svgImages/medicine.svg';
 import Menu from '../assets2/svgImages/menu.svg';
 import Notification from '../assets2/svgImages/notification.svg';
