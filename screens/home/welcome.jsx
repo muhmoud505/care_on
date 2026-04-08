@@ -1,4 +1,4 @@
-import { CommonActions, useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,13 +19,12 @@ const WelcomeScreen = () => {
 
   const handleContinue = async () => {
     if (sessionData) {
-      // Call setSession HERE — only when the user explicitly taps Continue.
-      // This ensures the root navigator doesn't switch stacks before this screen mounts.
+      // Call setSession HERE — only when user explicitly taps Continue.
+      // This ensures root navigator doesn't switch stacks before this screen mounts.
       await setSession(sessionData);
     }
-    navigation.dispatch(
-      CommonActions.reset({ index: 0, routes: [{ name: 'home' }] })
-    );
+    // Navigate to home screen directly instead of using reset action
+    navigation.navigate('home');
   };
 
   return (

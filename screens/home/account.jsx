@@ -36,6 +36,8 @@ const Account = () => {
 
   // tracks which account button is in loading state
   const [switchingId, setSwitchingId] = useState(null);
+  console.log('user', primaryUser);
+  
 
   useFocusEffect(
     React.useCallback(() => {
@@ -91,7 +93,7 @@ const handleSwitchAccount = async (account) => {
                 {primaryUser.user?.name || t('account.primary_user')}
               </Text>
               <Text style={styles.phoneNumber} numberOfLines={1}>
-                {primaryUser.user?.phone_number || t('account.no_phone_number')}
+                {primaryUser.user?.resource?.national_number || t('account.no_phone_number')}
               </Text>
             </View>
 
@@ -135,7 +137,7 @@ const handleSwitchAccount = async (account) => {
 
                 <View style={[styles.userInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
                   <Text style={styles.userName} numberOfLines={1}>{child.name}</Text>
-                  <Text style={styles.phoneNumber} numberOfLines={1}>{child.phone_number || ''}</Text>
+                  <Text style={styles.phoneNumber} numberOfLines={1}>{child.resource?.national_number || ''}</Text>
                 </View>
 
                 <TouchableOpacity

@@ -76,7 +76,7 @@ const PasswordScreen = ({ route }) => {
 
     // Show data confirmation modal
     showSuccess(
-      t('auth.confirm_data'),
+   
       `${t('auth.name')}: ${signupData.name}\n${t('auth.email')}: ${signupData.email}\n${t('auth.national_id')}: ${signupData.national_number}\n${t('common.password')}: ${form.password}`,
       t,
       { duration: 3000 }
@@ -147,7 +147,7 @@ const PasswordScreen = ({ route }) => {
               return (
                 <>
                   <Text>{parts[0]}</Text>
-                  <Text style={[styles.headerHighlight,{color:isChild ? THEME_GREEN : '#fff'}]}>{highlightText}</Text>
+                  <Text style={[styles.headerHighlight,{color:isChild ? THEME_GREEN : '#014CC4'}]}>{highlightText}</Text>
                   <Text>{parts[1]}</Text>
                 </>
               );
@@ -214,7 +214,7 @@ const PasswordScreen = ({ route }) => {
             styles.submitButton, 
             (!formIsValid || isAuthLoading || !agreedToTerms) && {backgroundColor: DISABLED_GREEN,
     elevation: 0,},
-            {backgroundColor:isChild ? THEME_GREEN : '#014CC4'}
+            {backgroundColor:isChild ? THEME_GREEN : '#014CC4',opacity:(!formIsValid || isAuthLoading || !agreedToTerms) ? 0.5 : 1}
           ]}
         >
           {isAuthLoading ? (

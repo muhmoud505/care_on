@@ -10,10 +10,10 @@ import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 import {
-  showError,
-  showNetworkError,
-  showSuccess,
-  showValidationError
+    showError,
+    showNetworkError,
+    showSuccess,
+    showValidationError
 } from '../../../utils/toastService';
 
 const Reset = () => {
@@ -79,7 +79,8 @@ const Reset = () => {
         { duration: 3000 }
       );
 
-      navigation.goBack();
+      // Replace current screen with signin to prevent going back to forget password
+      navigation.replace('signin');
     } catch (error) {
       console.error('Reset password error:', error);
       // Enhanced error handling for password reset
