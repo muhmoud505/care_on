@@ -24,7 +24,10 @@ const WelcomeScreen = () => {
       await setSession(sessionData);
     }
     // Navigate to home screen directly instead of using reset action
-    navigation.navigate('home');
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'home' }],
+    });
   };
 
   return (

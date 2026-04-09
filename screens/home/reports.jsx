@@ -130,7 +130,7 @@ const Reports = () => {
   );
   };
   return (
-    <SafeAreaView style={[styles.container, ]}>
+    <SafeAreaView style={[styles.container,{direction: i18n.dir()} ]}>
       <CustomHeader text={t('home.reports_title')} />
       <ListContainer
         loading={loading.reports}

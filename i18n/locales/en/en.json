@@ -344,6 +344,7 @@
     "reset_password": "Reset Password",
     "set_password": "Set Password",
     "logout": "Logout",
+    "deactivate_account": "Deactivate",
     "enter_passwords": "Please enter the passwords",
     "current_password": "Current Password",
     "enter_current_password": "Enter current password",

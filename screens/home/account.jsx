@@ -1,5 +1,5 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -32,11 +32,25 @@ const Account = () => {
     children,
     fetchChildren,
     switchAccount,
+    fetchCurrentUser,
   } = useAuth();
 
   // tracks which account button is in loading state
   const [switchingId, setSwitchingId] = useState(null);
-  console.log('user', primaryUser);
+  const [fetchedUser, setFetchedUser] = useState(null);
+  console.log('user', fetchedUser);
+  
+  // Fetch current user data on component mount
+  useEffect(() => {
+    const getCurrentUserData = async () => {
+      const userData = await fetchCurrentUser();
+      if (userData) {
+        setFetchedUser(userData);
+        console.log('Fetched user data:', userData);
+      }
+    };
+    getCurrentUserData();
+  }, [fetchCurrentUser]);
   
 
   useFocusEffect(
@@ -82,7 +96,7 @@ const handleSwitchAccount = async (account) => {
           <View style={[styles.profileCard, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <View style={styles.avatarContainer}>
               <Image
-                source={primaryUser?.user?.avatar ? { uri: primaryUser.user.avatar } : Images.profile}
+                source={fetchedUser?.avatar ? { uri: fetchedUser?.avatar } : Images.profile}
                 style={styles.avatarImage}
                 resizeMode="cover"
               />

@@ -29,6 +29,7 @@ const Images = {
   bookmark: require('./icons/bookmark.png'),
   call: require('../assets2/images/call.png'),
   close: require('../assets2/images/close.png'),
+  // deactivate: require('../assets2/images/deactivate.png'),
   download: require('../assets2/images/download.png'),
   edit: require('../assets2/images/edit.png'),
   eye: require('./icons/eye.png'),

@@ -42,7 +42,7 @@ const CustomDrawerContent = (props) => {
     
     getCurrentUser();
   }, [fetchCurrentUser, user?.user]);
-  console.log("currentUser", currentUser);
+  console.log("currentUsdder", currentUser);
 
   // Use age directly from user resource (API already calculates it)
   const age = currentUser?.resource?.age;
@@ -55,6 +55,12 @@ const CustomDrawerContent = (props) => {
   const handleNavigate = (screenName, params = {}) => {
     navigation.closeDrawer();
     parentNavigation?.navigate(screenName, params);
+  };
+
+  const handleDeactivateAccount = () => {
+    // For now, just sign out until API is prepared
+    logout();
+    // TODO: Implement deactivate account API call
   };
 
   const menuItems = [
@@ -179,6 +185,28 @@ const CustomDrawerContent = (props) => {
       textAlign: textAlign,
       writingDirection: isRTL ? 'rtl' : 'ltr',
     },
+    deactivateButton: {
+      backgroundColor: '#36eef4',
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 12,
+      flexDirection: rowDirection,
+      alignItems: 'center',
+      gap: 12,
+    },
+    deactivateIcon: {
+      width: 24,
+      height: 24,
+      tintColor: '#F44336',
+      transform: [{ scaleX: isRTL ? -1 : 1 }], // Flip arrow for RTL
+    },
+    deactivateText: {
+      fontSize: 16,
+      color: '#F44336',
+      fontWeight: '500',
+      textAlign: textAlign,
+      writingDirection: isRTL ? 'rtl' : 'ltr',
+    },
   });
 
   return (
@@ -186,8 +214,8 @@ const CustomDrawerContent = (props) => {
       {/* Profile Section */}
       <View style={[styles.profileSection]}>
         <View style={[styles.profileHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <View style={[styles.profileInfo, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              <TouchableOpacity onPress={() => handleNavigate('ProfileStack')}>
+          <View style={[styles.profileInfo, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <TouchableOpacity onPress={() => handleNavigate('ProfileStack')}>
               {currentUser?.avatar ? (
                 <Image
                   source={{ uri: currentUser.avatar }}
@@ -237,6 +265,11 @@ const CustomDrawerContent = (props) => {
 
       {/* Footer */}
       <View style={styles.footer}>
+        <TouchableOpacity onPress={handleDeactivateAccount} style={styles.deactivateButton}>
+          {/* <Image source={} style={styles.deactivateIcon} /> */}
+          <Text style={styles.deactivateText}>{t('auth.deactivate_account')}</Text>
+        </TouchableOpacity>
+        
         <TouchableOpacity onPress={logout} style={styles.logoutButton}>
           <Image source={images.logout} style={styles.logoutIcon} />
           <Text style={styles.logoutText}>{t('auth.logout')}</Text>

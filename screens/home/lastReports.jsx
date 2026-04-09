@@ -15,12 +15,12 @@ import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
 import {
-    showError,
-    showInfo,
-    showNetworkError,
-    showPermissionError,
-    showServerError,
-    showSuccess,
+  showError,
+  showInfo,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
 } from '../../utils/toastService';
 
 const LastReports = () => {
@@ -188,7 +188,7 @@ const LastReports = () => {
     ? styles.addButtonHigh // When toggle is visible, add button is higher
     : styles.addButtonLow;  // When toggle is NOT visible, add button is lower (takes toggle's place)
   return (
-    <SafeAreaView style={[styles.container,]}>
+    <SafeAreaView style={[styles.container,{direction: i18n.dir()}]}>
       <CustomHeader text={t('home.last_reports_title')}/>
       <ListContainer
         // Combine loading and error states from all categories

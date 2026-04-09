@@ -1,7 +1,7 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react'; // Added useEffect
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message'; // Import Toast
 import CustomHeader from '../../components/CustomHeader';
@@ -98,7 +98,8 @@ console.log(results[0])
     setExpandedItems(newExpandedState);
   };
 
-  const isToggleButtonVisible = areAllExpanded;
+  // Toggle button should be visible when there are results and at least one is expanded
+  const isToggleButtonVisible = results.length > 0 && Object.values(expandedItems).some(Boolean);
 
   const finalAddButtonStyle = isToggleButtonVisible
     ? styles.addButtonHigh
@@ -118,9 +119,9 @@ console.log(results[0])
   };
 
   return (
-    <SafeAreaView style={[styles.container, ]}>
+    <SafeAreaView style={[styles.container,{direction: i18n.dir()} ]}>
       <CustomHeader text={t('home.results_title')} />
-      <View style={{ direction: isRTL ? 'ltr' : 'ltr' }}>
+     
 
       
       <ListContainer
@@ -142,14 +143,13 @@ console.log(results[0])
       )}
 
       <TouchableOpacity
-        style={[styles.addButton, { [isRTL ? 'right' : 'left']: wp(5) }]}
+        style={[finalAddButtonStyle, { [isRTL ? 'left' : 'right']: wp(5) }]}
         onPress={() => navigation.navigate('addResult')}
       >
         <Icons.Add width={wp(18)} height={wp(18)} />
       </TouchableOpacity>
 
-      {/* Render the Toast component here */}
-      </View>
+     
       <Toast />
     </SafeAreaView>
   );
@@ -170,19 +170,19 @@ const styles = StyleSheet.create({
   },
   addButtonHigh: {
     position: 'absolute',
-    bottom: hp(1),
+    bottom: hp(24),
     right: wp(5),
     zIndex: 1,
   },
   addButtonLow: {
     position: 'absolute',
-    bottom: hp(1),
+    bottom: hp(16),
     right: wp(5),
     zIndex: 1,
   },
   toggleButton: {
     position: 'absolute',
-    bottom: hp(1),
+    bottom: hp(16),
     right: wp(8),
     zIndex: 1,
   },

@@ -12,12 +12,12 @@ import { useAuth } from '../../contexts/authContext';
 import { useMedicalRecords } from '../../contexts/medicalRecordsContext';
 import { hp, wp } from '../../utils/responsive';
 import {
-    showError,
-    showInfo,
-    showNetworkError,
-    showPermissionError,
-    showServerError,
-    showSuccess,
+  showError,
+  showInfo,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
 } from '../../utils/toastService';
 
 const Eshaas = () => { 

@@ -1,15 +1,29 @@
 import { useNavigation } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../contexts/authContext';
 import { Icons } from './Icons';
 
 export const HomeHeader = ({ showUserInfo = true }) => {
-  const { user } = useAuth();
+  const { user, fetchCurrentUser } = useAuth();
   const navigation = useNavigation();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
-  const userName = user?.user?.name;
+  const [fetchedUser, setFetchedUser] = useState(null);
+  const userName = fetchedUser?.name || user?.user?.name;
+
+  // Fetch current user data on component mount
+  useEffect(() => {
+    const getCurrentUserData = async () => {
+      const userData = await fetchCurrentUser();
+      if (userData) {
+        setFetchedUser(userData);
+        console.log('HomeHeader - Fetched user data:', userData);
+      }
+    };
+    getCurrentUserData();
+  }, [fetchCurrentUser]);
 
   return (
     <View style={[styles.headerContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
@@ -37,10 +51,10 @@ export const HomeHeader = ({ showUserInfo = true }) => {
           <Icons.Notification width={24} height={24} color="#000" style={styles.actionIcon} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('ProfileStack')}>
-          {user?.user?.avatar ? (
-            <Image source={{ uri: user.user.avatar }} style={styles.profileImage} />
+          {fetchedUser?.avatar ? (
+            <Image source={{ uri: fetchedUser.avatar }} style={styles.profileImage} />
           ) : (
-            <Icons.Profilea width={40} height={40} imageUrl={user?.user?.avatar} />
+            <Icons.Profilea width={40} height={40} imageUrl={fetchedUser?.avatar} />
           )}
         </TouchableOpacity>
       </View>

@@ -1,0 +1,11 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Privacy Policy</title>
+  <desc>Shield icon with lock representing privacy policy</desc>
+
+  <path d="M60 10 L95 26 L95 58 C95 80 80 96 60 106 C40 96 25 80 25 58 L25 26 Z" fill="#111111"/>
+
+  <rect x="46" y="55" width="28" height="22" rx="4" fill="white" opacity="0.9"/>
+  <path d="M52 55 L52 49 C52 43.48 56.48 39 62 39 C67.52 39 72 43.48 72 49 L72 55" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="60" cy="64" r="3" fill="#111111"/>
+  <rect x="58.5" y="64" width="3" height="5" rx="1.5" fill="#111111"/>
+</svg>

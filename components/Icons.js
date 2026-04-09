@@ -43,6 +43,7 @@ import Ok from '../assets2/svgImages/ok.svg';
 import PasswordCheck from '../assets2/svgImages/password-check.svg';
 import Paya from '../assets2/svgImages/payA.svg';
 import Payb from '../assets2/svgImages/payB.svg';
+import PrivacyPolicy from '../assets2/svgImages/privacy-policy.svg';
 import Profile from '../assets2/svgImages/profile.svg';
 import Profilea from '../assets2/svgImages/profileA.svg';
 import Profileb from '../assets2/svgImages/profileB.svg';
@@ -53,6 +54,7 @@ import Refresh from '../assets2/svgImages/refresh.svg';
 import Routing from '../assets2/svgImages/routing.svg';
 import Scan from '../assets2/svgImages/scan.svg';
 import Search from '../assets2/svgImages/search.svg';
+import TermsOfService from '../assets2/svgImages/terms-of-service.svg';
 import Unexpand from '../assets2/svgImages/unExpand.svg';
 import Union from '../assets2/svgImages/Union.svg';
 import Upload from '../assets2/svgImages/upload.svg';
@@ -72,6 +74,8 @@ export const Icons = {
   Analysis,
   analysisA,
   Arrd,
+  TermsOfService,
+  PrivacyPolicy,
   Arrl,
   ArrowLeft,
   Arrr,

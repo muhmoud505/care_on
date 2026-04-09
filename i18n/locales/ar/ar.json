@@ -119,6 +119,30 @@
     "privacy_policy": "سياسة الخصوصية",
     "terms_of_service": "شروط الخدمة"
   },
+   "terms_of_service": {
+    "title": "شروط الخدمة", 
+    "acceptance": "قبول الشروط",
+    "acceptance_description": "باستخدام خدماتنا، فإنك توافق على الالتزام بهذه الشروط والأحكام.",
+    "service_description": "وصف الخدمة",
+    "service_description_text": "Care On provides medical record management, appointment scheduling, and healthcare provider connectivity services.",
+    "user_responsibilities": "المسؤوليات الخاصة بالمستخدم",
+    "user_responsibilities_text": "أنت مسؤول عن الحفاظ على سرية بيانات اعتماد حسابك وجميع الأنشطة التي تحدث تحت حسابك.",
+    "service_availability": "توفر الخدمة",
+    "service_availability_text": "نحن نسعى لضمان توفر عالي ولكن لا يمكننا ضمان 100% من التوقيت. قد تكون الخدمات غير متاحة مؤقتاً للصيانة.",
+    "fees_and_payments": "الرسوم والدفع",
+    "fees_and_payments_text": "بعض الخدمات قد تخضع للرسوم. يتم معالجة الدفع من خلال قنوات آمنة.",
+    "cancellation": "الإلغاء",
+    "cancellation_text": "يمكنك إلغاء حسابك في أي وقت. التراجع عن المبالغ المدفوعة خاضع لسياسة الإلغاء لدينا.",
+    "privacy": "الخصوصية",
+    "privacy_text": "استخدامك لخدماتنا تخضع أيضاً لسياسة الخصوصية الخاصة بنا.",
+    "intellectual_property": "الملكية الفكرية",
+    "intellectual_property_text": "جميع المحتويات والمواد المتاحة من خلال خدماتنا مملوكة لـ Care On أو مزوديها و محمية بقوانين الملكية الفكرية.",
+    "disclaimer": "إخلاء المسؤولية",
+    "disclaimer_text": "تُقدم خدماتنا 'كما هي' دون ضمانات من أي نوع. يجب مراجعة المعلومات الطبية من قبل مختصين في الرعاية الصحية.",
+    "contact": "اتصل بنا",
+    "contact_text": "للاستفسار عن هذه الشروط، يرجى الاتصال بفريق الدعم لدينا.",
+    "contact_support": "اتصل بفريق الدعم"
+  },
 
   "privacy_policy": {
     "title": "سياسة الخصوصية",
@@ -320,6 +344,7 @@
     "enter_code": "برجاء ادخال الكود",
     "set_password": "تحديد كلمة المرور",
     "logout": "تسجيل الخروج",
+    "deactivate_account": "إلغاء تنشيط الحساب",
     "enter_passwords": "يرجى إدخال كلمات المرور",
     "current_password": "كلمة المرور الحالية",
     "enter_current_password": "أدخل كلمة المرور الحالية",
