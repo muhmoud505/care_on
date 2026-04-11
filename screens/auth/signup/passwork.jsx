@@ -77,7 +77,7 @@ const PasswordScreen = ({ route }) => {
     // Show data confirmation modal
     showSuccess(
    
-      `${t('auth.name')}: ${signupData.name}\n${t('auth.email')}: ${signupData.email}\n${t('auth.national_id')}: ${signupData.national_number}\n${t('common.password')}: ${form.password}`,
+      t('auth.account_created'),
       t,
       { duration: 3000 }
     );

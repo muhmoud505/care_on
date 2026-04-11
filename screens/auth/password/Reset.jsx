@@ -10,10 +10,10 @@ import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 import {
-    showError,
-    showNetworkError,
-    showSuccess,
-    showValidationError
+  showError,
+  showNetworkError,
+  showSuccess,
+  showValidationError
 } from '../../../utils/toastService';
 
 const Reset = () => {
@@ -28,7 +28,6 @@ const Reset = () => {
     current_password: '',
     password: '',
     password_confirmation: '',
-   
   });
 
 
@@ -79,10 +78,16 @@ const Reset = () => {
         { duration: 3000 }
       );
 
-      // Replace current screen with signin to prevent going back to forget password
-      navigation.replace('signin');
+      // Replace current screen with home since user is resetting password inside the app
+      navigation.replace('home');
     } catch (error) {
       console.error('Reset password error:', error);
+      showError(
+        t('reset_password.password_reset_error'),
+        t('common.try_again'),
+        t,
+        { duration: 4000 }
+      );
       // Enhanced error handling for password reset
       if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
       showNetworkError(

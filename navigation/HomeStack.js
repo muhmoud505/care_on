@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useTranslation } from 'react-i18next';
+import Reset from "../screens/auth/password/Reset";
 import DoctorsUsedCodesScreen from "../screens/doctorsUsedCodes/DoctorsUsedCodesScreen";
 import Eshaas from "../screens/home/eshaa";
 import Home from "../screens/home/home";
@@ -17,7 +18,6 @@ export default function HomeStack(){
   const { t } = useTranslation();
   return(
     <Stack.Navigator screenOptions={{headerShown:false}}>
-      <Stack.Screen component={WelcomeScreen} name='welcome' options={{ title: t('marketing.health_in_pocket', { defaultValue: 'صحتك في جيبك' }) }} />
       <Stack.Screen component={Home} name='home' options={{ title: t('marketing.health_in_pocket', { defaultValue: 'صحتك في جيبك' }) }} />
       <Stack.Screen component={Results} name='results' options={{ title: t('home.results_title', { defaultValue: 'نتائج التحاليل' }) }} />
       <Stack.Screen component={Eshaas} name='eshaa' options={{ title: t('home.xray_title', { defaultValue: 'الاشعة' }) }} />
@@ -28,6 +28,8 @@ export default function HomeStack(){
       <Stack.Screen component={DoctorsUsedCodesScreen} name='DoctorsUsedCodes' options={{ title: t('doctors_used_codes.title', { defaultValue: 'اطباء استخدموا اكوادك' }) }} />
       <Stack.Screen component={NotificationsScreen} name='Notifications' options={{ title: t('notifications.title', { defaultValue: 'الاشعارات' }) }} />
       <Stack.Screen component={YourCreatedCodesScreen} name='YourCreatedCodes' options={{ title: t('your_created_codes.title', { defaultValue: 'أكوادك المنشأة' }) }} />
+      <Stack.Screen name ='reset' component={Reset} />
+      <Stack.Screen component={WelcomeScreen} name='welcome' options={{ title: t('marketing.health_in_pocket', { defaultValue: 'صحتك في جيبك' }) }} />
     </Stack.Navigator>
   )
 }

@@ -633,6 +633,7 @@
   "reset_password": {
     "password_reset_success": "Password reset successfully",
     "password_reset_failed": "Failed to reset password",
+    "password_reset_error": "Failed to reset password",
     "password_validation_error": "Passwords do not match",
     "password_network_error": "Network error while resetting password",
     "password_server_error": "Server error while resetting password",

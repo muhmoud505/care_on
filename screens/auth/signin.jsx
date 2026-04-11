@@ -46,7 +46,7 @@ const SignIn = () => {
         t('auth.welcome_back'),
         { duration: 3000 }
       );
-      navigation.replace('App');
+      navigation.replace('home');
     } catch (error) {
       // Enhanced error handling with specific error types
       if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
