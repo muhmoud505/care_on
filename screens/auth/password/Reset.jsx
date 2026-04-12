@@ -9,6 +9,7 @@ import FormField from '../../../components/FormInput';
 import { useAuth } from '../../../contexts/authContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
+
 import {
   showError,
   showNetworkError,
@@ -78,8 +79,9 @@ const Reset = () => {
         { duration: 3000 }
       );
 
-      // Replace current screen with home since user is resetting password inside the app
-      navigation.replace('home');
+
+// After successful password reset:
+navigation.goBack();
     } catch (error) {
       console.error('Reset password error:', error);
       showError(
