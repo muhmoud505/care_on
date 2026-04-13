@@ -19,7 +19,7 @@ const Result = ({
   const { t,i18n } = useTranslation();
 
   const isRTL = i18n.dir() === 'rtl';
-  const rowDirection = isRTL ? 'row-reverse' : 'row';
+  const rowDirection = isRTL ? 'row' : 'row-reverse';
 
   // Parse the description if it's a JSON string
   let parsedDescription = { labName: '', notes: '', date: '' };

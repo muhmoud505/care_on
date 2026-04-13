@@ -12,13 +12,13 @@ import { useMedicalRecords } from '../../../contexts/medicalRecordsContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 import {
-    showError,
-    showFileError,
-    showNetworkError,
-    showPermissionError,
-    showServerError,
-    showSuccess,
-    showValidationError,
+  showError,
+  showFileError,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
+  showValidationError,
 } from '../../../utils/toastService';
 
 const AddResultScreen = () => {
@@ -51,15 +51,18 @@ const AddResultScreen = () => {
     setIsSubmitting(true);
 
     const descriptionObject = {
+      date: form.date,
       labName: form.labName,
       notes: form.notes,
-      date: form.date,
     };
 
     const payload = {
       type: 'lab_test',
       title: form.testName,
-      description: JSON.stringify(descriptionObject),
+      description: JSON.stringify(descriptionObject, null, 2),
+      labName: form.labName,
+      notes: form.notes,
+      date: form.date,
     };
 
     if (form.documents) {

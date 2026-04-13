@@ -81,11 +81,7 @@ const AddReportScreen = () => {
     };
     const apiType = typeMap[form.type] || 'diagnosis';
 
-    const descriptionObj = {
-      date:      form.date,
-      diagnosis: form.diagnosis,
-      notes:     form.notes,
-    };
+   
 
     // Separate custom items (send as name) from existing items (send as id)
     const selectedCustomLabTests = form.RequiredTests.filter(id => id.startsWith('custom_'));
@@ -97,7 +93,7 @@ const AddReportScreen = () => {
     const payload = {
       type:            apiType,
       title:           form.doctorName,
-      description:     JSON.stringify(descriptionObj),
+      description:     form.notes,
       // Existing items: send as { id }
       lab_tests: validLabTests.map(id => ({ id })),
       radiology_exams: validRadiologyExams.map(id => ({ id })),

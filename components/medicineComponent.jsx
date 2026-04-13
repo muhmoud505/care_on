@@ -17,7 +17,7 @@ const Medicine = ({
   const { t, i18n } = useTranslation();
   // Inline RTL logic
   const isRTL = i18n.dir() === 'rtl';
-  const rowDirection = isRTL ? 'row-reverse' : 'row';
+  const rowDirection = isRTL ? 'row' : 'row-reverse';
 
   let parsedDescription = { dosage: '', startDate: '', endDate: '' };
   if (description && typeof description === 'string' && description.startsWith('{')) {
