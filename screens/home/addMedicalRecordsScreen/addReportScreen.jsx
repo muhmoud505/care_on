@@ -101,27 +101,33 @@ const AddReportScreen = () => {
       // Existing items: send as { id }
       lab_tests: validLabTests.map(id => ({ id })),
       radiology_exams: validRadiologyExams.map(id => ({ id })),
-      // Custom items: send as new_lab_tests and new_radiology_exams with name[en]/name[ar]
-      new_lab_tests: selectedCustomLabTests.map(customId => {
+    };
+
+    // Only add new_lab_tests if they have items
+    if (selectedCustomLabTests.length > 0) {
+      payload.new_lab_tests = selectedCustomLabTests.map((customId, index) => {
         const customItem = customLabTests.find(item => item.value === customId);
         return {
           name: {
-            en: customItem?.label || customId.replace('custom_', ''),
-            ar: customItem?.label || customId.replace('custom_', '')
+            en: customItem?.label || `Custom Lab Test ${index + 1}`,
+            ar: customItem?.label || `Custom Lab Test ${index + 1}`
           }
         };
-      }),
-      new_radiology_exams: selectedCustomRadiologyExams.map(customId => {
+      });
+    }
+
+    // Only add new_radiology_exams if they have items
+    if (selectedCustomRadiologyExams.length > 0) {
+      payload.new_radiology_exams = selectedCustomRadiologyExams.map((customId, index) => {
         const customItem = customRadiologyExams.find(item => item.value === customId);
         return {
           name: {
-            en: customItem?.label || customId.replace('custom_', ''),
-            ar: customItem?.label || customId.replace('custom_', '')
+            en: customItem?.label || `Custom Radiology Exam ${index + 1}`,
+            ar: customItem?.label || `Custom Radiology Exam ${index + 1}`
           }
         };
-      }),
-      patient_id: 1,
-    };
+      });
+    }
 
     if (form.documents) {
       payload.documents = [form.documents];
