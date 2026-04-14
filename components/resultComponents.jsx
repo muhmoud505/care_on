@@ -14,15 +14,17 @@ const Result = ({
   expanded, 
   onExpandedChange,
   icon,
-  fileUrl
+  fileUrl,
+  labTestsDisplay
 }) => {
   const { t,i18n } = useTranslation();
 
   const isRTL = i18n.dir() === 'rtl';
   const rowDirection = isRTL ? 'row' : 'row-reverse';
-
+  console.log('labTestsDisplay', labTestsDisplay);
+  
   // Parse the description if it's a JSON string
-  let parsedDescription = { labName: '', notes: '', date: '' };
+  let parsedDescription = { notes: '', date: '' };
   if (description && typeof description === 'string' && description.startsWith('{')) {
     try {
       parsedDescription = JSON.parse(description);
@@ -32,6 +34,8 @@ const Result = ({
   } else {
     parsedDescription.notes = description || '';
   }
+
+
 
   // Use parsed values, fallback to props
   const displayLabName = parsedDescription.labName || labName || '';
@@ -109,16 +113,17 @@ const Result = ({
                      <Text style={styles.txt2}>{t('result.analysis_name')}:</Text>
                      <Text style={styles.txt3}>{title}</Text>
                    </View>
-                   <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
+                   {/* <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
                      <Icons.Union width={20} height={20} />
                      <Text style={styles.txt2}>{t('result.lab_name')}:</Text>
                      <Text style={styles.txt3}>{displayLabName}</Text>
-                   </View>
-                   <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
+                   </View> */}
+                   {/* <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
                      <Icons.Calendara width={20} height={20} />
                      <Text style={styles.txt2}>{t('result.analysis_date')}:</Text>
                      <Text style={styles.txt3}>{displayDate}</Text>
-                   </View>
+                   </View> */}
+                   
                    <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
                      <Icons.ReceiptEdit width={20} height={20} />
                      <Text style={styles.txt2}>{t('result.description')}:</Text>
@@ -126,6 +131,14 @@ const Result = ({
                         {displayNotes}
                      </Text>
                    </View>
+                   
+                   {!!labTestsDisplay && (
+                     <View style={styles.miccontianer}>
+                       <Icons.analysisA width={20} height={20} />
+                       <Text style={styles.txt2}>{t('report.required_tests', { defaultValue: 'التحليل المطلوب' })}:</Text>
+                       <Text style={styles.txt3}>{labTestsDisplay}</Text>
+                     </View>
+                   )}
                    
                    {fileUrl && (
                      <TouchableOpacity onPress={handleDownload} activeOpacity={0.8}>

@@ -33,6 +33,8 @@ const Eshaas = () => {
     useCallback(() => {
       if (user?.token?.value) {
         fetchEshaas();
+        console.log(fetchEshaas());
+        
       }
     }, [user?.token?.value, fetchEshaas])
   );
@@ -122,7 +124,33 @@ const Eshaas = () => {
   const renderItem = ({ item }) => {
     // Extract file URL from the documents array (taking the first one) or fallback to other keys
     const fileUrl = item.documents?.[0]?.url || item.documents?.[0]?.file || item.fileUrl || item.file || item.url;
-    console.log(`[Eshaa] Item ${item.id} documents:`, JSON.stringify(item.documents));
+    
+    // Extract and format radiology exams display - handle both old and new result formats
+    let radiologyExamsDisplay = null;
+    console.log("radiology_exams from item:", item.radiology_exams);
+    
+    
+    // Try to get radiology exams from new format (item.radiology_exams - after mapping fix)
+    if (item.radiology_exams && Array.isArray(item.radiology_exams) && item.radiology_exams.length > 0) {
+
+      radiologyExamsDisplay = item.radiology_exams.map(exam => exam.name).join(', ');
+    } 
+   
+    
+    // Fallback to old format - try to parse radiology exams from description JSON
+    else if (item.description && typeof item.description === 'string' && item.description.startsWith('{')) {
+      try {
+        const parsedDescription = JSON.parse(item.description);
+        if (parsedDescription.radiology_exams && Array.isArray(parsedDescription.radiology_exams) && parsedDescription.radiology_exams.length > 0) {
+          radiologyExamsDisplay = parsedDescription.radiology_exams.map(exam => exam.name).join(', ');
+        }
+      } catch (e) {
+        console.error('Error parsing radiology exams from description:', e);
+      }
+    }
+    
+ console.log("radiologyExamsDisplay from screen", radiologyExamsDisplay);
+    
     return (
     <Eshaa
       title={item.title}
@@ -133,6 +161,7 @@ const Eshaas = () => {
       fileUrl={fileUrl}
       expanded={expandedItems[item.id] || false}
       onExpandedChange={(isExpanded) => handleItemExpand(item.id, isExpanded)}
+      radiologyExamsDisplay={radiologyExamsDisplay}
     />
   );
   };

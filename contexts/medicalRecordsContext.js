@@ -68,6 +68,8 @@ const parseDescriptionToProps = (description) => {
 };
 
 const mapApiDataToComponentProps = (item, componentType, originalTypeSent = null) => {
+  console.log('Eshaa itemff  f:', item.type);
+  console.log('Full item object:', JSON.stringify(item, null, 2));
   let type;
   const rawApiType = item.type || item.record_type || item.recordType;
 
@@ -97,9 +99,22 @@ const mapApiDataToComponentProps = (item, componentType, originalTypeSent = null
 
   switch (type) {
     case 'result':
-      return { ...commonProps, title: item.title, description: rawDescription, labName: item.provider?.name || '' };
+      return { 
+        ...commonProps, 
+        title: item.title, 
+        description: rawDescription, 
+        labName: item.provider?.name || '',
+        lab_tests: item.lab_tests || []  
+      };
     case 'eshaa':
-      return { ...commonProps, title: item.title, description: rawDescription, labName: item.provider?.name || '' };
+      console.log('[MedicalRecordsContext] Eshaa item radiology_exams:', item.radiology_exams);
+      return { 
+        ...commonProps, 
+        title: item.title, 
+        description: rawDescription, 
+
+        radiology_exams: item.radiology_exams || []  
+      };
     case 'report': {
       const descProps = parseDescriptionToProps(rawDescription);
       return {
@@ -232,6 +247,7 @@ export const MedicalRecordsProvider = ({ children }) => {
             if (!response.ok) throw new Error(`Failed to fetch type ${apiType}`);
 
             const json = await response.json();
+           
 
             setPagination(prev => ({
               ...prev,
@@ -282,7 +298,15 @@ export const MedicalRecordsProvider = ({ children }) => {
 
   const fetchAllRecords = createFetcher({ stateKey: 'all',       stateSetter: setAllRecords, types: [{ apiType: null,           componentType: 'all' }],      sort: true });
   const fetchMedicines  = createFetcher({ stateKey: 'medicines', stateSetter: setMedicines,  types: [{ apiType: 'prescription', componentType: 'medicine' }] });
-  const fetchResults    = createFetcher({ stateKey: 'results',   stateSetter: setResults,    types: [{ apiType: 'lab_test',     componentType: 'result' }] });
+  const fetchResults = createFetcher({ 
+  stateKey: 'results',   
+  stateSetter: setResults,    
+  types: [{ apiType: 'lab_test', componentType: 'result' }],
+  sort: true 
+});
+
+
+
   const fetchEshaas     = createFetcher({ stateKey: 'eshaa',     stateSetter: setEshaa,      types: [{ apiType: 'radiology',    componentType: 'eshaa' }] });
   const fetchReports    = createFetcher({
     stateKey: 'reports', stateSetter: setReports,
@@ -304,6 +328,8 @@ export const MedicalRecordsProvider = ({ children }) => {
       const response = await authFetch(`${BASE_URL}/api/v1/lab-tests`);
       if (!response.ok) throw new Error('Failed to fetch lab tests');
       const data = await response.json();
+    
+      
       const formattedTests = data.data?.map(test => ({
         label: test.name || test.title,
         value: test.name || test.title,

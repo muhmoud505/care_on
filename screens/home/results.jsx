@@ -27,7 +27,7 @@ const Results = () => {
   const { user } = useAuth();
   const { results, loading, error, fetchResults } = useMedicalRecords();
   const isRTL = i18n.dir() === 'rtl'; // Inline RTL logic
-console.log(results[0])
+  console.log('results [0]', results[0]);
   // This effect runs every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
@@ -108,12 +108,34 @@ console.log(results[0])
   const renderItem = ({ item }) => {
     const fileUrl = item.documents?.[0]?.url || item.documents?.[0]?.file || item.fileUrl || item.file || item.url;
 
+    // Extract and format lab tests display - handle both old and new result formats
+    let labTestsDisplay = null;
+    
+    // Try to get lab tests from new format (item.lab_tests - after mapping fix)
+    if (item.lab_tests && Array.isArray(item.lab_tests) && item.lab_tests.length > 0) {
+      labTestsDisplay = item.lab_tests.map(test => test.name).join(', ');
+    } 
+    // Fallback to old format - try to parse lab tests from description JSON
+    else if (item.description && typeof item.description === 'string' && item.description.startsWith('{')) {
+      try {
+        const parsedDescription = JSON.parse(item.description);
+        if (parsedDescription.lab_tests && Array.isArray(parsedDescription.lab_tests) && parsedDescription.lab_tests.length > 0) {
+          labTestsDisplay = parsedDescription.lab_tests.map(test => test.name).join(', ');
+        }
+      } catch (e) {
+        console.error('Error parsing lab tests from description:', e);
+      }
+    }
+
+
+
     return (
       <Result
         {...item}
         fileUrl={fileUrl}
         expanded={expandedItems[item.id] || false}
         onExpandedChange={(isExpanded) => handleItemExpand(item.id, isExpanded)}
+        labTestsDisplay={labTestsDisplay}
       />
     );
   };

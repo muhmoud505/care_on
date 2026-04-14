@@ -1,11 +1,10 @@
 // addResultScreen.jsx - Fixed RTL
 
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import CustomHeader from '../../../components/CustomHeader';
-import DatePick from '../../../components/datePicker';
 import FormField from '../../../components/FormInput';
 import Uploader from '../../../components/Uploader';
 import { useMedicalRecords } from '../../../contexts/medicalRecordsContext';
@@ -23,16 +22,22 @@ import {
 
 const AddResultScreen = () => {
   const navigation = useNavigation();
-  const { addRecord } = useMedicalRecords();
+  const { addRecord, labTests, fetchLabTests } = useMedicalRecords();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Local state for custom items added via "Add Others"
+  const [customLabTests, setCustomLabTests] = useState([]);
+
+  useEffect(() => {
+    fetchLabTests();
+  }, [fetchLabTests]);
+
   const { form, errors, handleChange, checkFormValidity } = useForm({
     testName: '',
-    labName: '',
-    date: null,
+    RequiredTests: [],
     notes: '',
     documents: null,
   });
@@ -50,20 +55,31 @@ const AddResultScreen = () => {
     }
     setIsSubmitting(true);
 
-    const descriptionObject = {
-      date: form.date,
-      labName: form.labName,
-      notes: form.notes,
-    };
+    // Separate custom items (send as name) from existing items (send as id)
+    const selectedCustomLabTests = form.RequiredTests.filter(id => id.startsWith('custom_'));
+    const validLabTests = form.RequiredTests.filter(id => !id.startsWith('custom_'));
 
     const payload = {
       type: 'lab_test',
       title: form.testName,
-      description: JSON.stringify(descriptionObject, null, 2),
-      labName: form.labName,
-      notes: form.notes,
-      date: form.date,
+      description: form.notes,
+      // Existing items: send as { id }
+      lab_tests: validLabTests.map(id => ({ id })),
+     
     };
+
+    // Only add new_lab_tests if they have items
+    if (selectedCustomLabTests.length > 0) {
+      payload.new_lab_tests = selectedCustomLabTests.map((customId, index) => {
+        const customItem = customLabTests.find(item => item.value === customId);
+        return {
+          name: {
+            en: customItem?.label || `Custom Lab Test ${index + 1}`,
+            ar: customItem?.label || `Custom Lab Test ${index + 1}` 
+          }
+        };
+      });
+    }
 
     if (form.documents) {
       payload.documents = [form.documents];
@@ -71,6 +87,8 @@ const AddResultScreen = () => {
 
     try {
       const result = await addRecord(payload);
+
+      
       setIsSubmitting(false);
 
       if (result.success) {
@@ -165,21 +183,28 @@ const AddResultScreen = () => {
           />
 
           <FormField
-            title={t('add_result.lab_name')}
-            placeholder={t('add_result.lab_name_placeholder')}
-            value={form.labName}
-            onChangeText={(text) => handleChange('labName', text)}
-            error={errors.labName}
-            required
-          />
-
-          <DatePick
-            title={t('add_result.date')}
-            placeholder={t('add_result.date_placeholder')}
-            value={form.date}
-            onDateSelect={(date) => handleChange('date', date)}
-            error={errors.date}
-            required
+            title={t('add_report.required_tests')}
+            placeholder={t('add_report.required_tests_placeholder')}
+            value={form.RequiredTests}
+            onChangeText={(v) => handleChange('RequiredTests', v)}
+            error={errors.RequiredTests}
+            type="picker"
+            pickerItems={[...labTests.map(item => ({
+              label: item.label,
+              value: String(item.id), // value = id, not name
+            })), ...customLabTests]}
+            multiSelect={true}
+            addOthers
+            addLabel={t('add_report.create_new_test')}
+            addModalTitle={t('add_report.add_new_test')}
+            addArabicLabel={t('add_report.test_name_arabic')}
+            addEnglishLabel={t('add_report.test_name_english')}
+            onAddConfirm={(arabic) => {
+              const customId = `custom_${Date.now()}`;
+              setCustomLabTests(prev => [...prev, { label: arabic, value: customId }]);
+              const currentTests = form.RequiredTests || [];
+              handleChange('RequiredTests', [...currentTests, customId]);
+            }}
           />
 
           <FormField

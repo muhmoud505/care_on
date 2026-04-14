@@ -1,41 +1,49 @@
 // addEshaaScreen.jsx - Fixed RTL
 
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    ActivityIndicator,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import CustomHeader from '../../../components/CustomHeader';
-import DatePick from '../../../components/datePicker';
 import FormField from '../../../components/FormInput';
 import Uploader from '../../../components/Uploader';
 import { useMedicalRecords } from '../../../contexts/medicalRecordsContext';
 import useForm from '../../../hooks/useForm';
 import { hp, wp } from '../../../utils/responsive';
 import {
-    showError,
-    showFileError,
-    showNetworkError,
-    showPermissionError,
-    showServerError,
-    showSuccess,
-    showValidationError,
+  showError,
+  showFileError,
+  showNetworkError,
+  showPermissionError,
+  showServerError,
+  showSuccess,
+  showValidationError,
 } from '../../../utils/toastService';
 
 const AddEshaaScreen = () => {
   const navigation = useNavigation();
-  const { addRecord } = useMedicalRecords();
+  const { addRecord, radiologyExams, fetchRadiologyExams } = useMedicalRecords();
+  console.log(radiologyExams);
+  
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [customRadiologyExams, setCustomRadiologyExams] = useState([]);
+  const [selectedCustomRadiologyExams, setSelectedCustomRadiologyExams] = useState([]);
+
+  // Fetch radiology exams when component mounts
+  useEffect(() => {
+    fetchRadiologyExams();
+  }, [fetchRadiologyExams]);
 
   const { form, errors, handleChange, checkFormValidity } = useForm({
     xrayName: '',
@@ -43,6 +51,7 @@ const AddEshaaScreen = () => {
     labName: '',
     doctorName: '',
     notes: '',
+    RequiredTests: [], // Add RequiredTests field
     documents: null,
   });
 
@@ -59,21 +68,29 @@ const AddEshaaScreen = () => {
     }
     setIsSubmitting(true);
 
-    const descriptionObject = {
-      date: form.date,
-      labName: form.labName,
-      doctorName: form.doctorName,
-      notes: form.notes,
-    };
+   
 
     const payload = {
       type: 'radiology',
       title: form.xrayName,
-      description: JSON.stringify(descriptionObject),
+      description: form.notes
     };
 
     if (form.documents) {
       payload.documents = [form.documents];
+    }
+
+    // Only add new_radiology_exams if they have items
+    if (selectedCustomRadiologyExams.length > 0) {
+      payload.new_radiology_exams = selectedCustomRadiologyExams.map((customId, index) => {
+        const customItem = customRadiologyExams.find(item => item.value === customId);
+        return {
+          name: {
+            en: customItem?.label || `Custom Radiology Exam ${index + 1}`,
+            ar: customItem?.label || `Custom Radiology Exam ${index + 1}` 
+          }
+        };
+      });
     }
 
     try {
@@ -171,32 +188,34 @@ const AddEshaaScreen = () => {
             required
           />
 
-          <DatePick
-            title={t('add_eshaa.date')}
-            placeholder={t('add_eshaa.date_placeholder')}
-            value={form.date}
-            onDateSelect={(date) => handleChange('date', date)}
-            error={errors.date}
-            required
-          />
+         
+         
 
-          <FormField
-            title={t('add_eshaa.lab_name')}
-            placeholder={t('add_eshaa.lab_name_placeholder')}
-            value={form.labName}
-            onChangeText={(text) => handleChange('labName', text)}
-            error={errors.labName}
-            required
-          />
 
-          <FormField
-            title={t('add_eshaa.doctor_name')}
-            placeholder={t('add_eshaa.doctor_name_placeholder')}
-            value={form.doctorName}
-            onChangeText={(text) => handleChange('doctorName', text)}
-            error={errors.doctorName}
-            required
-          />
+           <FormField
+              title={t('add_report.required_scans')}
+              placeholder={t('add_report.required_scans_placeholder')}
+              value={form.RequiredScans}
+              onChangeText={(v) => handleChange('RequiredScans', v)}
+              error={errors.RequiredScans}
+              type="picker"
+              pickerItems={[...radiologyExams.map(item => ({
+                label: item.label,
+                value: String(item.id), // ✅ value = id, not name
+              })), ...customRadiologyExams]}
+              multiSelect={true}
+              addOthers
+              addLabel={t('add_report.create_new_scan')}
+              addModalTitle={t('add_report.add_new_scan')}
+              addArabicLabel={t('add_report.scan_name_arabic')}
+              addEnglishLabel={t('add_report.scan_name_english')}
+              onAddConfirm={(arabic) => {
+                const customId = `custom_${Date.now()}`;
+                setCustomRadiologyExams(prev => [...prev, { label: arabic, value: customId }]);
+                const currentScans = form.RequiredScans || [];
+                handleChange('RequiredScans', [...currentScans, customId]);
+              }}
+            />
 
           <FormField
             title={t('add_eshaa.notes')}

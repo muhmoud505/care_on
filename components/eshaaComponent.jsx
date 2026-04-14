@@ -14,7 +14,8 @@ const Eshaa = ({
   expanded,
   onExpandedChange,
   icon,
-  fileUrl
+  fileUrl,
+  radiologyExamsDisplay
 }) => {
   const { t,i18n } = useTranslation();
 
@@ -34,8 +35,8 @@ const rowDirection = isRTL ? 'row' : 'row-reverse';
   }
 
   // Use parsed values, fallback to props
-  const displayLabName = parsedDescription.labName || labName || '';
-  const displayDate = parsedDescription.date || date || '';
+console.log("radiologyExamsDisplay", radiologyExamsDisplay);
+
   const displayNotes = parsedDescription.notes || '';
 
   const handleDownload = async () => {
@@ -108,21 +109,21 @@ const rowDirection = isRTL ? 'row' : 'row-reverse';
           <Text style={styles.txt2}>{t('eshaa.xray_name')}:</Text>
           <Text style={styles.txt3}>{title}</Text>
         </View>
-        <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
-          <Icons.Buliding width={20} height={20} />
-          <Text style={styles.txt2}>{t('eshaa.lab_name')}:</Text>
-          <Text style={styles.txt3}>{displayLabName}</Text>
-        </View>
-        <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
-          <Icons.Calendara width={20} height={20} />
-          <Text style={styles.txt2}>{t('eshaa.xray_date')}:</Text>
-          <Text style={styles.txt3}>{displayDate}</Text>
-        </View>
+       
+       
         <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
           <Icons.ReceiptEdit width={20} height={20} />
           <Text style={styles.txt2}>{t('eshaa.description')}:</Text>
           <Text style={styles.txt3}>{displayNotes}</Text>
         </View>
+        
+        {!!radiologyExamsDisplay && (
+          <View style={styles.miccontianer}>
+            <Icons.Union width={20} height={20} />
+            <Text style={styles.txt2}>{t('report.required_scans', { defaultValue: 'Ashiaa Mtlb' })}:</Text>
+            <Text style={styles.txt3}>{radiologyExamsDisplay}</Text>
+          </View>
+        )}
         
         {fileUrl && (
           <TouchableOpacity onPress={handleDownload} activeOpacity={0.8}>
