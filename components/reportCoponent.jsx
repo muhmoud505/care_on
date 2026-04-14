@@ -173,14 +173,14 @@ const Report = ({
           </View>
         )}
 
-        {/* التاريخ */}
+        {/* التاريخ
         {!!displayDate && (
           <View style={styles.miccontianer}>
             <Icons.Calendara width={20} height={20} />
             <Text style={styles.txt2}>{t('report.report_date')}:</Text>
             <Text style={styles.txt3}>{displayDate}</Text>
           </View>
-        )}
+        )} */}
 
         {/* التحاليل المطلوبة */}
         {!!labTestsDisplay && (

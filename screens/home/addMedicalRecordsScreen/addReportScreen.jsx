@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import CustomHeader from '../../../components/CustomHeader';
-import DatePick from '../../../components/datePicker';
 import FormField from '../../../components/FormInput';
 import Uploader from '../../../components/Uploader';
 import { useMedicalRecords } from '../../../contexts/medicalRecordsContext';
@@ -215,14 +214,14 @@ const AddReportScreen = () => {
               required
             />
 
-            <DatePick
+            {/* <DatePick
               title={t('add_report.date')}
               placeholder={t('add_report.date_placeholder')}
               value={form.date}
               onDateSelect={(date) => handleChange('date', date)}
               error={errors.date}
               required
-            />
+            /> */}
 
             <FormField
               title={t('add_report.type')}
@@ -288,13 +287,13 @@ const AddReportScreen = () => {
               }}
             />
 
-            <FormField
+            {/* <FormField
               title={t('add_report.diagnosis')}
               placeholder={t('add_report.diagnosis_placeholder')}
               value={form.diagnosis}
               onChangeText={(v) => handleChange('diagnosis', v)}
               error={errors.diagnosis}
-            />
+            /> */}
 
             <FormField
               title={t('add_report.medical_notes')}

@@ -33,7 +33,7 @@ const Eshaas = () => {
     useCallback(() => {
       if (user?.token?.value) {
         fetchEshaas();
-        console.log(fetchEshaas());
+        console.log(eshaa[0]);
         
       }
     }, [user?.token?.value, fetchEshaas])
@@ -127,11 +127,11 @@ const Eshaas = () => {
     
     // Extract and format radiology exams display - handle both old and new result formats
     let radiologyExamsDisplay = null;
-    console.log("radiology_exams from item:", item.radiology_exams);
     
-    
+    //&& Array.isArray(item.radiology_exams) && item.radiology_exams.length > 0
     // Try to get radiology exams from new format (item.radiology_exams - after mapping fix)
-    if (item.radiology_exams && Array.isArray(item.radiology_exams) && item.radiology_exams.length > 0) {
+    if (item.radiology_exams ) {
+      console.log("radiology_exams from item:", item);
 
       radiologyExamsDisplay = item.radiology_exams.map(exam => exam.name).join(', ');
     } 

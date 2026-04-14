@@ -1,5 +1,4 @@
 // addEshaaScreen.jsx - Fixed RTL
-
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,7 +37,6 @@ const AddEshaaScreen = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customRadiologyExams, setCustomRadiologyExams] = useState([]);
-  const [selectedCustomRadiologyExams, setSelectedCustomRadiologyExams] = useState([]);
 
   // Fetch radiology exams when component mounts
   useEffect(() => {
@@ -47,11 +45,8 @@ const AddEshaaScreen = () => {
 
   const { form, errors, handleChange, checkFormValidity } = useForm({
     xrayName: '',
-    date: null,
-    labName: '',
-    doctorName: '',
     notes: '',
-    RequiredTests: [], // Add RequiredTests field
+    RequiredScans: [], // ✅ Stores selected IDs (strings)
     documents: null,
   });
 
@@ -68,19 +63,24 @@ const AddEshaaScreen = () => {
     }
     setIsSubmitting(true);
 
-   
+    // ✅ Separate custom scans from existing DB scans (same as addReportScreen)
+    const selectedCustomRadiologyExams = form.RequiredScans.filter(id => id.startsWith('custom_'));
+    const validRadiologyExams = form.RequiredScans.filter(id => !id.startsWith('custom_'));
 
+    // ✅ Build payload with proper structure for server
     const payload = {
       type: 'radiology',
       title: form.xrayName,
-      description: form.notes
+      description: form.notes,
+      // ✅ Existing items: send as { id }
+      radiology_exams: validRadiologyExams.map(id => ({ id })),
     };
 
     if (form.documents) {
       payload.documents = [form.documents];
     }
 
-    // Only add new_radiology_exams if they have items
+    // ✅ Only add new_radiology_exams if custom items exist
     if (selectedCustomRadiologyExams.length > 0) {
       payload.new_radiology_exams = selectedCustomRadiologyExams.map((customId, index) => {
         const customItem = customRadiologyExams.find(item => item.value === customId);
@@ -92,6 +92,8 @@ const AddEshaaScreen = () => {
         };
       });
     }
+
+    console.log('=== Eshaa Payload ===', JSON.stringify(payload, null, 2));
 
     try {
       const result = await addRecord(payload);
@@ -188,34 +190,30 @@ const AddEshaaScreen = () => {
             required
           />
 
-         
-         
-
-
-           <FormField
-              title={t('add_report.required_scans')}
-              placeholder={t('add_report.required_scans_placeholder')}
-              value={form.RequiredScans}
-              onChangeText={(v) => handleChange('RequiredScans', v)}
-              error={errors.RequiredScans}
-              type="picker"
-              pickerItems={[...radiologyExams.map(item => ({
-                label: item.label,
-                value: String(item.id), // ✅ value = id, not name
-              })), ...customRadiologyExams]}
-              multiSelect={true}
-              addOthers
-              addLabel={t('add_report.create_new_scan')}
-              addModalTitle={t('add_report.add_new_scan')}
-              addArabicLabel={t('add_report.scan_name_arabic')}
-              addEnglishLabel={t('add_report.scan_name_english')}
-              onAddConfirm={(arabic) => {
-                const customId = `custom_${Date.now()}`;
-                setCustomRadiologyExams(prev => [...prev, { label: arabic, value: customId }]);
-                const currentScans = form.RequiredScans || [];
-                handleChange('RequiredScans', [...currentScans, customId]);
-              }}
-            />
+          <FormField
+            title={t('add_report.required_scans')}
+            placeholder={t('add_report.required_scans_placeholder')}
+            value={form.RequiredScans}
+            onChangeText={(v) => handleChange('RequiredScans', v)}
+            error={errors.RequiredScans}
+            type="picker"
+            pickerItems={[...radiologyExams.map(item => ({
+              label: item.label,
+              value: String(item.id), // ✅ value = id, not name
+            })), ...customRadiologyExams]}
+            multiSelect={true}
+            addOthers
+            addLabel={t('add_report.create_new_scan')}
+            addModalTitle={t('add_report.add_new_scan')}
+            addArabicLabel={t('add_report.scan_name_arabic')}
+            addEnglishLabel={t('add_report.scan_name_english')}
+            onAddConfirm={(arabic) => {
+              const customId = `custom_${Date.now()}`;
+              setCustomRadiologyExams(prev => [...prev, { label: arabic, value: customId }]);
+              const currentScans = form.RequiredScans || [];
+              handleChange('RequiredScans', [...currentScans, customId]);
+            }}
+          />
 
           <FormField
             title={t('add_eshaa.notes')}
