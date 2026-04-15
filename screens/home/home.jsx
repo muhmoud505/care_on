@@ -36,7 +36,7 @@ const Home = () => {
     { key: 'results', titleKey: 'home.results_title', icon: Icons.Analysis, navigateTo: 'results' },
     { key: 'eshaa', titleKey: 'home.xray_title', icon: Icons.Scan, navigateTo: 'eshaa' },
     { key: 'reports', titleKey: 'home.reports_title', icon: Icons.Scan, navigateTo: 'reports' },
-    { key: 'medicines', titleKey: 'home.medicines_title', icon: Icons.Medicine, navigateTo: 'medicines' },
+    // { key: 'medicines', titleKey: 'home.medicines_title', icon: Icons.Medicine, navigateTo: 'medicines' },
     { key: 'last', titleKey: 'home.last_reports_title', icon: Icons.Scan, navigateTo: 'last' },
   ];
 

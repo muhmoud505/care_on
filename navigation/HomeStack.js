@@ -5,7 +5,6 @@ import DoctorsUsedCodesScreen from "../screens/doctorsUsedCodes/DoctorsUsedCodes
 import Eshaas from "../screens/home/eshaa";
 import Home from "../screens/home/home";
 import LastReports from "../screens/home/lastReports";
-import Medicines from "../screens/home/medicines";
 import Reports from "../screens/home/reports";
 import Results from "../screens/home/results";
 import Survey from "../screens/home/survey";
@@ -23,7 +22,7 @@ export default function HomeStack(){
       <Stack.Screen component={Eshaas} name='eshaa' options={{ title: t('home.xray_title', { defaultValue: 'الاشعة' }) }} />
       <Stack.Screen component={Reports} name='reports' options={{ title: t('home.reports_title', { defaultValue: 'تقارير الدكاترة' }) }} />
       <Stack.Screen component={LastReports} name='last' options={{ title: t('home.last_reports_title', { defaultValue: 'التقارير السابقة' }) }} />
-      <Stack.Screen  component={Medicines} name='medicines' options={{ title: t('home.medicines_title', { defaultValue: 'الادوية' }) }} />
+      {/* <Stack.Screen  component={Medicines} name='medicines' options={{ title: t('home.medicines_title', { defaultValue: 'الادوية' }) }} /> */}
       <Stack.Screen component={Survey} name='survey' options={{ title: t('survey.title', { defaultValue: 'استبيان' }) }} />
       <Stack.Screen component={DoctorsUsedCodesScreen} name='DoctorsUsedCodes' options={{ title: t('doctors_used_codes.title', { defaultValue: 'اطباء استخدموا اكوادك' }) }} />
       <Stack.Screen component={NotificationsScreen} name='Notifications' options={{ title: t('notifications.title', { defaultValue: 'الاشعارات' }) }} />

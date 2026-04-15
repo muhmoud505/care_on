@@ -313,6 +313,7 @@ export const MedicalRecordsProvider = ({ children }) => {
     types: [
       { apiType: 'diagnosis',    componentType: 'report' },
       { apiType: 'consultation', componentType: 'report' },
+      { apiType: 'prescription', componentType: 'report' },
     ],
     sort: true,
   });

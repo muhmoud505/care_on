@@ -32,11 +32,11 @@ const AddRecordSelector = () => {
       label: t('add_selector.add_report', { defaultValue: 'تقارير الدكاترة' }), 
       screen: 'addReport' 
     },
-    { 
-      key: 'addMedicine', 
-      label: t('add_selector.add_medicine', { defaultValue: 'الأدوية' }), 
-      screen: 'addMedicine' 
-    },
+    // { 
+    //   key: 'addMedicine', 
+    //   label: t('add_selector.add_medicine', { defaultValue: 'الأدوية' }), 
+    //   screen: 'addMedicine' 
+    // },
   ];
 
   const pickerItems = recordTypes.map(item => ({
