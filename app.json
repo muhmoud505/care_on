@@ -18,7 +18,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.muhmoud_505.HC"
+      "package": "com.muhmoud_505.HC",
+      "ndk": "26.3.11579264"
     },
     "web": {
       "bundler": "metro",
