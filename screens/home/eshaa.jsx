@@ -166,7 +166,7 @@ const Eshaas = () => {
   );
   };
   return (
-    <SafeAreaView style={[styles.container,]}>
+    <SafeAreaView style={[styles.container,{direction: i18n.dir()} ]}>
       <CustomHeader text={t('home.xray_title')}/>
       <ListContainer
         loading={loading.eshaa}

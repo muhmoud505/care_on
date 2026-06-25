@@ -109,7 +109,7 @@ const Calendar = ({onDataSelect}) => {
   const monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
-  const years = Array.from({ length: 10 }, (_, i) => currentDate.getFullYear() - 5 + i);
+  const years = Array.from({ length: 40 }, (_, i) => currentDate.getFullYear() - 30 + i);
 
   const renderMonthItem = ({ item, index }) => (
     <TouchableOpacity

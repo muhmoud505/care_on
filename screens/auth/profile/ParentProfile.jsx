@@ -1,10 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
+import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ImageBackground, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import CustomHeader from '../../../components/CustomHeader';
@@ -28,7 +29,7 @@ const ParentProfile = () => {
   const [meData, setMeData] = useState(null);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === 'rtl';
-  const ds = getDynamicStyles(isRTL);          // RTL-aware dynamic styles
+  const ds = getDynamicStyles(isRTL);
   const navigation = useNavigation();
   const { user, fetchCurrentUser, refreshToken, updateUserProfile, setTempAvatar, deleteUserAvatar } = useAuth();
 
@@ -41,42 +42,22 @@ const ParentProfile = () => {
     try {
       const result = await deleteUserAvatar(user.user.id);
       if (!result.success) throw new Error(result.error || 'Unknown error');
-      showSuccess(
-        t('common.success'),
-        t('profile.photo_deleted'),
-        { duration: 3000 }
-      );
+      showSuccess(t('common.success'), t('profile.photo_deleted'), { duration: 3000 });
     } catch (error) {
-      // Enhanced error handling for photo deletion
       if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
-        showNetworkError(
-          t('profile.profile_network_error'),
-          () => handleDeletePhoto() // Retry function
-        );
+        showNetworkError(t('profile.profile_network_error'), () => handleDeletePhoto());
       } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
-        showPermissionError(
-          t('profile.profile_permission_error'),
-          { duration: 4000 }
-        );
+        showPermissionError(t('profile.profile_permission_error'), { duration: 4000 });
       } else if (error.message?.includes('server') || error.message?.includes('500')) {
-        showServerError(
-          t('profile.profile_server_error'),
-          { duration: 4000 }
-        );
+        showServerError(t('profile.profile_server_error'), { duration: 4000 });
       } else {
-        showError(
-          t('profile.photo_delete_failed'),
-          error?.message || t('common.unknown_error'),
-          { duration: 4000 }
-        );
+        showError(t('profile.photo_delete_failed'), error?.message || t('common.unknown_error'), { duration: 4000 });
       }
     }
   };
 
   /* ── Download birth certificate ── */
   const handleDownloadBirthCertificate = async () => {
-    console.log(user);
-    
     const url =
       user?.user?.resource?.birth_certificate_url ||
       user?.user?.resource?.birth_certificate ||
@@ -88,48 +69,56 @@ const ParentProfile = () => {
       user?.user?.birth_cert_url ||
       null;
 
-
     if (!url) {
-      showValidationError(
-        'download',
-        t('common.no_file_to_download'),
-        { duration: 3000 }
-      );
+      showValidationError('download', t('common.no_file_to_download'), { duration: 3000 });
       return;
     }
+
     try {
-      const fileUri = `${FileSystem.cacheDirectory}birth_certificate.pdf`;
-      const { uri } = await FileSystem.createDownloadResumable(url, fileUri).downloadAsync();
-      if (!(await Sharing.isAvailableAsync())) {
-        showFileError(
-          t('common.sharing_not_available'),
-          { duration: 3000 }
-        );
+      // Detect extension from URL (fallback to 'jpg')
+      const ext = url.split('.').pop().split('?')[0].toLowerCase() || 'jpg';
+      const fileUri = `${FileSystem.cacheDirectory}birth_certificate.${ext}`;
+
+      // Download the file
+      const downloadResumable = FileSystem.createDownloadResumable(url, fileUri);
+      const result = await downloadResumable.downloadAsync();
+
+      // Check HTTP status — downloadAsync resolves even on non-200
+      if (!result || result.status !== 200) {
+        showFileError(t('profile.file_download_failed'), { duration: 4000 });
+        return;
+      }
+
+      const { uri } = result;
+
+      // On Android: try to save directly to the device's Downloads/Gallery
+      if (Platform.OS === 'android') {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status === 'granted') {
+          await MediaLibrary.saveToLibraryAsync(uri);
+          showSuccess(t('common.success'), t('common.file_saved'), { duration: 3000 });
+          return;
+        }
+        // Permission denied — fall through to share sheet
+      }
+
+      // iOS or Android (permission denied): open share sheet so user can save manually
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        showFileError(t('common.sharing_not_available'), { duration: 3000 });
         return;
       }
       await Sharing.shareAsync(uri);
+
     } catch (error) {
-      // Enhanced error handling for file download
       if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
-        showNetworkError(
-          t('profile.file_download_failed'),
-          () => handleDownloadBirthCertificate() // Retry function
-        );
+        showNetworkError(t('profile.file_download_failed'), () => handleDownloadBirthCertificate());
       } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
-        showPermissionError(
-          t('profile.profile_permission_error'),
-          { duration: 4000 }
-        );
+        showPermissionError(t('profile.profile_permission_error'), { duration: 4000 });
       } else if (error.message?.includes('server') || error.message?.includes('500')) {
-        showServerError(
-          t('profile.profile_server_error'),
-          { duration: 4000 }
-        );
+        showServerError(t('profile.profile_server_error'), { duration: 4000 });
       } else {
-        showFileError(
-          t('profile.file_download_failed'),
-          { duration: 4000 }
-        );
+        showFileError(t('profile.file_download_failed'), { duration: 4000 });
       }
     }
   };
@@ -142,123 +131,95 @@ const ParentProfile = () => {
       if (type === 'camera') {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
-          showPermissionError(
-            t('profile.camera_permission_denied'),
-            { duration: 3000 }
-          );
+          showPermissionError(t('profile.camera_permission_denied'), { duration: 3000 });
           return;
         }
-        pickerResult = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [1, 1], quality: 0.5 });
+        pickerResult = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.5,
+        });
       } else {
-        pickerResult = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [1, 1], quality: 0.5 });
+        pickerResult = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.5,
+        });
       }
+
       if (!pickerResult || pickerResult.canceled) return;
+
       if (pickerResult.assets?.length > 0) {
         const asset = pickerResult.assets[0];
-        
-        // Validate file type
+
         if (!asset.mimeType || !asset.mimeType.startsWith('image/')) {
-          showFileError(
-            t('profile.invalid_file_type'),
-            { duration: 3000 }
-          );
+          showFileError(t('profile.invalid_file_type'), { duration: 3000 });
           return;
         }
-        
+
         const formData = new FormData();
-        formData.append('avatar', { uri: asset.uri, name: asset.fileName || `avatar_${Date.now()}.jpg`, type: asset.mimeType || 'image/jpeg' });
+        formData.append('avatar', {
+          uri: asset.uri,
+          name: asset.fileName || `avatar_${Date.now()}.jpg`,
+          type: asset.mimeType || 'image/jpeg',
+        });
+
         const previousAvatar = user?.user?.avatar;
-        
         setPreviewAvatar(asset.uri);
         try { setTempAvatar(user.user.id, asset.uri); } catch (e) { console.warn('setTempAvatar failed', e.message); }
+
         const updateResult = await updateUserProfile(user.user.id, formData);
+
         if (!updateResult.success) {
           setPreviewAvatar(previousAvatar);
           try { setTempAvatar(user.user.id, previousAvatar); } catch (e) { console.warn('reverting failed', e.message); }
-          
-          // Enhanced error handling for photo upload
+
           if (updateResult.error?.includes('Network request failed') || updateResult.error?.includes('network')) {
-            showNetworkError(
-              t('profile.photo_upload_failed'),
-              () => handleImagePick(type) // Retry function
-            );
+            showNetworkError(t('profile.photo_upload_failed'), () => handleImagePick(type));
           } else if (updateResult.error?.includes('permission') || updateResult.error?.includes('unauthorized')) {
-            showPermissionError(
-              t('profile.profile_permission_error'),
-              { duration: 4000 }
-            );
+            showPermissionError(t('profile.profile_permission_error'), { duration: 4000 });
           } else if (updateResult.error?.includes('server') || updateResult.error?.includes('500')) {
-            showServerError(
-              t('profile.profile_server_error'),
-              { duration: 4000 }
-            );
+            showServerError(t('profile.profile_server_error'), { duration: 4000 });
           } else if (updateResult.error?.includes('file too large') || updateResult.error?.includes('size')) {
-            showFileError(
-              t('profile.file_too_large'),
-              { duration: 4000 }
-            );
+            showFileError(t('profile.file_too_large'), { duration: 4000 });
           } else {
-            showError(
-              t('profile.photo_upload_failed'),
-              updateResult.error || t('common.unknown_error'),
-              { duration: 4000 }
-            );
+            showError(t('profile.photo_upload_failed'), updateResult.error || t('common.unknown_error'), { duration: 4000 });
           }
           return;
         }
-        showSuccess(
-          t('common.success'),
-          t('profile.photo_updated'),
-          { duration: 3000 }
-        );
+
+        showSuccess(t('common.success'), t('profile.photo_updated'), { duration: 3000 });
       }
     } catch (error) {
-      // Enhanced error handling for image picker
       if (error.message?.includes('Network request failed') || error.message?.includes('network')) {
-        showNetworkError(
-          t('profile.photo_upload_failed'),
-          () => handleImagePick(type) // Retry function
-        );
+        showNetworkError(t('profile.photo_upload_failed'), () => handleImagePick(type));
       } else if (error.message?.includes('permission') || error.message?.includes('unauthorized')) {
-        showPermissionError(
-          t('profile.profile_permission_error'),
-          { duration: 4000 }
-        );
+        showPermissionError(t('profile.profile_permission_error'), { duration: 4000 });
       } else if (error.message?.includes('server') || error.message?.includes('500')) {
-        showServerError(
-          t('profile.profile_server_error'),
-          { duration: 4000 }
-        );
+        showServerError(t('profile.profile_server_error'), { duration: 4000 });
       } else {
-        showError(
-          t('profile.photo_upload_failed'),
-          error.message || t('common.unknown_error'),
-          { duration: 4000 }
-        );
+        showError(t('profile.photo_upload_failed'), error.message || t('common.unknown_error'), { duration: 4000 });
       }
     }
   };
 
   useEffect(() => {
-    refreshToken(); // Ensure token is fresh when profile loads
+    refreshToken();
     let isMounted = true;
 
     const loadCurrentUser = async () => {
       try {
         const data = await fetchCurrentUser();
-        if (isMounted && data) {
-          setMeData(data);
-        }
+        if (isMounted && data) setMeData(data);
       } catch (error) {
         console.warn('ParentProfile fetchCurrentUser failed', error?.message || error);
       }
     };
 
     loadCurrentUser();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [fetchCurrentUser]);
 
   return (
@@ -270,9 +231,9 @@ const ParentProfile = () => {
         {/* ── Profile card ── */}
         <View style={localStyles.card}>
 
-          {/* Linked Accounts button — top corner, direction-aware */}
+          {/* Linked Accounts button */}
           <TouchableOpacity
-            style={[localStyles.linkedBtn, { [isRTL ? 'left' : 'left']: wp(4) }]}
+            style={[localStyles.linkedBtn, { left: wp(4) }]}
             onPress={() => navigation.navigate('accounts')}
           >
             <Text style={localStyles.linkedBtnText} numberOfLines={1}>
@@ -293,18 +254,13 @@ const ParentProfile = () => {
               style={localStyles.avatar}
               resizeMode="cover"
             />
-            {/* ✅ Edit icon: absolutely positioned at bottom-right of avatar */}
             <TouchableOpacity
               style={localStyles.editIconBtn}
               onPress={() => setModalVisible(true)}
             >
               <View style={localStyles.editIconInner}>
                 <Icons.Edita width={wp(10)} height={wp(10)} />
-                <Icons.Editb
-                  style={localStyles.editbOverlay}
-                  width={wp(5)}
-                  height={wp(5)}
-                />
+                <Icons.Editb style={localStyles.editbOverlay} width={wp(5)} height={wp(5)} />
               </View>
             </TouchableOpacity>
           </View>
@@ -322,8 +278,10 @@ const ParentProfile = () => {
         </View>
 
         {/* ── Birth certificate ── */}
-        <View style={[localStyles.section, { direction: isRTL ? 'ltr' : 'ltr' }]}>
-          <Text style={[localStyles.sectionLabel, { textAlign: isRTL ? 'right' : 'left' }]}>{t('profile.birth_certificate')}</Text>
+        <View style={[localStyles.section, { direction: 'ltr' }]}>
+          <Text style={[localStyles.sectionLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
+            {t('profile.birth_certificate')}
+          </Text>
           <TouchableOpacity onPress={handleDownloadBirthCertificate} style={{ width: '100%' }}>
             <ImageBackground
               source={Images.id}
@@ -358,15 +316,16 @@ const ParentProfile = () => {
 
       {/* ── Photo options modal ── */}
       {modalVisible && (
-        <TouchableOpacity style={localStyles.modalOverlay} activeOpacity={1} onPress={() => {
-          setModalVisible(false);
-          setPreviewAvatar(null);
-        }}>
-          <TouchableOpacity activeOpacity={1} style={localStyles.modalContent} onPress={() => { }}>
-            <TouchableOpacity style={[localStyles.closeIconContainer, { [isRTL ? 'left' : 'right']: 15 }]} onPress={() => {
-              setModalVisible(false);
-              setPreviewAvatar(null);
-            }}>
+        <TouchableOpacity
+          style={localStyles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => { setModalVisible(false); setPreviewAvatar(null); }}
+        >
+          <TouchableOpacity activeOpacity={1} style={localStyles.modalContent} onPress={() => {}}>
+            <TouchableOpacity
+              style={[localStyles.closeIconContainer, { [isRTL ? 'left' : 'right']: 15 }]}
+              onPress={() => { setModalVisible(false); setPreviewAvatar(null); }}
+            >
               <Text style={localStyles.closeIcon}>✕</Text>
             </TouchableOpacity>
             <TouchableOpacity style={localStyles.option} onPress={handleDeletePhoto}>
@@ -390,7 +349,6 @@ const ParentProfile = () => {
 export default ParentProfile;
 
 const localStyles = StyleSheet.create({
-  /* Profile card at top */
   card: {
     alignItems: 'center',
     backgroundColor: '#fff',
@@ -406,7 +364,6 @@ const localStyles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  /* Linked Accounts button — absolutely positioned at top corner */
   linkedBtn: {
     position: 'absolute',
     top: hp(1.5),
@@ -420,7 +377,6 @@ const localStyles = StyleSheet.create({
     fontSize: Math.min(wp(3), 12),
     fontWeight: '600',
   },
-  /* Avatar */
   avatarWrapper: {
     position: 'relative',
     marginBottom: hp(1.5),
@@ -431,16 +387,12 @@ const localStyles = StyleSheet.create({
     borderRadius: wp(15),
     overflow: 'hidden',
   },
-  /* ✅ Edit icon: sits at bottom-right of avatar circle, no overlap with name */
   editIconBtn: {
     position: 'absolute',
     bottom: 0,
     right: 0,
   },
-  nextButton: {
-    width: '100%'
-  }
-  , editIconInner: {
+  editIconInner: {
     width: wp(10),
     height: wp(10),
     position: 'relative',
@@ -461,7 +413,6 @@ const localStyles = StyleSheet.create({
     color: '#999',
     marginTop: hp(0.3),
   },
-  /* Section */
   section: {
     marginHorizontal: wp(5),
     marginTop: hp(2.5),
@@ -472,7 +423,6 @@ const localStyles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
   },
-  /* Modal */
   modalOverlay: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,

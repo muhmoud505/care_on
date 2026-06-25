@@ -18,7 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.muhmoud_505.HC"
+       "package": "com.re3aya.myapp" 
     },
     "web": {
       "bundler": "metro",

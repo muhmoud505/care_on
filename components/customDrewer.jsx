@@ -25,7 +25,7 @@ const CustomDrawerContent = (props) => {
   const { user, logout, fetchCurrentUser } = useAuth();
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Fetch current user data on mount
+  
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
@@ -146,9 +146,11 @@ const CustomDrawerContent = (props) => {
     menuItem: {
       flexDirection: rowDirection,
       alignItems: 'center',
-      paddingHorizontal: 24,
+      paddingHorizontal: 60,
       paddingVertical: 18,
-      gap: 20,
+      // justifyContent: 'space-between',
+      // width: '100%', 
+      gap: 50,
     },
     menuText: {
       fontSize: 16,
@@ -156,7 +158,6 @@ const CustomDrawerContent = (props) => {
       fontWeight: '500',
       textAlign: textAlign,
       writingDirection: isRTL ? 'rtl' : 'ltr',
-      flex: 1,
     },
     footer: {
       paddingHorizontal: 20,
@@ -246,7 +247,7 @@ const CustomDrawerContent = (props) => {
 
       {/* Menu Items */}
       <ScrollView
-        style={[styles.menuContainer, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}
+        style={styles.menuContainer}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingVertical: 8 }}
       >
@@ -265,10 +266,7 @@ const CustomDrawerContent = (props) => {
 
       {/* Footer */}
       <View style={styles.footer}>
-        <TouchableOpacity onPress={handleDeactivateAccount} style={styles.deactivateButton}>
-          {/* <Image source={} style={styles.deactivateIcon} /> */}
-          <Text style={styles.deactivateText}>{t('auth.deactivate_account')}</Text>
-        </TouchableOpacity>
+        {/*  */}
         
         <TouchableOpacity onPress={logout} style={styles.logoutButton}>
           <Image source={images.logout} style={styles.logoutIcon} />

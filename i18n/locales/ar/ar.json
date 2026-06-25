@@ -120,6 +120,7 @@
     "terms_of_service": "شروط الخدمة"
   },
    "terms_of_service": {
+    "last_updated": "آخر تحديث",
     "title": "شروط الخدمة", 
     "acceptance": "قبول الشروط",
     "acceptance_description": "باستخدام خدماتنا، فإنك توافق على الالتزام بهذه الشروط والأحكام.",
