@@ -1,7 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions, useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import Constants from 'expo-constants';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useWindowDimensions } from 'react-native';
+import RenderHtml from 'react-native-render-html';
+
 import {
   ActivityIndicator,
   Modal,
@@ -30,9 +34,12 @@ const THEME_GREEN = '#80D280';
 const DISABLED_GREEN = '#B9E8BD';
 
 const PasswordScreen = ({ route }) => {
+  const [termsData, setTermsData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const { signup, isAuthLoading } = useAuth();
+  const { width } = useWindowDimensions();
   const isRTL = i18n.dir() === 'rtl';
   const rowDirection = isRTL ? 'row-reverse' : 'row';
 
@@ -45,10 +52,42 @@ const PasswordScreen = ({ route }) => {
   const [isConfirmPasswordSecure, setIsConfirmPasswordSecure] = useState(true);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const { signupData ,isChild } = route.params || {};
-  
-  console.log(isChild);
-  
+  const { signupData, isChild } = route.params || {};
+
+  const fetchTermsOfService = async () => {
+    try {
+      setLoading(true);
+
+      const API_URL = Constants.expoConfig?.extra?.API_URL || 'https://dash.rayaa360.cloud';
+      const response = await fetch(`${API_URL}/api/v1/legal-pages/terms-conditions`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'accept-language': i18n.language,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch terms of service');
+
+      const json = await response.json();
+
+      if (json.success && json.data) {
+        // Store only the content HTML string
+        setTermsData(json.data.content);
+      } else {
+        throw new Error('Invalid response structure');
+      }
+    } catch (err) {
+      console.error('Error fetching terms of service:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTermsOfService();
+  }, [i18n.language]);
 
   if (!signupData) {
     return null;
@@ -76,7 +115,6 @@ const PasswordScreen = ({ route }) => {
 
     // Show data confirmation modal
     showSuccess(
-   
       t('auth.account_created'),
       t,
       { duration: 3000 }
@@ -104,10 +142,10 @@ const PasswordScreen = ({ route }) => {
         }
         navigation.navigate('accounts');
         showSuccess(
-      t('auth.account_created'),
-      t('auth.please_complete_profile'),
-      { duration: 3000 }
-    );
+          t('auth.account_created'),
+          t('auth.please_complete_profile'),
+          { duration: 3000 }
+        );
       } else {
         navigation.dispatch(
           CommonActions.reset({
@@ -125,8 +163,6 @@ const PasswordScreen = ({ route }) => {
       );
     }
   };
-  
-  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -134,7 +170,7 @@ const PasswordScreen = ({ route }) => {
       <CustomHeader text={t('auth.signup')} />
       
       <ScrollView 
-        contentContainerStyle={[styles.scrollContainer, { direction: isRTL ? 'ltr' : 'ltr' }]} 
+        contentContainerStyle={[styles.scrollContainer]} 
         showsVerticalScrollIndicator={false}
       >
         {/* Header Text matching the image exactly */}
@@ -147,7 +183,7 @@ const PasswordScreen = ({ route }) => {
               return (
                 <>
                   <Text>{parts[0]}</Text>
-                  <Text style={[styles.headerHighlight,{color:isChild ? THEME_GREEN : '#014CC4'}]}>{highlightText}</Text>
+                  <Text style={[styles.headerHighlight, {color: isChild ? THEME_GREEN : '#014CC4'}]}>{highlightText}</Text>
                   <Text>{parts[1]}</Text>
                 </>
               );
@@ -155,7 +191,7 @@ const PasswordScreen = ({ route }) => {
           </Text>
         </View>
 
-        <View style={[styles.formContainer, { direction: isRTL ? 'ltr' : 'ltr' }]}>
+        <View style={[styles.formContainer,{direction:isRTL?'ltr':'rtl'}]}>
           <FormField
             required
             title={t('auth.password')}
@@ -191,11 +227,11 @@ const PasswordScreen = ({ route }) => {
         {/* Terms and Conditions Checkbox */}
         <View style={[styles.termsContainer, { flexDirection: rowDirection }]}>
           <TouchableOpacity
-            style={[styles.checkbox, agreedToTerms && { borderColor: THEME_GREEN ,}]}
+            style={[styles.checkbox, agreedToTerms && { borderColor: THEME_GREEN }]}
             onPress={() => setAgreedToTerms(!agreedToTerms)}
             activeOpacity={0.7}
           >
-            {agreedToTerms && <View style={[styles.checkboxInner,{backgroundColor: isChild ? THEME_GREEN : '#014CC4'}]} />}
+            {agreedToTerms && <View style={[styles.checkboxInner, {backgroundColor: isChild ? THEME_GREEN : '#014CC4'}]} />}
           </TouchableOpacity>
           <Text style={styles.termsText}>
             {t('auth.agree_prefix')}
@@ -212,9 +248,11 @@ const PasswordScreen = ({ route }) => {
           disabled={!formIsValid || isAuthLoading || !agreedToTerms}
           style={[
             styles.submitButton, 
-            (!formIsValid || isAuthLoading || !agreedToTerms) && {backgroundColor: DISABLED_GREEN,
-    elevation: 0,},
-            {backgroundColor:isChild ? THEME_GREEN : '#014CC4',opacity:(!formIsValid || isAuthLoading || !agreedToTerms) ? 0.5 : 1}
+            (!formIsValid || isAuthLoading || !agreedToTerms) && {
+              backgroundColor: DISABLED_GREEN,
+              elevation: 0,
+            },
+            {backgroundColor: isChild ? THEME_GREEN : '#014CC4', opacity: (!formIsValid || isAuthLoading || !agreedToTerms) ? 0.5 : 1}
           ]}
         >
           {isAuthLoading ? (
@@ -225,18 +263,38 @@ const PasswordScreen = ({ route }) => {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Terms Modal ... keeps existing code */}
+      {/* Terms Modal - Fixed to render HTML content */}
       <Modal animationType="slide" transparent visible={showTermsModal}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-             <TouchableOpacity style={styles.closeIconContainer} onPress={() => setShowTermsModal(false)}>
+            <TouchableOpacity style={styles.closeIconContainer} onPress={() => setShowTermsModal(false)}>
               <Text style={styles.closeIcon}>✕</Text>
             </TouchableOpacity>
             <Text style={styles.modalTitle}>{t('auth.terms_title')}</Text>
             <ScrollView style={styles.modalScroll}>
-              <Text style={styles.modalText}>{t('auth.terms_full_text')}</Text>
+              {termsData ? (
+                <RenderHtml
+                  contentWidth={width}
+                  source={{ html: termsData }}
+                  baseStyle={styles.modalText}
+                  tagsStyles={{
+                    h2: { fontSize: 16, fontWeight: 'bold', marginTop: 15, marginBottom: 10, color: '#333' },
+                    p: { fontSize: 14, lineHeight: 22, marginBottom: 10, color: '#555' },
+                    ul: { marginBottom: 10 },
+                    li: { fontSize: 14, lineHeight: 22, marginBottom: 5, color: '#555' },
+                  }}
+                />
+              ) : (
+                <ActivityIndicator size="large" color="#014CC4" />
+              )}
             </ScrollView>
-            <TouchableOpacity style={styles.modalCloseButton} onPress={() => { setAgreedToTerms(true); setShowTermsModal(false); }}>
+            <TouchableOpacity 
+              style={[styles.modalCloseButton, { backgroundColor: isChild ? THEME_GREEN : '#014CC4' }]} 
+              onPress={() => { 
+                setAgreedToTerms(true); 
+                setShowTermsModal(false); 
+              }}
+            >
               <Text style={styles.modalCloseButtonText}>{t('auth.agree')}</Text>
             </TouchableOpacity>
           </View>
@@ -249,7 +307,7 @@ const PasswordScreen = ({ route }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFF', // Slightly tinted background like your image
+    backgroundColor: '#F8FAFF',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -297,7 +355,6 @@ const styles = StyleSheet.create({
   checkboxInner: {
     width: wp(3.5),
     height: wp(3.5),
-   
     borderRadius: 4,
   },
   termsText: {
@@ -306,7 +363,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   termsLink: {
-    color: '#014CC4', // Link remains blue for clarity
+    color: '#014CC4',
     textDecorationLine: 'underline',
   },
   submitButton: {
@@ -326,15 +383,58 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: wp(7),
   },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, height: hp(60) },
-  closeIconContainer: { position: 'absolute', top: 15, right: 15, zIndex: 1, width: 30, height: 30, borderRadius: 15, borderWidth: 1, justifyContent: 'center', alignItems: 'center' },
-  closeIcon: { fontSize: 16 },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 15 },
-  modalScroll: { marginBottom: 15 },
-  modalText: { fontSize: 14, lineHeight: 22 },
-  modalCloseButton: { backgroundColor: '#014CC4', paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
-  modalCloseButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  modalOverlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(0,0,0,0.5)', 
+    justifyContent: 'flex-end' 
+  },
+  modalContent: { 
+    backgroundColor: '#fff', 
+    borderTopLeftRadius: 20, 
+    borderTopRightRadius: 20, 
+    padding: 20, 
+    height: hp(60) 
+  },
+  closeIconContainer: { 
+    position: 'absolute', 
+    top: 15, 
+    right: 15, 
+    zIndex: 1, 
+    width: 30, 
+    height: 30, 
+    borderRadius: 15, 
+    borderWidth: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  closeIcon: { 
+    fontSize: 16 
+  },
+  modalTitle: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    marginBottom: 15 
+  },
+  modalScroll: { 
+    marginBottom: 15 
+  },
+  modalText: { 
+    fontSize: 14, 
+    lineHeight: 22,
+    color: '#333',
+  },
+  modalCloseButton: { 
+    backgroundColor: '#014CC4', 
+    paddingVertical: 12, 
+    borderRadius: 10, 
+    alignItems: 'center' 
+  },
+  modalCloseButtonText: { 
+    color: '#fff', 
+    fontWeight: 'bold', 
+    fontSize: 16 
+  },
 });
 
 export default PasswordScreen;

@@ -1,4 +1,5 @@
 import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 import { useTranslation } from 'react-i18next';
 import { ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -6,21 +7,18 @@ import Toast from 'react-native-toast-message';
 import CollapsibleCard from './CollapsibleCard';
 import { Icons } from './Icons';
 
-const Eshaa = ({ 
-  title, 
-  labName, 
-  date, 
-  description, 
+const Eshaa = ({
+  title,
+  labName,
+  date,
+  description,
   expanded,
   onExpandedChange,
   icon,
   fileUrl,
-  radiologyExamsDisplay
+  radiologyExamsDisplay,
 }) => {
-  const { t,i18n } = useTranslation();
-
-const isRTL = i18n.dir() === 'rtl';
-const rowDirection = isRTL ? 'row' : 'row-reverse';
+  const { t } = useTranslation();
 
   // Parse the description if it's a JSON string
   let parsedDescription = { labName: '', notes: '', date: '' };
@@ -28,14 +26,11 @@ const rowDirection = isRTL ? 'row' : 'row-reverse';
     try {
       parsedDescription = JSON.parse(description);
     } catch (e) {
-      parsedDescription.notes = description; // Fallback to plain text
+      parsedDescription.notes = description;
     }
   } else {
     parsedDescription.notes = description || '';
   }
-
-  // Use parsed values, fallback to props
-console.log("radiologyExamsDisplay", radiologyExamsDisplay);
 
   const displayNotes = parsedDescription.notes || '';
 
@@ -43,49 +38,58 @@ console.log("radiologyExamsDisplay", radiologyExamsDisplay);
     if (!fileUrl) return;
 
     try {
-      const fileName = fileUrl.split('/').pop().split('?')[0] || 'download';
-      const fileUri = FileSystem.documentDirectory + fileName;
-      
-      const { uri } = await FileSystem.downloadAsync(fileUrl, fileUri);
-      
-      if (Platform.OS === 'android') {
-        try {
-          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-          if (permissions.granted) {
-            const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
-            await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, fileName, 'application/octet-stream')
-              .then(async (createdUri) => {
-                await FileSystem.writeAsStringAsync(createdUri, base64, { encoding: FileSystem.EncodingType.Base64 });
-                Toast.show({
-                  type: 'success',
-                  text1: t('common.success'),
-                  text2: t('common.file_saved', { defaultValue: 'File saved successfully' }),
-                  position: 'top',
-                  visibilityTime: 3000,
-                });
-              })
-              .catch(e => {
-                console.error(e);
-                Toast.show({
-                  type: 'error',
-                  text1: t('common.error'),
-                  text2: t('common.download_failed', { defaultValue: 'Download failed' }),
-                  position: 'top',
-                  visibilityTime: 3000,
-                });
-              });
-          } else {
-            await Sharing.shareAsync(uri);
-          }
-        } catch (permissionError) {
-          console.error('Permission error:', permissionError);
-          await Sharing.shareAsync(uri);
-        }
-      } else {
-        await Sharing.shareAsync(uri);
+      const rawName = fileUrl.split('/').pop().split('?')[0] || 'download';
+      const ext = rawName.split('.').pop().toLowerCase() || 'pdf';
+      const baseName = rawName.replace(/\.[^/.]+$/, '');
+      const fileName = `${baseName}.${ext}`;
+      const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+
+      const downloadResumable = FileSystem.createDownloadResumable(fileUrl, fileUri);
+      const result = await downloadResumable.downloadAsync();
+
+      if (!result || result.status !== 200) {
+        Toast.show({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('common.download_failed', { defaultValue: 'Download failed' }),
+          position: 'top',
+          visibilityTime: 3000,
+        });
+        return;
       }
+
+      const { uri } = result;
+
+      if (Platform.OS === 'android') {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status === 'granted') {
+          await MediaLibrary.saveToLibraryAsync(uri);
+          Toast.show({
+            type: 'success',
+            text1: t('common.success'),
+            text2: t('common.file_saved', { defaultValue: 'File saved successfully' }),
+            position: 'top',
+            visibilityTime: 3000,
+          });
+          return;
+        }
+      }
+
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Toast.show({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('common.sharing_not_available', { defaultValue: 'Sharing not available' }),
+          position: 'top',
+          visibilityTime: 3000,
+        });
+        return;
+      }
+      await Sharing.shareAsync(uri);
+
     } catch (err) {
-      console.error("Download error:", err);
+      console.error('Download error:', err);
       Toast.show({
         type: 'error',
         text1: t('common.error'),
@@ -104,36 +108,39 @@ console.log("radiologyExamsDisplay", radiologyExamsDisplay);
       onToggle={onExpandedChange}
     >
       <>
-        <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
+        {/* X-ray name row */}
+        <View style={styles.miccontianer}>
           <Icons.Union width={20} height={20} />
           <Text style={styles.txt2}>{t('eshaa.xray_name')}:</Text>
           <Text style={styles.txt3}>{title}</Text>
         </View>
-       
-       
-        <View style={[styles.miccontianer, { flexDirection: rowDirection }]}>
+
+        {/* Description row */}
+        <View style={styles.miccontianer}>
           <Icons.ReceiptEdit width={20} height={20} />
           <Text style={styles.txt2}>{t('eshaa.description')}:</Text>
-          <Text style={styles.txt3}>{displayNotes}</Text>
+          <Text style={[styles.txt3, { flexShrink: 1 }]}>{displayNotes}</Text>
         </View>
-        
+
+        {/* Required scans row */}
         {!!radiologyExamsDisplay && (
           <View style={styles.miccontianer}>
             <Icons.Union width={20} height={20} />
-            <Text style={styles.txt2}>{t('report.required_scans', { defaultValue: 'Ashiaa Mtlb' })}:</Text>
-            <Text style={styles.txt3}>{radiologyExamsDisplay}</Text>
+            <Text style={styles.txt2}>{t('report.required_scans', { defaultValue: 'الاشعة المطلوبة' })}:</Text>
+            <Text style={[styles.txt3, { flexShrink: 1 }]}>{radiologyExamsDisplay}</Text>
           </View>
         )}
-        
-        {fileUrl && (
+
+        {/* Download button */}
+        {!!fileUrl && (
           <TouchableOpacity onPress={handleDownload} activeOpacity={0.8}>
-            <ImageBackground 
+            <ImageBackground
               source={require('../assets2/images/backg.png')}
               style={styles.background}
-              imageStyle={{width:319, height:61}}
-              resizeMode='cover'
+              imageStyle={{ width: 319, height: 61 }}
+              resizeMode="cover"
             >
-              <View style={[styles.overlay, { flexDirection: rowDirection }]}>
+              <View style={styles.overlay}>
                 <Icons.Download width={20} height={20} />
                 <Text style={styles.txt4}>{t('common.download')}</Text>
               </View>
@@ -142,27 +149,21 @@ console.log("radiologyExamsDisplay", radiologyExamsDisplay);
         )}
       </>
     </CollapsibleCard>
-  )
-}
+  );
+};
 
-export default Eshaa
+export default Eshaa;
 
 const styles = StyleSheet.create({
-  container: {
-    direction: 'rtl',
-    width: '100%',
-    height: '100%',
-    gap: 10
-  },
   miccontianer: {
     flexDirection: 'row',
     columnGap: 5,
-    margin: 10
+    margin: 10,
   },
   txt2: {
     fontWeight: '600',
     fontSize: 14,
-    color: '#000000'
+    color: '#000000',
   },
   txt3: {
     fontWeight: '500',
@@ -174,12 +175,12 @@ const styles = StyleSheet.create({
   txt4: {
     fontWeight: '700',
     fontSize: 14,
-    color: '#FFFFFF'
+    color: '#FFFFFF',
   },
   background: {
     width: '100%',
     height: 61,
-    marginTop: 10
+    marginTop: 10,
   },
   overlay: {
     backgroundColor: '#00000080',
@@ -191,9 +192,4 @@ const styles = StyleSheet.create({
     gap: 10,
     borderRadius: 12,
   },
-  ele:{
-    position:'absolute',
-    bottom:"10%",
-    left:'10%'
-  }
 });

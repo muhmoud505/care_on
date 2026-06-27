@@ -332,6 +332,7 @@
 
   "auth": {
     "signin": "تسجيل الدخول",
+    "terms_title": "الشروط والأحكام",
     "enter_email_send_code": "أدخل بريدك الإلكتروني، سيتم إرسال رمز",
     "signup": "إنشاء حساب",
     "password_highlight": "كلمة المرور",

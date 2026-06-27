@@ -1,4 +1,5 @@
 import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 import { useTranslation } from 'react-i18next';
 import { ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -6,17 +7,6 @@ import Toast from 'react-native-toast-message';
 import CollapsibleCard from './CollapsibleCard';
 import { Icons } from './Icons';
 
-/**
- * Parses the description field into a structured object.
- *
- * New records: JSON string like:
- *   '{"date":"9/3/2026","RequiredTests":"تحليل دم","RequiredScans":"اشعة x ray","diagnosis":"شك","notes":"ملاحظة"}'
- *
- * Legacy records: plain text string — treated as a plain notes value.
- *
- * Always returns:
- *   { date, requiredTests, requiredScans, diagnosis, notes }
- */
 const parseDescription = (description) => {
   const empty = { date: '', requiredTests: '', requiredScans: '', diagnosis: '', notes: '' };
 
@@ -39,7 +29,6 @@ const parseDescription = (description) => {
     }
   }
 
-  // Legacy plain-text description: show it as-is in the notes row
   return { ...empty, notes: trimmed };
 };
 
@@ -55,16 +44,14 @@ const Report = ({
   icon,
   fileUrl,
   documents,
-  lab_tests,      // ✅ New: Structured lab tests array
-  radiology_exams, // ✅ New: Structured radiology exams array
-  TYPE
+  lab_tests,
+  radiology_exams,
+  TYPE,
 }) => {
   const { t } = useTranslation();
 
-  // Parse structured fields out of the description string
   const parsed = parseDescription(description);
 
-  // Prop-level values take priority; fall back to what's inside the description JSON
   const displayDoctorName    = doctorName    || '';
   const displayDate          = date          || parsed.date          || '';
   const displayRequiredTests = requiredTests || parsed.requiredTests || '';
@@ -72,7 +59,6 @@ const Report = ({
   const displayDiagnosis     = parsed.diagnosis || '';
   const displayNotes         = parsed.notes     || '';
 
-  // ✅ Build lab tests display: use structured array first, then fallback to string
   const getLabTestsDisplay = () => {
     if (lab_tests && Array.isArray(lab_tests) && lab_tests.length > 0) {
       return lab_tests.map(test => test.name).join(', ');
@@ -80,7 +66,6 @@ const Report = ({
     return displayRequiredTests;
   };
 
-  // ✅ Build radiology exams display: use structured array first, then fallback to string
   const getRadiologyExamsDisplay = () => {
     if (radiology_exams && Array.isArray(radiology_exams) && radiology_exams.length > 0) {
       return radiology_exams.map(exam => exam.name).join(', ');
@@ -88,10 +73,9 @@ const Report = ({
     return displayRequiredScans;
   };
 
-  const labTestsDisplay = getLabTestsDisplay();
+  const labTestsDisplay       = getLabTestsDisplay();
   const radiologyExamsDisplay = getRadiologyExamsDisplay();
 
-  // Support both direct fileUrl prop and documents array
   const resolvedFileUrl =
     fileUrl ||
     (Array.isArray(documents) && documents.length > 0 ? documents[0]?.url : null);
@@ -100,48 +84,61 @@ const Report = ({
     if (!resolvedFileUrl) return;
 
     try {
-      const fileName = resolvedFileUrl.split('/').pop().split('?')[0] || 'download';
-      const fileUri = FileSystem.documentDirectory + fileName;
+      // Detect extension from URL dynamically
+      const rawName = resolvedFileUrl.split('/').pop().split('?')[0] || 'download';
+      const ext = rawName.split('.').pop().toLowerCase() || 'pdf';
+      const baseName = rawName.replace(/\.[^/.]+$/, '');
+      const fileName = `${baseName}.${ext}`;
+      const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
 
-      const { uri } = await FileSystem.downloadAsync(resolvedFileUrl, fileUri);
+      const downloadResumable = FileSystem.createDownloadResumable(resolvedFileUrl, fileUri);
+      const result = await downloadResumable.downloadAsync();
 
-      if (Platform.OS === 'android') {
-        try {
-          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-          if (permissions.granted) {
-            const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
-            await FileSystem.StorageAccessFramework
-              .createFileAsync(permissions.directoryUri, fileName, 'application/octet-stream')
-              .then(async (createdUri) => {
-                await FileSystem.writeAsStringAsync(createdUri, base64, { encoding: FileSystem.EncodingType.Base64 });
-                Toast.show({
-                  type: 'success',
-                  text1: t('common.success'),
-                  text2: t('common.file_saved', { defaultValue: 'File saved successfully' }),
-                  position: 'top',
-                  visibilityTime: 3000,
-                });
-              })
-              .catch(e => {
-                console.error(e);
-                Toast.show({
-                  type: 'error',
-                  text1: t('common.error'),
-                  text2: t('common.download_failed', { defaultValue: 'Download failed' }),
-                  position: 'top',
-                  visibilityTime: 3000,
-                });
-              });
-          } else {
-            await Sharing.shareAsync(uri);
-          }
-        } catch (permissionError) {
-          console.error('Permission error:', permissionError);
-          await Sharing.shareAsync(uri);
-        }
-      } else {
-        await Sharing.shareAsync(uri);
+      // Check HTTP status
+      if (!result || result.status !== 200) {
+        Toast.show({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('common.download_failed', { defaultValue: 'Download failed' }),
+          position: 'top',
+          visibilityTime: 3000,
+        });
+        return;
       }
+
+      const { uri } = result;
+
+      // Android: try MediaLibrary first
+      if (Platform.OS === 'android') {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status === 'granted') {
+          await MediaLibrary.saveToLibraryAsync(uri);
+          Toast.show({
+            type: 'success',
+            text1: t('common.success'),
+            text2: t('common.file_saved', { defaultValue: 'File saved successfully' }),
+            position: 'top',
+            visibilityTime: 3000,
+          });
+          return;
+        }
+        // Permission denied — fall through to share sheet
+      }
+
+      // iOS or Android (permission denied): share sheet
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Toast.show({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('common.sharing_not_available', { defaultValue: 'Sharing not available' }),
+          position: 'top',
+          visibilityTime: 3000,
+        });
+        return;
+      }
+      await Sharing.shareAsync(uri);
+
     } catch (err) {
       console.error('Download error:', err);
       Toast.show({
@@ -164,7 +161,6 @@ const Report = ({
       showType={true}
     >
       <>
-        {/* اسم الدكتور */}
         {!!displayDoctorName && (
           <View style={styles.miccontianer}>
             <Icons.Doctor width={20} height={20} />
@@ -173,16 +169,6 @@ const Report = ({
           </View>
         )}
 
-        {/* التاريخ
-        {!!displayDate && (
-          <View style={styles.miccontianer}>
-            <Icons.Calendara width={20} height={20} />
-            <Text style={styles.txt2}>{t('report.report_date')}:</Text>
-            <Text style={styles.txt3}>{displayDate}</Text>
-          </View>
-        )} */}
-
-        {/* التحاليل المطلوبة */}
         {!!labTestsDisplay && (
           <View style={styles.miccontianer}>
             <Icons.analysisA width={20} height={20} />
@@ -191,7 +177,6 @@ const Report = ({
           </View>
         )}
 
-        {/* الاشعة المطلوبة */}
         {!!radiologyExamsDisplay && (
           <View style={styles.miccontianer}>
             <Icons.Union width={20} height={20} />
@@ -200,7 +185,6 @@ const Report = ({
           </View>
         )}
 
-        {/* التشخيص */}
         {!!displayDiagnosis && (
           <View style={styles.miccontianer}>
             <Icons.ReceiptEdit width={20} height={20} />
@@ -209,16 +193,14 @@ const Report = ({
           </View>
         )}
 
-        {/* الوصف الطبي */}
         {!!displayNotes && (
           <View style={styles.miccontianer}>
             <Icons.ReceiptEdit width={20} height={20} />
-            <Text style={styles.txt2}>{t('report.notes', { defaultValue: 'الوصف الطبي' })}:</Text>
+            <Text style={styles.txt2}>{t('report.medical_notes', { defaultValue: 'الوصف الطبي' })}:</Text>
             <Text style={[styles.txt3, { flexShrink: 1 }]}>{displayNotes}</Text>
           </View>
         )}
 
-        {/* تنزيل */}
         {!!resolvedFileUrl && (
           <TouchableOpacity onPress={handleDownload} activeOpacity={0.8}>
             <ImageBackground

@@ -331,6 +331,7 @@
   },
 
   "auth": {
+     "terms_title": "Terms and Conditions",
     "signin": "Sign In",
     "signup": "Sign Up",
     "password_highlight": "password",

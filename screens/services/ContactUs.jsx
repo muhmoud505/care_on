@@ -45,7 +45,7 @@ const ContactUs = ({ navigation }) => {
         </View>
         <View style={styles.cardsContainer}>
           {/* Location Card */}
-          <View style={styles.card}>
+          {/* <View style={styles.card}>
             <View style={styles.iconCircle}>
               <Icons.Locationa width={24} height={24} />
             </View>
@@ -61,7 +61,7 @@ const ContactUs = ({ navigation }) => {
             >
               <Text style={styles.buttonText}>Eagle St, Brisbane, QLD, 4000 1</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           {/* Email Card */}
           <View style={styles.card}>
@@ -76,27 +76,13 @@ const ContactUs = ({ navigation }) => {
             </Text>
             <TouchableOpacity 
               style={styles.greenButton}
-              onPress={() => handleEmailPress('example@Raya360.com')}
+              onPress={() => handleEmailPress('support@rayaa360.cloud')}
             >
-              <Text style={styles.buttonText}>example@Raya360.com</Text>
+              <Text style={styles.buttonText}>support@rayaa360.cloud</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Live Chat Card */}
-          <View style={styles.card}>
-            <View style={styles.iconCircle}>
-              <Icons.Chat width={24} height={24} />
-            </View>
-            <Text style={[styles.cardTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
-              {t('contact_us.live_chat')}
-            </Text>
-            <Text style={[styles.cardDesc, { textAlign: isRTL ? 'right' : 'left' }]}>
-              {t('contact_us.chat_desc')}
-            </Text>
-            <TouchableOpacity style={styles.blueButton}>
-              <Text style={styles.buttonText}>{t('contact_us.chat_button')}</Text>
-            </TouchableOpacity>
-          </View>
+          
 
           {/* Phone Card */}
           <View style={styles.card}>
@@ -113,7 +99,7 @@ const ContactUs = ({ navigation }) => {
               style={styles.blueButton}
               onPress={() => handleCallPress('+1234567890')}
             >
-              <Text style={styles.buttonText}>+123 456 7890</Text>
+              <Text style={styles.buttonText}>+201505001946</Text>
             </TouchableOpacity>
           </View>
         </View>
