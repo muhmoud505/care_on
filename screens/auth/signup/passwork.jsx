@@ -41,7 +41,7 @@ const PasswordScreen = ({ route }) => {
   const { signup, isAuthLoading } = useAuth();
   const { width } = useWindowDimensions();
   const isRTL = i18n.dir() === 'rtl';
-  const rowDirection = isRTL ? 'row-reverse' : 'row';
+  const rowDirection = isRTL ? 'row' : 'row-reverse';
 
   const { form, errors, handleChange, checkFormValidity } = useForm({
     password: '',
@@ -191,7 +191,11 @@ const PasswordScreen = ({ route }) => {
           </Text>
         </View>
 
+<<<<<<< HEAD
         <View style={[styles.formContainer,{direction:isRTL?'ltr':'rtl'}]}>
+=======
+        <View style={[styles.formContainer,{direction: isRTL ? 'ltr' : 'rtl'}]}>
+>>>>>>> 21f4eff (m)
           <FormField
             required
             title={t('auth.password')}

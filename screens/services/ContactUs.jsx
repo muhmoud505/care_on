@@ -97,7 +97,7 @@ const ContactUs = ({ navigation }) => {
             </Text>
             <TouchableOpacity 
               style={styles.blueButton}
-              onPress={() => handleCallPress('+1234567890')}
+              onPress={() => handleCallPress('+201505001946')}
             >
               <Text style={styles.buttonText}>+201505001946</Text>
             </TouchableOpacity>
