@@ -191,11 +191,11 @@ const PasswordScreen = ({ route }) => {
           </Text>
         </View>
 
-<<<<<<< HEAD
+
         <View style={[styles.formContainer,{direction:isRTL?'ltr':'rtl'}]}>
-=======
-        <View style={[styles.formContainer,{direction: isRTL ? 'ltr' : 'rtl'}]}>
->>>>>>> 21f4eff (m)
+
+        
+
           <FormField
             required
             title={t('auth.password')}
