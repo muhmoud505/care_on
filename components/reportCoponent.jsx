@@ -206,7 +206,7 @@ const Report = ({
             <ImageBackground
               source={require('../assets2/images/backg.png')}
               style={styles.background}
-              imageStyle={{ width: 319, height: 61 }}
+              imageStyle={{ width: '100%', height: 61 }}
               resizeMode="cover"
             >
               <View style={styles.overlay}>
@@ -246,6 +246,8 @@ const styles = StyleSheet.create({
     color: '#000000',
     lineHeight: 20,
     width: '70%',
+    flexShrink: 1,
+     flexWrap: 'wrap'
   },
   txt4: {
     fontWeight: '700',

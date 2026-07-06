@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#FFF',
     padding: 10,
-    overflow: 'hidden',
+    // overflow: 'hidden',
   },
   mincontainer: {
     flexDirection: 'row',
