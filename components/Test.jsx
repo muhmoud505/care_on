@@ -311,8 +311,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   dayContainer: {
-    width: 40,
-    height: 40,
+    width: 35,
+    height: 35,
     justifyContent: 'center',
     alignItems: 'center',
     margin: 2,
