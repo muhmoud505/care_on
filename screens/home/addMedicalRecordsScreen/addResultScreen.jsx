@@ -62,7 +62,7 @@ const AddResultScreen = () => {
     const payload = {
       type: 'lab_test',
       title: form.testName,
-      description: 'desc',
+      description: form.notes,
       // Existing items: send as { id }
       lab_tests: validLabTests.map(id => ({ id })),
      

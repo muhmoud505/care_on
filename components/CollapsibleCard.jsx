@@ -1,5 +1,4 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Shadow } from 'react-native-shadow-2';
 import { useCollapsible } from '../hooks/useCollapsible';
 import useRTL from '../hooks/useRTL';
 import { wp } from '../utils/responsive';
@@ -15,57 +14,55 @@ const CollapsibleCard = ({
   showType = false,
 }) => {
   const { isExpanded, toggle } = useCollapsible(controlledExpanded, onToggle);
-  const { rowDirection } = useRTL(); // Use reactive useRTL hook
+  const { rowDirection } = useRTL();
 
   return (
-    <Shadow
-      distance={4}
-      startColor="#00000010"
-      offset={[-5, 2]}
-      radius={12}
-      style={{ width: '100%' }}
-      paintInside={false}
-    >
+    <View style={styles.card}>
       <TouchableOpacity activeOpacity={0.8} onPress={toggle}>
-        <View style={styles.smcontainer}>
-          {/* Header - always visible */}
-          <View style={[styles.mincontainer, { flexDirection: rowDirection }]}>
-            {icon && <Icons.Medicine width={wp(6)} height={wp(6)} />}
-            <Text style={styles.txt1}>{title}</Text>
-            {showType && (
-              <View style={styles.TYPE}>
-                <Text style={{color:"#FFF"}}>{TYPE}</Text>
-              </View>
-            )}
-            {
-              isExpanded?(
-                <Icons.Expand width={wp(6)} height={wp(6)} />
-              ):(
-                <Icons.Expand width={wp(6)} height={wp(6)} style={{transform:[{rotate:'180deg'}],}} />
-              )
-            }
-           
-          </View>
-
-          {/* Collapsible content */}
-          {isExpanded && children}
+        {/* Header - always visible */}
+        <View style={[styles.mincontainer, { flexDirection: rowDirection }]}>
+          {icon && <Icons.Medicine width={wp(6)} height={wp(6)} />}
+          <Text style={styles.txt1}>{title}</Text>
+          {showType && (
+            <View style={styles.TYPE}>
+              <Text style={{ color: '#FFF' }}>{TYPE}</Text>
+            </View>
+          )}
+          <Icons.Expand
+            width={wp(6)}
+            height={wp(6)}
+            style={!isExpanded ? { transform: [{ rotate: '180deg' }] } : undefined}
+          />
         </View>
+
+        {/* Collapsible content */}
+        {isExpanded && children}
       </TouchableOpacity>
-    </Shadow>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  smcontainer: {
-    width: '100%', // Take the full width provided by the Shadow container
+  card: {
+    width: '100%',
     borderRadius: 12,
     backgroundColor: '#FFF',
     padding: 10,
-    // overflow: 'hidden',
+    marginVertical: 8,
+
+    // iOS shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+
+    // Android shadow
+    elevation: 4,
   },
   mincontainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingBottom: 10,
   },
   txt1: {
@@ -73,19 +70,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#014CC4',
   },
-  TYPE:{
-    backgroundColor:'#014CC4',
-    padding:5,
-    borderRadius:5,
-    minWidth:50,
-    maxWidth:80,
-    height:30,
-    justifyContent:"center",
-    alignItems:"center",
-    color:"#fff",
-    fontSize:10,
-    fontWeight:"bold"
-  }
+  TYPE: {
+    backgroundColor: '#014CC4',
+    padding: 5,
+    borderRadius: 5,
+    minWidth: 50,
+    maxWidth: 80,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default CollapsibleCard;

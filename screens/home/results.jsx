@@ -110,6 +110,7 @@ const Results = () => {
 
     // Extract and format lab tests display - handle both old and new result formats
     let labTestsDisplay = null;
+    console.log('this is item ' + item);
     
     // Try to get lab tests from new format (item.lab_tests - after mapping fix)
     if (item.lab_tests && Array.isArray(item.lab_tests) && item.lab_tests.length > 0) {
@@ -131,7 +132,7 @@ const Results = () => {
 
     return (
       <Result
-        {...item}
+        {...item} 
         fileUrl={fileUrl}
         expanded={expandedItems[item.id] || false}
         onExpandedChange={(isExpanded) => handleItemExpand(item.id, isExpanded)}
