@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { hp, wp } from '../utils/responsive';
 
 const Calendar = ({onDataSelect}) => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -222,37 +223,37 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
     width: '100%',
-    minHeight: 400,
-    padding: 15,
-    borderRadius: 15,
+    minHeight: hp(50),
+    padding: wp(4),
+    borderRadius: wp(4),
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp(0.25) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: wp(1),
     elevation: 3,
   },
   selectorContainer: {
-    marginBottom: 15,
+    marginBottom: wp(4),
     borderWidth: 1,
     borderColor: '#e0e0e0',
-    borderRadius: 10,
-    padding: 10,
+    borderRadius: wp(2.5),
+    padding: wp(2.5),
     backgroundColor: '#f9f9f9',
     width:'100%',
   },
   selectorColumns: {
     flexDirection: 'row',
-    height: 300,
+    height: hp(37),
   },
   column: {
     flex: 1,
-    paddingHorizontal: 5,
+    paddingHorizontal: wp(1.5),
   },
   columnHeader: {
-    fontSize: 16,
+    fontSize: wp(4),
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: wp(2.5),
     color: '#4285f4',
   },
   listContainer: {
@@ -262,45 +263,45 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   listItem: {
-    padding: 10,
-    marginVertical: 2,
-    borderRadius: 5,
+    padding: wp(2.5),
+    marginVertical: hp(0.25),
+    borderRadius: wp(1.5),
     alignItems: 'center',
   },
   selectedListItem: {
     backgroundColor: '#e6f2ff',
   },
   listItemText: {
-    fontSize: 14,
+    fontSize: wp(3.5),
     color: '#333',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
-    paddingHorizontal: 5,
+    marginBottom: wp(4),
+    paddingHorizontal: wp(1.5),
   },
   monthTitle: {
-    fontSize: 18,
+    fontSize: wp(4.5),
     fontWeight: '600',
     color: '#333',
   },
   navButton: {
-    fontSize: 24,
+    fontSize: wp(6),
     fontWeight: 'bold',
     color: '#333',
-    paddingHorizontal: 15,
+    paddingHorizontal: wp(4),
   },
   weekdaysContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 10,
+    marginBottom: wp(2.5),
   },
   weekdayText: {
-    width: 40,
+    width: wp(10),
     textAlign: 'center',
-    fontSize: 12,
+    fontSize: wp(3),
     fontWeight: 'bold',
     color: '#666',
   },
@@ -311,15 +312,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   dayContainer: {
-    width: 35,
-    height: 35,
+    width: wp(9),
+    height: wp(9),
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 2,
-    borderRadius: 20,
+    margin: wp(0.5),
+    borderRadius: wp(4.5),
   },
   dayText: {
-    fontSize: 16,
+    fontSize: wp(4),
     color: '#333',
   },
   todayDay: {
